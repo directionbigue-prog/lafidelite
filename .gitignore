@@ -25,3 +25,6 @@ node-compile-cache/
 .worktrees/
 .superpowers/
 
+# Lien local vers le projet Vercel (`vercel link`) : identifiants de projet,
+# propres à une machine.
+.vercel
