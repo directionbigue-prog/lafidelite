@@ -13,7 +13,7 @@ The product is two things sharing one account and one device:
 1. **Le jeu du couple** (`/jeu`, `/api/games/*`) — the core loop. Two partners pair into an *Espace Couple*, then play a **pass-and-play** session of 3 rounds (Miroir, Scénario, Face-à-Face) that ends in an immutable `GameResult` and a complicity level.
 2. **Le Salon** (`/salon`, `/api/salon/*`) — five light board games on the same shared device, deliberately sealed off from the couple's score.
 
-**63 API routes; 2193 unit tests across 184 files, all green.** The UI is shipped and opinionated (see *Design system* below), and it is in French.
+**66 API routes; 2319 unit tests across 191 files, all green** (counted 2026-10-13). The UI is shipped and opinionated (see *Design system* below), and it is in French.
 
 Origin: bootstrapped from the `izikit` starter (itself ported from `amadou-template` on 2026-05-07 through 7 phases: auth → OAuth/notifs → admin → uploads/withdrawals → webhooks/cron → docs/tests → final pass). The starter's generic surface — auth, payments, admin back-office, webhooks, cron, uploads, withdrawals — is still live and still load-bearing; the couple game sits on top of it.
 
@@ -215,7 +215,7 @@ Three tripwires, each written from a defect that shipped:
 Anything outside [Files Claude must NOT modify](#files-claude-must-not-modify) is the fork's surface area:
 
 - **Domain models** ([prisma/schema.prisma](prisma/schema.prisma)) — add fields, add models, add migrations. Do not rename the generic models; everything else is yours.
-- **Routes** ([src/app/api/](src/app/api/)) — add new resources. The 62 existing routes are templates: `requireAuth` + `verifyCsrf` + `withRequestContext` is the boilerplate to copy.
+- **Routes** ([src/app/api/](src/app/api/)) — add new resources. The 66 existing routes are templates: `requireAuth` + `verifyCsrf` + `withRequestContext` is the boilerplate to copy.
 - **Page UI** ([src/app/](src/app/)) — extend the design system above; don't start a second one.
 - **Notifications** ([src/lib/server/notifications/templates.ts](src/lib/server/notifications/templates.ts)) — add new typed templates.
 - **Payments** ([src/lib/server/payments/](src/lib/server/payments/)) — add Stripe, Paystack, etc. behind the `PaymentProvider` interface.
