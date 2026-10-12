@@ -1,0 +1,20 @@
+<!--
+  La marque de Cœur Fidèle : deux cercles entrelacés, leur intersection en or.
+
+  Deux partenaires, et ce qu'ils ont en commun. C'est exactement ce que le jeu
+  mesure — le score du couple s'affiche avant les scores individuels — donc le
+  signe dit la règle.
+
+  Version TRANSPARENTE, pour poser la marque sur le fond sombre du produit.
+  La version sur fond encre, pour l'onglet du navigateur, est `src/app/icon.svg`.
+
+  Les couleurs sont celles de `tailwind.config.ts` : cream #F6EEE6 et gold
+  #E8B860. Écrites en dur ici parce qu'un SVG servi depuis /public ne traverse
+  pas Tailwind — si la palette change, ce fichier et son jumeau changent avec,
+  et `marque.test.ts` vérifie qu'ils ne contiennent aucune autre couleur.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Cœur Fidèle">
+  <circle cx="24" cy="32" r="13" fill="none" stroke="#F6EEE6" stroke-width="3.2" />
+  <circle cx="40" cy="32" r="13" fill="none" stroke="#F6EEE6" stroke-width="3.2" />
+  <path d="M32 21.8A13 13 0 0 1 32 42.2A13 13 0 0 1 32 21.8Z" fill="#E8B860" />
+</svg>

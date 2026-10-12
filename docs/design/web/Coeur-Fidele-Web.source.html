@@ -1,0 +1,2521 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="4748d1fc-e1b2-4683-a75b-a8f7f8fc8ac7"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <meta name="design_doc_mode" content="canvas" />
+        <title>Cœur Fidèle — version web</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+        <style>
+          /* vietnamese */
+          @font-face {
+            font-family: 'Familjen Grotesk';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('dca16c3f-2789-44b3-9fb2-17a5b0ff1fb9') format('woff2');
+            unicode-range:
+              U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0,
+              U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+          }
+          /* latin-ext */
+          @font-face {
+            font-family: 'Familjen Grotesk';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('25558564-e368-417c-a47a-5db103698ace') format('woff2');
+            unicode-range:
+              U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+              U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+              U+2113, U+2C60-2C7F, U+A720-A7FF;
+          }
+          /* latin */
+          @font-face {
+            font-family: 'Familjen Grotesk';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('783de138-5722-4ca7-8ba6-edbc484121cb') format('woff2');
+            unicode-range:
+              U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+              U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+          }
+          /* vietnamese */
+          @font-face {
+            font-family: 'Familjen Grotesk';
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url('dca16c3f-2789-44b3-9fb2-17a5b0ff1fb9') format('woff2');
+            unicode-range:
+              U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0,
+              U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+          }
+          /* latin-ext */
+          @font-face {
+            font-family: 'Familjen Grotesk';
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url('25558564-e368-417c-a47a-5db103698ace') format('woff2');
+            unicode-range:
+              U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+              U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+              U+2113, U+2C60-2C7F, U+A720-A7FF;
+          }
+          /* latin */
+          @font-face {
+            font-family: 'Familjen Grotesk';
+            font-style: normal;
+            font-weight: 500;
+            font-display: swap;
+            src: url('783de138-5722-4ca7-8ba6-edbc484121cb') format('woff2');
+            unicode-range:
+              U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+              U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+          }
+          /* vietnamese */
+          @font-face {
+            font-family: 'Familjen Grotesk';
+            font-style: normal;
+            font-weight: 600;
+            font-display: swap;
+            src: url('dca16c3f-2789-44b3-9fb2-17a5b0ff1fb9') format('woff2');
+            unicode-range:
+              U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0,
+              U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+          }
+          /* latin-ext */
+          @font-face {
+            font-family: 'Familjen Grotesk';
+            font-style: normal;
+            font-weight: 600;
+            font-display: swap;
+            src: url('25558564-e368-417c-a47a-5db103698ace') format('woff2');
+            unicode-range:
+              U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+              U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+              U+2113, U+2C60-2C7F, U+A720-A7FF;
+          }
+          /* latin */
+          @font-face {
+            font-family: 'Familjen Grotesk';
+            font-style: normal;
+            font-weight: 600;
+            font-display: swap;
+            src: url('783de138-5722-4ca7-8ba6-edbc484121cb') format('woff2');
+            unicode-range:
+              U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+              U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+          }
+          /* vietnamese */
+          @font-face {
+            font-family: 'Familjen Grotesk';
+            font-style: normal;
+            font-weight: 700;
+            font-display: swap;
+            src: url('dca16c3f-2789-44b3-9fb2-17a5b0ff1fb9') format('woff2');
+            unicode-range:
+              U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0,
+              U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+          }
+          /* latin-ext */
+          @font-face {
+            font-family: 'Familjen Grotesk';
+            font-style: normal;
+            font-weight: 700;
+            font-display: swap;
+            src: url('25558564-e368-417c-a47a-5db103698ace') format('woff2');
+            unicode-range:
+              U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+              U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+              U+2113, U+2C60-2C7F, U+A720-A7FF;
+          }
+          /* latin */
+          @font-face {
+            font-family: 'Familjen Grotesk';
+            font-style: normal;
+            font-weight: 700;
+            font-display: swap;
+            src: url('783de138-5722-4ca7-8ba6-edbc484121cb') format('woff2');
+            unicode-range:
+              U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+              U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+          }
+          /* latin-ext */
+          @font-face {
+            font-family: 'Instrument Serif';
+            font-style: italic;
+            font-weight: 400;
+            font-display: swap;
+            src: url('00d5f2c6-37c9-4a6b-9e6c-8cca96ce5f04') format('woff2');
+            unicode-range:
+              U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+              U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+              U+2113, U+2C60-2C7F, U+A720-A7FF;
+          }
+          /* latin */
+          @font-face {
+            font-family: 'Instrument Serif';
+            font-style: italic;
+            font-weight: 400;
+            font-display: swap;
+            src: url('0482329e-17eb-4d5a-9bb6-b04e944b0b76') format('woff2');
+            unicode-range:
+              U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+              U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+          }
+          /* latin-ext */
+          @font-face {
+            font-family: 'Instrument Serif';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('1b645d39-7224-4a98-817f-4b9652a80b21') format('woff2');
+            unicode-range:
+              U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+              U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+              U+2113, U+2C60-2C7F, U+A720-A7FF;
+          }
+          /* latin */
+          @font-face {
+            font-family: 'Instrument Serif';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('c7b4d28f-b626-4ee5-9d8a-e20645faf91a') format('woff2');
+            unicode-range:
+              U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+              U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+          }
+        </style>
+        <style>
+          body {
+            margin: 0;
+            background: #100910;
+            color: #f6eee6;
+            font-family: 'Familjen Grotesk', system-ui, sans-serif;
+          }
+          * {
+            box-sizing: border-box;
+          }
+          a {
+            color: #e8b860;
+            text-decoration: none;
+          }
+          a:hover {
+            color: #f6eee6;
+          }
+          @keyframes softPulse {
+            0%,
+            100% {
+              opacity: 0.35;
+              transform: scale(1);
+            }
+            50% {
+              opacity: 0.8;
+              transform: scale(1.06);
+            }
+          }
+        </style>
+      </helmet>
+
+      <div style="padding: clamp(28px, 4vw, 64px); background: #100910; min-height: 100vh">
+        <div style="max-width: 760px; margin: 0 0 clamp(40px, 5vw, 72px)">
+          <div style="display: flex; align-items: center; gap: 11px; margin-bottom: 22px">
+            <div
+              style="
+                width: 11px;
+                height: 11px;
+                border-radius: 50%;
+                background: #e8b860;
+                box-shadow: 0 0 0 4px rgba(232, 184, 96, 0.16);
+              "
+            ></div>
+            <span style="font-family: 'Instrument Serif', serif; font-size: 25px">Cœur Fidèle</span>
+          </div>
+          <h1
+            style="
+              font-family: 'Instrument Serif', serif;
+              font-weight: 400;
+              font-size: clamp(36px, 4.6vw, 60px);
+              line-height: 1.04;
+              margin: 0 0 16px;
+            "
+          >
+            La version web
+          </h1>
+          <p
+            style="
+              font-size: 17px;
+              line-height: 1.6;
+              color: rgba(246, 238, 230, 0.62);
+              margin: 0;
+              max-width: 34em;
+            "
+          >
+            Les mêmes écrans en 1440 × 900. Une barre latérale porte l'Espace Couple et le solde de
+            points ; le jeu occupe le centre, jamais plus large que ce qu'on peut lire d'un regard.
+          </p>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: clamp(36px, 4vw, 68px)">
+          <div style="display: flex; flex-direction: column; gap: 16px">
+            <div style="display: flex; align-items: center; gap: 12px">
+              <span style="font-family: 'Instrument Serif', serif; font-size: 20px; color: #e8b860"
+                >01</span
+              ><span style="font-size: 15px; color: rgba(246, 238, 230, 0.62)"
+                >Espace Couple · tableau de bord</span
+              >
+            </div>
+            <div
+              data-screen-label="Web 01 Espace Couple"
+              style="
+                width: 1440px;
+                height: 900px;
+                border-radius: 20px;
+                overflow: hidden;
+                border: 1px solid rgba(246, 238, 230, 0.12);
+                box-shadow: 0 60px 110px -60px rgba(0, 0, 0, 0.9);
+                display: flex;
+                flex-direction: column;
+                background: #1b0f20;
+              "
+            >
+              <div
+                style="
+                  flex-shrink: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 16px;
+                  padding: 0 20px;
+                  height: 46px;
+                  background: #241129;
+                  border-bottom: 1px solid rgba(246, 238, 230, 0.1);
+                "
+              >
+                <div style="display: flex; gap: 7px">
+                  <span
+                    style="width: 11px; height: 11px; border-radius: 50%; background: #4a2b4f"
+                  ></span
+                  ><span
+                    style="width: 11px; height: 11px; border-radius: 50%; background: #4a2b4f"
+                  ></span
+                  ><span
+                    style="width: 11px; height: 11px; border-radius: 50%; background: #4a2b4f"
+                  ></span>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    max-width: 420px;
+                    padding: 6px 14px;
+                    border-radius: 100px;
+                    background: #170d1b;
+                    font-size: 13px;
+                    color: rgba(246, 238, 230, 0.64);
+                  "
+                >
+                  coeurfidele.com/espace
+                </div>
+              </div>
+              <div style="flex: 1; display: flex; min-height: 0">
+                <div
+                  style="
+                    width: 264px;
+                    flex-shrink: 0;
+                    border-right: 1px solid rgba(246, 238, 230, 0.1);
+                    padding: 28px 22px;
+                    display: flex;
+                    flex-direction: column;
+                    background: #170d1b;
+                  "
+                >
+                  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 34px">
+                    <div
+                      style="width: 10px; height: 10px; border-radius: 50%; background: #e8b860"
+                    ></div>
+                    <span style="font-family: 'Instrument Serif', serif; font-size: 21px"
+                      >Cœur Fidèle</span
+                    >
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 12px;
+                      padding: 14px;
+                      border-radius: 18px;
+                      background: #241129;
+                      margin-bottom: 26px;
+                    "
+                  >
+                    <div style="display: flex">
+                      <div
+                        style="
+                          width: 30px;
+                          height: 30px;
+                          border-radius: 50%;
+                          background: linear-gradient(140deg, #8b2c56, #e8b860);
+                        "
+                      ></div>
+                      <div
+                        style="
+                          width: 30px;
+                          height: 30px;
+                          border-radius: 50%;
+                          background: linear-gradient(140deg, #e8b860, #8b2c56);
+                          margin-left: -14px;
+                          border: 2px solid #241129;
+                        "
+                      ></div>
+                    </div>
+                    <div style="min-width: 0">
+                      <div style="font-size: 14px; font-weight: 600">Aïssatou &amp; Malick</div>
+                      <div style="font-size: 12px; color: rgba(246, 238, 230, 0.64)">Zone FCFA</div>
+                    </div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 26px">
+                    <div
+                      style="
+                        padding: 12px 14px;
+                        border-radius: 14px;
+                        background: rgba(232, 184, 96, 0.14);
+                        color: #e8b860;
+                        font-size: 15px;
+                        font-weight: 600;
+                      "
+                    >
+                      Accueil
+                    </div>
+                    <div
+                      style="
+                        padding: 12px 14px;
+                        border-radius: 14px;
+                        font-size: 15px;
+                        color: rgba(246, 238, 230, 0.65);
+                      "
+                    >
+                      Nos parties
+                    </div>
+                    <div
+                      style="
+                        padding: 12px 14px;
+                        border-radius: 14px;
+                        font-size: 15px;
+                        color: rgba(246, 238, 230, 0.65);
+                      "
+                    >
+                      Catégories
+                    </div>
+                    <div
+                      style="
+                        padding: 12px 14px;
+                        border-radius: 14px;
+                        font-size: 15px;
+                        color: rgba(246, 238, 230, 0.65);
+                      "
+                    >
+                      Rapport de Couple
+                    </div>
+                    <div
+                      style="
+                        padding: 12px 14px;
+                        border-radius: 14px;
+                        font-size: 15px;
+                        color: rgba(246, 238, 230, 0.65);
+                      "
+                    >
+                      Réglages
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      margin-top: auto;
+                      padding: 18px;
+                      border-radius: 20px;
+                      border: 1px solid rgba(232, 184, 96, 0.3);
+                      background: rgba(232, 184, 96, 0.08);
+                    "
+                  >
+                    <div
+                      style="
+                        font-size: 12px;
+                        letter-spacing: 0.12em;
+                        text-transform: uppercase;
+                        color: rgba(246, 238, 230, 0.64);
+                        margin-bottom: 8px;
+                      "
+                    >
+                      Solde commun
+                    </div>
+                    <div
+                      style="
+                        font-family: 'Instrument Serif', serif;
+                        font-size: 32px;
+                        line-height: 1;
+                        color: #e8b860;
+                        margin-bottom: 12px;
+                      "
+                    >
+                      {{ pointsBalance }} pts
+                    </div>
+                    <div style="font-size: 13px; color: rgba(246, 238, 230, 0.7)">
+                      Rechargeable par vous deux
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    min-width: 0;
+                    padding: 40px 48px;
+                    position: relative;
+                    overflow: hidden;
+                  "
+                >
+                  <div
+                    style="
+                      position: absolute;
+                      top: -200px;
+                      right: -140px;
+                      width: 520px;
+                      height: 520px;
+                      border-radius: 50%;
+                      background: radial-gradient(
+                        circle,
+                        rgba(139, 44, 86, 0.45),
+                        rgba(27, 15, 32, 0) 68%
+                      );
+                      pointer-events: none;
+                    "
+                  ></div>
+                  <div style="position: relative; max-width: 900px">
+                    <div
+                      style="
+                        font-size: 13px;
+                        letter-spacing: 0.14em;
+                        text-transform: uppercase;
+                        color: rgba(246, 238, 230, 0.62);
+                        margin-bottom: 12px;
+                      "
+                    >
+                      Bonsoir tous les deux
+                    </div>
+                    <div
+                      style="
+                        font-family: 'Instrument Serif', serif;
+                        font-size: 52px;
+                        line-height: 1.04;
+                        margin-bottom: 34px;
+                      "
+                    >
+                      Vous jouez ce soir ?
+                    </div>
+                    <div
+                      style="
+                        display: grid;
+                        grid-template-columns: 1.35fr 1fr;
+                        gap: 18px;
+                        margin-bottom: 18px;
+                      "
+                    >
+                      <div
+                        style="
+                          background: linear-gradient(160deg, #3a1b33, #26122c);
+                          border: 1px solid rgba(232, 184, 96, 0.26);
+                          border-radius: 28px;
+                          padding: 30px;
+                        "
+                      >
+                        <div
+                          style="
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: flex-start;
+                            margin-bottom: 22px;
+                          "
+                        >
+                          <div>
+                            <div
+                              style="
+                                font-size: 12px;
+                                letter-spacing: 0.12em;
+                                text-transform: uppercase;
+                                color: rgba(246, 238, 230, 0.64);
+                                margin-bottom: 10px;
+                              "
+                            >
+                              Score du couple
+                            </div>
+                            <div
+                              style="
+                                font-family: 'Instrument Serif', serif;
+                                font-size: 60px;
+                                line-height: 1;
+                                color: #e8b860;
+                              "
+                            >
+                              248
+                            </div>
+                          </div>
+                          <div
+                            style="
+                              padding: 8px 15px;
+                              border-radius: 100px;
+                              background: rgba(232, 184, 96, 0.16);
+                              color: #e8b860;
+                              font-size: 14px;
+                              font-weight: 600;
+                            "
+                          >
+                            Complices
+                          </div>
+                        </div>
+                        <div
+                          style="
+                            height: 8px;
+                            border-radius: 100px;
+                            background: rgba(246, 238, 230, 0.14);
+                            overflow: hidden;
+                            margin-bottom: 12px;
+                          "
+                        >
+                          <div
+                            style="
+                              width: 62%;
+                              height: 100%;
+                              background: linear-gradient(90deg, #8b2c56, #e8b860);
+                            "
+                          ></div>
+                        </div>
+                        <div style="font-size: 14px; color: rgba(246, 238, 230, 0.66)">
+                          52 points avant le niveau Inséparables
+                        </div>
+                      </div>
+                      <div style="display: flex; flex-direction: column; gap: 14px">
+                        <div
+                          style="
+                            flex: 1;
+                            background: #26132c;
+                            border: 1px solid rgba(246, 238, 230, 0.08);
+                            border-radius: 24px;
+                            padding: 24px;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                          "
+                        >
+                          <div
+                            style="
+                              font-family: 'Instrument Serif', serif;
+                              font-size: 34px;
+                              line-height: 1;
+                            "
+                          >
+                            7
+                          </div>
+                          <div
+                            style="
+                              font-size: 14px;
+                              color: rgba(246, 238, 230, 0.66);
+                              margin-top: 8px;
+                            "
+                          >
+                            parties jouées ensemble
+                          </div>
+                        </div>
+                        <div
+                          style="
+                            flex: 1;
+                            background: #26132c;
+                            border: 1px solid rgba(246, 238, 230, 0.08);
+                            border-radius: 24px;
+                            padding: 24px;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                          "
+                        >
+                          <div
+                            style="
+                              font-family: 'Instrument Serif', serif;
+                              font-size: 34px;
+                              line-height: 1;
+                            "
+                          >
+                            4
+                          </div>
+                          <div
+                            style="
+                              font-size: 14px;
+                              color: rgba(246, 238, 230, 0.66);
+                              margin-top: 8px;
+                            "
+                          >
+                            catégories ouvertes sur 8
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div style="display: flex; gap: 14px; align-items: center">
+                      <div
+                        style="
+                          padding: 18px 34px;
+                          border-radius: 100px;
+                          background: #e8b860;
+                          color: #170d1b;
+                          font-weight: 700;
+                          font-size: 17px;
+                        "
+                      >
+                        Nouvelle partie
+                      </div>
+                      <div
+                        style="
+                          padding: 16px 30px;
+                          border-radius: 100px;
+                          border: 1px solid rgba(246, 238, 230, 0.2);
+                          font-size: 16px;
+                          color: rgba(246, 238, 230, 0.85);
+                        "
+                      >
+                        Reprendre la partie de mardi
+                      </div>
+                      <div
+                        style="font-size: 14px; color: rgba(246, 238, 230, 0.62); margin-left: 6px"
+                      >
+                        Malick est en ligne
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 16px">
+            <div style="display: flex; align-items: center; gap: 12px">
+              <span style="font-family: 'Instrument Serif', serif; font-size: 20px; color: #e8b860"
+                >02</span
+              ><span style="font-size: 15px; color: rgba(246, 238, 230, 0.62)"
+                >Choix des catégories &amp; du format</span
+              >
+            </div>
+            <div
+              data-screen-label="Web 02 Catégories"
+              style="
+                width: 1440px;
+                height: 900px;
+                border-radius: 20px;
+                overflow: hidden;
+                border: 1px solid rgba(246, 238, 230, 0.12);
+                box-shadow: 0 60px 110px -60px rgba(0, 0, 0, 0.9);
+                display: flex;
+                flex-direction: column;
+                background: #f6eee6;
+                color: #241129;
+              "
+            >
+              <div
+                style="
+                  flex-shrink: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 16px;
+                  padding: 0 20px;
+                  height: 46px;
+                  background: #ead9c8;
+                  border-bottom: 1px solid rgba(36, 17, 41, 0.12);
+                "
+              >
+                <div style="display: flex; gap: 7px">
+                  <span
+                    style="
+                      width: 11px;
+                      height: 11px;
+                      border-radius: 50%;
+                      background: rgba(36, 17, 41, 0.2);
+                    "
+                  ></span
+                  ><span
+                    style="
+                      width: 11px;
+                      height: 11px;
+                      border-radius: 50%;
+                      background: rgba(36, 17, 41, 0.2);
+                    "
+                  ></span
+                  ><span
+                    style="
+                      width: 11px;
+                      height: 11px;
+                      border-radius: 50%;
+                      background: rgba(36, 17, 41, 0.2);
+                    "
+                  ></span>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    max-width: 420px;
+                    padding: 6px 14px;
+                    border-radius: 100px;
+                    background: #f6eee6;
+                    font-size: 13px;
+                    color: rgba(36, 17, 41, 0.68);
+                  "
+                >
+                  coeurfidele.com/partie/nouvelle
+                </div>
+              </div>
+              <div style="flex: 1; min-height: 0; display: flex">
+                <div style="flex: 1; min-width: 0; padding: 44px 48px; overflow: hidden">
+                  <div
+                    style="
+                      font-size: 13px;
+                      letter-spacing: 0.14em;
+                      text-transform: uppercase;
+                      color: rgba(36, 17, 41, 0.76);
+                      margin-bottom: 12px;
+                    "
+                  >
+                    Étape 1 sur 2
+                  </div>
+                  <div
+                    style="
+                      font-family: 'Instrument Serif', serif;
+                      font-size: 46px;
+                      line-height: 1.05;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    De quoi parle-t-on ce soir ?
+                  </div>
+                  <div style="font-size: 16px; color: rgba(36, 17, 41, 0.74); margin-bottom: 30px">
+                    Deux thèmes minimum. Vos réponses restent masquées jusqu'à la fin de chaque
+                    manche.
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+                    <sc-for list="{{ categories }}" as="cat" hint-placeholder-count="8">
+                      <div
+                        style="display:flex;align-items:center;gap:14px;background:{{ cat.bg }};border:1px solid {{ cat.border }};border-radius:20px;padding:18px 20px"
+                      >
+                        <div
+                          style="width:40px;height:40px;border-radius:13px;background:{{ cat.chip }};flex-shrink:0"
+                        ></div>
+                        <div style="flex: 1; min-width: 0">
+                          <div style="font-size: 16px; font-weight: 600; margin-bottom: 3px">
+                            {{ cat.name }}
+                          </div>
+                          <div style="font-size: 13px; color: rgba(36, 17, 41, 0.72)">
+                            {{ cat.meta }}
+                          </div>
+                        </div>
+                        <div
+                          style="font-size:14px;font-weight:700;color:{{ cat.markColor }};flex-shrink:0"
+                        >
+                          {{ cat.mark }}
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div
+                  style="
+                    width: 392px;
+                    flex-shrink: 0;
+                    border-left: 1px solid rgba(36, 17, 41, 0.12);
+                    padding: 44px 36px;
+                    display: flex;
+                    flex-direction: column;
+                    background: #efe3d6;
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 13px;
+                      letter-spacing: 0.14em;
+                      text-transform: uppercase;
+                      color: rgba(36, 17, 41, 0.76);
+                      margin-bottom: 18px;
+                    "
+                  >
+                    Étape 2 · le format
+                  </div>
+                  <div
+                    style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px"
+                  >
+                    <div
+                      style="
+                        background: #f6eee6;
+                        border: 1px solid rgba(36, 17, 41, 0.14);
+                        border-radius: 22px;
+                        padding: 18px 20px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                      "
+                    >
+                      <div>
+                        <div style="font-size: 16px; font-weight: 600; margin-bottom: 3px">
+                          Express
+                        </div>
+                        <div style="font-size: 13px; color: rgba(36, 17, 41, 0.72)">
+                          5 questions · 5 min
+                        </div>
+                      </div>
+                      <div style="font-size: 15px; font-weight: 600">20 pts</div>
+                    </div>
+                    <div
+                      style="
+                        background: #241129;
+                        color: #f6eee6;
+                        border: 1px solid #241129;
+                        border-radius: 22px;
+                        padding: 18px 20px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        position: relative;
+                        box-shadow: 0 24px 46px -28px rgba(36, 17, 41, 0.6);
+                      "
+                    >
+                      <div
+                        style="
+                          position: absolute;
+                          top: -11px;
+                          left: 20px;
+                          background: #e8b860;
+                          color: #170d1b;
+                          font-size: 11px;
+                          font-weight: 700;
+                          letter-spacing: 0.08em;
+                          text-transform: uppercase;
+                          padding: 5px 11px;
+                          border-radius: 100px;
+                        "
+                      >
+                        Recommandé
+                      </div>
+                      <div>
+                        <div style="font-size: 16px; font-weight: 600; margin-bottom: 3px">
+                          Standard
+                        </div>
+                        <div style="font-size: 13px; color: rgba(246, 238, 230, 0.7)">
+                          15 questions · 12 min
+                        </div>
+                      </div>
+                      <div style="font-size: 15px; font-weight: 700; color: #e8b860">50 pts</div>
+                    </div>
+                    <div
+                      style="
+                        background: #f6eee6;
+                        border: 1px solid rgba(36, 17, 41, 0.14);
+                        border-radius: 22px;
+                        padding: 18px 20px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                      "
+                    >
+                      <div>
+                        <div style="font-size: 16px; font-weight: 600; margin-bottom: 3px">
+                          Longue soirée
+                        </div>
+                        <div style="font-size: 13px; color: rgba(36, 17, 41, 0.72)">
+                          30 questions · 25 min
+                        </div>
+                      </div>
+                      <div style="font-size: 15px; font-weight: 600">90 pts</div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      padding: 18px 20px;
+                      border-radius: 20px;
+                      background: rgba(139, 44, 86, 0.1);
+                      border: 1px solid rgba(139, 44, 86, 0.28);
+                      margin-bottom: 24px;
+                    "
+                  >
+                    <div style="font-size: 15px; font-weight: 600; margin-bottom: 6px">
+                      Deux jokers chacun
+                    </div>
+                    <div style="font-size: 14px; line-height: 1.5; color: rgba(36, 17, 41, 0.76)">
+                      Une question vous met mal à l'aise ? Vous passez, sans perdre un point.
+                    </div>
+                  </div>
+                  <div style="margin-top: auto">
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        font-size: 14px;
+                        color: rgba(36, 17, 41, 0.74);
+                        margin-bottom: 14px;
+                      "
+                    >
+                      <span>Débité à la fin de la partie</span
+                      ><span style="font-weight: 600; color: #241129">50 pts</span>
+                    </div>
+                    <div
+                      style="
+                        text-align: center;
+                        padding: 18px;
+                        border-radius: 100px;
+                        background: #241129;
+                        color: #f6eee6;
+                        font-weight: 700;
+                        font-size: 17px;
+                      "
+                    >
+                      Lancer la partie
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 16px">
+            <div style="display: flex; align-items: center; gap: 12px">
+              <span style="font-family: 'Instrument Serif', serif; font-size: 20px; color: #e8b860"
+                >03</span
+              ><span style="font-size: 15px; color: rgba(246, 238, 230, 0.62)"
+                >En partie · manche Miroir</span
+              >
+            </div>
+            <div
+              data-screen-label="Web 03 Miroir"
+              style="
+                width: 1440px;
+                height: 900px;
+                border-radius: 20px;
+                overflow: hidden;
+                border: 1px solid rgba(246, 238, 230, 0.12);
+                box-shadow: 0 60px 110px -60px rgba(0, 0, 0, 0.9);
+                display: flex;
+                flex-direction: column;
+                background: #1b0f20;
+                position: relative;
+              "
+            >
+              <div
+                style="
+                  flex-shrink: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 16px;
+                  padding: 0 20px;
+                  height: 46px;
+                  background: #241129;
+                  border-bottom: 1px solid rgba(246, 238, 230, 0.1);
+                  position: relative;
+                  z-index: 2;
+                "
+              >
+                <div style="display: flex; gap: 7px">
+                  <span
+                    style="width: 11px; height: 11px; border-radius: 50%; background: #4a2b4f"
+                  ></span
+                  ><span
+                    style="width: 11px; height: 11px; border-radius: 50%; background: #4a2b4f"
+                  ></span
+                  ><span
+                    style="width: 11px; height: 11px; border-radius: 50%; background: #4a2b4f"
+                  ></span>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    max-width: 420px;
+                    padding: 6px 14px;
+                    border-radius: 100px;
+                    background: #170d1b;
+                    font-size: 13px;
+                    color: rgba(246, 238, 230, 0.64);
+                  "
+                >
+                  coeurfidele.com/partie/en-cours
+                </div>
+              </div>
+              <div
+                style="
+                  position: absolute;
+                  top: -140px;
+                  left: -100px;
+                  width: 540px;
+                  height: 540px;
+                  border-radius: 50%;
+                  background: radial-gradient(
+                    circle,
+                    rgba(139, 44, 86, 0.42),
+                    rgba(27, 15, 32, 0) 68%
+                  );
+                  pointer-events: none;
+                "
+              ></div>
+              <div
+                style="
+                  flex: 1;
+                  min-height: 0;
+                  display: flex;
+                  flex-direction: column;
+                  position: relative;
+                  z-index: 1;
+                "
+              >
+                <div
+                  style="
+                    flex-shrink: 0;
+                    padding: 26px 48px;
+                    display: flex;
+                    align-items: center;
+                    gap: 32px;
+                    border-bottom: 1px solid rgba(246, 238, 230, 0.1);
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 13px;
+                      letter-spacing: 0.12em;
+                      text-transform: uppercase;
+                      color: #e8b860;
+                      flex-shrink: 0;
+                    "
+                  >
+                    Manche 1 · Miroir
+                  </div>
+                  <div style="flex: 1; display: flex; gap: 6px">
+                    <div
+                      style="flex: 1; height: 4px; border-radius: 100px; background: #e8b860"
+                    ></div>
+                    <div
+                      style="flex: 1; height: 4px; border-radius: 100px; background: #e8b860"
+                    ></div>
+                    <div
+                      style="flex: 1; height: 4px; border-radius: 100px; background: #e8b860"
+                    ></div>
+                    <div
+                      style="
+                        flex: 1;
+                        height: 4px;
+                        border-radius: 100px;
+                        background: rgba(246, 238, 230, 0.18);
+                      "
+                    ></div>
+                    <div
+                      style="
+                        flex: 1;
+                        height: 4px;
+                        border-radius: 100px;
+                        background: rgba(246, 238, 230, 0.18);
+                      "
+                    ></div>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 10px;
+                      flex-shrink: 0;
+                      font-size: 14px;
+                      color: rgba(246, 238, 230, 0.7);
+                    "
+                  >
+                    <span
+                      style="
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 50%;
+                        border: 2px solid #e8b860;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 12px;
+                        color: #e8b860;
+                        font-weight: 700;
+                      "
+                      >{{ timerSeconds }}</span
+                    >secondes
+                  </div>
+                  <div
+                    style="
+                      flex-shrink: 0;
+                      padding: 9px 16px;
+                      border-radius: 100px;
+                      border: 1px solid rgba(232, 184, 96, 0.34);
+                      font-size: 14px;
+                      font-weight: 600;
+                      color: #e8b860;
+                    "
+                  >
+                    {{ pointsBalance }} pts
+                  </div>
+                </div>
+                <div
+                  style="flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 340px"
+                >
+                  <div
+                    style="padding: 56px 48px; display: flex; flex-direction: column; min-width: 0"
+                  >
+                    <div
+                      style="font-size: 15px; color: rgba(246, 238, 230, 0.64); margin-bottom: 18px"
+                    >
+                      Que va répondre Malick ?
+                    </div>
+                    <div
+                      style="
+                        font-family: 'Instrument Serif', serif;
+                        font-size: 44px;
+                        line-height: 1.14;
+                        margin-bottom: 40px;
+                        max-width: 20em;
+                        text-wrap: pretty;
+                      "
+                    >
+                      « Un message d'une ex arrive à minuit. Tu fais quoi ? »
+                    </div>
+                    <div
+                      style="
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 12px;
+                        max-width: 820px;
+                      "
+                    >
+                      <div
+                        style="
+                          border: 1px solid rgba(246, 238, 230, 0.14);
+                          border-radius: 20px;
+                          padding: 20px 22px;
+                          font-size: 17px;
+                          line-height: 1.4;
+                          background: #26132c;
+                        "
+                      >
+                        Je réponds, sans en parler
+                      </div>
+                      <div
+                        style="
+                          border: 1px solid #e8b860;
+                          border-radius: 20px;
+                          padding: 20px 22px;
+                          font-size: 17px;
+                          line-height: 1.4;
+                          background: rgba(232, 184, 96, 0.14);
+                          display: flex;
+                          justify-content: space-between;
+                          gap: 14px;
+                        "
+                      >
+                        <span>Je montre le message tout de suite</span
+                        ><span style="color: #e8b860; font-weight: 700">✓</span>
+                      </div>
+                      <div
+                        style="
+                          border: 1px solid rgba(246, 238, 230, 0.14);
+                          border-radius: 20px;
+                          padding: 20px 22px;
+                          font-size: 17px;
+                          line-height: 1.4;
+                          background: #26132c;
+                        "
+                      >
+                        Je laisse sans répondre
+                      </div>
+                      <div
+                        style="
+                          border: 1px solid rgba(246, 238, 230, 0.14);
+                          border-radius: 20px;
+                          padding: 20px 22px;
+                          font-size: 17px;
+                          line-height: 1.4;
+                          background: #26132c;
+                        "
+                      >
+                        Je bloque le numéro
+                      </div>
+                    </div>
+                    <div style="margin-top: auto; display: flex; gap: 14px; align-items: center">
+                      <div
+                        style="
+                          padding: 18px 40px;
+                          border-radius: 100px;
+                          background: #e8b860;
+                          color: #170d1b;
+                          font-weight: 700;
+                          font-size: 17px;
+                        "
+                      >
+                        Valider
+                      </div>
+                      <div
+                        style="
+                          padding: 16px 26px;
+                          border-radius: 100px;
+                          border: 1px solid rgba(246, 238, 230, 0.2);
+                          font-size: 16px;
+                          color: rgba(246, 238, 230, 0.75);
+                        "
+                      >
+                        Passer · 2 jokers
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      border-left: 1px solid rgba(246, 238, 230, 0.1);
+                      padding: 40px 32px;
+                      display: flex;
+                      flex-direction: column;
+                      background: rgba(23, 13, 27, 0.5);
+                    "
+                  >
+                    <div
+                      style="
+                        font-size: 12px;
+                        letter-spacing: 0.14em;
+                        text-transform: uppercase;
+                        color: rgba(246, 238, 230, 0.62);
+                        margin-bottom: 20px;
+                      "
+                    >
+                      Où vous en êtes
+                    </div>
+                    <div
+                      style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 26px"
+                    >
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          gap: 12px;
+                          padding: 14px 16px;
+                          border-radius: 18px;
+                          background: #26132c;
+                          border: 1px solid rgba(246, 238, 230, 0.08);
+                        "
+                      >
+                        <div
+                          style="
+                            width: 30px;
+                            height: 30px;
+                            border-radius: 50%;
+                            background: linear-gradient(140deg, #8b2c56, #e8b860);
+                            flex-shrink: 0;
+                          "
+                        ></div>
+                        <div style="flex: 1">
+                          <div style="font-size: 15px; font-weight: 600">Aïssatou</div>
+                          <div style="font-size: 13px; color: rgba(246, 238, 230, 0.64)">
+                            en train de choisir
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          gap: 12px;
+                          padding: 14px 16px;
+                          border-radius: 18px;
+                          background: rgba(232, 184, 96, 0.1);
+                          border: 1px solid rgba(232, 184, 96, 0.28);
+                        "
+                      >
+                        <div
+                          style="
+                            width: 30px;
+                            height: 30px;
+                            border-radius: 50%;
+                            background: linear-gradient(140deg, #e8b860, #8b2c56);
+                            flex-shrink: 0;
+                          "
+                        ></div>
+                        <div style="flex: 1">
+                          <div style="font-size: 15px; font-weight: 600">Malick</div>
+                          <div style="font-size: 13px; color: #e8b860">a déjà répondu</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        padding: 18px;
+                        border-radius: 20px;
+                        border: 1px solid rgba(246, 238, 230, 0.12);
+                        font-size: 14px;
+                        line-height: 1.55;
+                        color: rgba(246, 238, 230, 0.7);
+                        margin-bottom: 20px;
+                      "
+                    >
+                      Vos réponses ne seront visibles qu'à la fin de la manche. Personne ne joue
+                      contre personne.
+                    </div>
+                    <div
+                      style="
+                        margin-top: auto;
+                        font-size: 13px;
+                        color: rgba(246, 238, 230, 0.62);
+                        line-height: 1.5;
+                      "
+                    >
+                      Coupure réseau ? Vous reprenez à cette question pendant 10 minutes.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 16px">
+            <div style="display: flex; align-items: center; gap: 12px">
+              <span style="font-family: 'Instrument Serif', serif; font-size: 20px; color: #e8b860"
+                >04</span
+              ><span style="font-size: 15px; color: rgba(246, 238, 230, 0.62)"
+                >Révélation de manche</span
+              >
+            </div>
+            <div
+              data-screen-label="Web 04 Révélation"
+              style="
+                width: 1440px;
+                height: 900px;
+                border-radius: 20px;
+                overflow: hidden;
+                border: 1px solid rgba(246, 238, 230, 0.12);
+                box-shadow: 0 60px 110px -60px rgba(0, 0, 0, 0.9);
+                display: flex;
+                flex-direction: column;
+                background: #1b0f20;
+              "
+            >
+              <div
+                style="
+                  flex-shrink: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 16px;
+                  padding: 0 20px;
+                  height: 46px;
+                  background: #241129;
+                  border-bottom: 1px solid rgba(246, 238, 230, 0.1);
+                "
+              >
+                <div style="display: flex; gap: 7px">
+                  <span
+                    style="width: 11px; height: 11px; border-radius: 50%; background: #4a2b4f"
+                  ></span
+                  ><span
+                    style="width: 11px; height: 11px; border-radius: 50%; background: #4a2b4f"
+                  ></span
+                  ><span
+                    style="width: 11px; height: 11px; border-radius: 50%; background: #4a2b4f"
+                  ></span>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    max-width: 420px;
+                    padding: 6px 14px;
+                    border-radius: 100px;
+                    background: #170d1b;
+                    font-size: 13px;
+                    color: rgba(246, 238, 230, 0.64);
+                  "
+                >
+                  coeurfidele.com/partie/manche-1
+                </div>
+              </div>
+              <div style="flex: 1; min-height: 0; padding: 48px; display: flex; gap: 24px">
+                <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                  <div
+                    style="
+                      font-size: 13px;
+                      letter-spacing: 0.12em;
+                      text-transform: uppercase;
+                      color: #e8b860;
+                      margin-bottom: 14px;
+                    "
+                  >
+                    Fin de la manche 1
+                  </div>
+                  <div
+                    style="
+                      font-family: 'Instrument Serif', serif;
+                      font-size: 48px;
+                      line-height: 1.05;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    Vous vous êtes compris<br />4 fois sur 5
+                  </div>
+                  <div
+                    style="font-size: 16px; color: rgba(246, 238, 230, 0.66); margin-bottom: 30px"
+                  >
+                    Voilà les deux réponses où vous avez divergé.
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 14px">
+                    <div
+                      style="
+                        background: #26132c;
+                        border: 1px solid rgba(246, 238, 230, 0.1);
+                        border-radius: 24px;
+                        padding: 26px;
+                      "
+                    >
+                      <div
+                        style="
+                          font-size: 16px;
+                          line-height: 1.45;
+                          color: rgba(246, 238, 230, 0.85);
+                          margin-bottom: 22px;
+                        "
+                      >
+                        « Un message d'une ex arrive à minuit. Tu fais quoi ? »
+                      </div>
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+                        <div style="display: flex; gap: 12px; align-items: flex-start">
+                          <div
+                            style="
+                              width: 30px;
+                              height: 30px;
+                              border-radius: 50%;
+                              background: linear-gradient(140deg, #8b2c56, #e8b860);
+                              flex-shrink: 0;
+                            "
+                          ></div>
+                          <div>
+                            <div
+                              style="
+                                font-size: 13px;
+                                color: rgba(246, 238, 230, 0.64);
+                                margin-bottom: 4px;
+                              "
+                            >
+                              Aïssatou pensait
+                            </div>
+                            <div style="font-size: 16px">Je montre le message tout de suite</div>
+                          </div>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: flex-start">
+                          <div
+                            style="
+                              width: 30px;
+                              height: 30px;
+                              border-radius: 50%;
+                              background: linear-gradient(140deg, #e8b860, #8b2c56);
+                              flex-shrink: 0;
+                            "
+                          ></div>
+                          <div>
+                            <div
+                              style="
+                                font-size: 13px;
+                                color: rgba(246, 238, 230, 0.64);
+                                margin-bottom: 4px;
+                              "
+                            >
+                              Malick a répondu
+                            </div>
+                            <div style="font-size: 16px; color: #e8b860">
+                              Je laisse sans répondre
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        background: #26132c;
+                        border: 1px solid rgba(246, 238, 230, 0.1);
+                        border-radius: 24px;
+                        padding: 26px;
+                      "
+                    >
+                      <div
+                        style="
+                          font-size: 16px;
+                          line-height: 1.45;
+                          color: rgba(246, 238, 230, 0.85);
+                          margin-bottom: 22px;
+                        "
+                      >
+                        « Ton téléphone reste-t-il déverrouillé à la maison ? »
+                      </div>
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+                        <div style="display: flex; gap: 12px; align-items: flex-start">
+                          <div
+                            style="
+                              width: 30px;
+                              height: 30px;
+                              border-radius: 50%;
+                              background: linear-gradient(140deg, #8b2c56, #e8b860);
+                              flex-shrink: 0;
+                            "
+                          ></div>
+                          <div>
+                            <div
+                              style="
+                                font-size: 13px;
+                                color: rgba(246, 238, 230, 0.64);
+                                margin-bottom: 4px;
+                              "
+                            >
+                              Aïssatou pensait
+                            </div>
+                            <div style="font-size: 16px">Toujours déverrouillé</div>
+                          </div>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: flex-start">
+                          <div
+                            style="
+                              width: 30px;
+                              height: 30px;
+                              border-radius: 50%;
+                              background: linear-gradient(140deg, #e8b860, #8b2c56);
+                              flex-shrink: 0;
+                            "
+                          ></div>
+                          <div>
+                            <div
+                              style="
+                                font-size: 13px;
+                                color: rgba(246, 238, 230, 0.64);
+                                margin-bottom: 4px;
+                              "
+                            >
+                              Malick a répondu
+                            </div>
+                            <div style="font-size: 16px; color: #e8b860">
+                              Verrouillé, par habitude
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="
+                    width: 352px;
+                    flex-shrink: 0;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
+                  "
+                >
+                  <div
+                    style="
+                      background: linear-gradient(160deg, #3a1b33, #26122c);
+                      border: 1px solid rgba(232, 184, 96, 0.26);
+                      border-radius: 26px;
+                      padding: 26px;
+                    "
+                  >
+                    <div
+                      style="
+                        font-size: 12px;
+                        letter-spacing: 0.12em;
+                        text-transform: uppercase;
+                        color: rgba(246, 238, 230, 0.64);
+                        margin-bottom: 12px;
+                      "
+                    >
+                      Points de la manche
+                    </div>
+                    <div
+                      style="
+                        font-family: 'Instrument Serif', serif;
+                        font-size: 50px;
+                        line-height: 1;
+                        color: #e8b860;
+                      "
+                    >
+                      +82
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      background: #26132c;
+                      border: 1px solid rgba(246, 238, 230, 0.1);
+                      border-radius: 26px;
+                      padding: 26px;
+                    "
+                  >
+                    <div
+                      style="
+                        font-size: 12px;
+                        letter-spacing: 0.12em;
+                        text-transform: uppercase;
+                        color: rgba(246, 238, 230, 0.64);
+                        margin-bottom: 12px;
+                      "
+                    >
+                      À se demander ce soir
+                    </div>
+                    <div style="font-size: 17px; line-height: 1.5; margin-bottom: 16px">
+                      « Répondre ou pas, c'est quoi la différence pour toi ? »
+                    </div>
+                    <div style="font-size: 17px; line-height: 1.5; color: rgba(246, 238, 230, 0.7)">
+                      « Un téléphone verrouillé, ça te dit quoi ? »
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      margin-top: auto;
+                      text-align: center;
+                      padding: 18px;
+                      border-radius: 100px;
+                      background: #e8b860;
+                      color: #170d1b;
+                      font-weight: 700;
+                      font-size: 17px;
+                    "
+                  >
+                    Manche suivante
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 16px">
+            <div style="display: flex; align-items: center; gap: 12px">
+              <span style="font-family: 'Instrument Serif', serif; font-size: 20px; color: #e8b860"
+                >05</span
+              ><span style="font-size: 15px; color: rgba(246, 238, 230, 0.62)"
+                >Résultats &amp; carte partageable</span
+              >
+            </div>
+            <div
+              data-screen-label="Web 05 Résultats"
+              style="
+                width: 1440px;
+                height: 900px;
+                border-radius: 20px;
+                overflow: hidden;
+                border: 1px solid rgba(246, 238, 230, 0.12);
+                box-shadow: 0 60px 110px -60px rgba(0, 0, 0, 0.9);
+                display: flex;
+                flex-direction: column;
+                background: #1b0f20;
+                position: relative;
+              "
+            >
+              <div
+                style="
+                  flex-shrink: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 16px;
+                  padding: 0 20px;
+                  height: 46px;
+                  background: #241129;
+                  border-bottom: 1px solid rgba(246, 238, 230, 0.1);
+                  position: relative;
+                  z-index: 2;
+                "
+              >
+                <div style="display: flex; gap: 7px">
+                  <span
+                    style="width: 11px; height: 11px; border-radius: 50%; background: #4a2b4f"
+                  ></span
+                  ><span
+                    style="width: 11px; height: 11px; border-radius: 50%; background: #4a2b4f"
+                  ></span
+                  ><span
+                    style="width: 11px; height: 11px; border-radius: 50%; background: #4a2b4f"
+                  ></span>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    max-width: 420px;
+                    padding: 6px 14px;
+                    border-radius: 100px;
+                    background: #170d1b;
+                    font-size: 13px;
+                    color: rgba(246, 238, 230, 0.64);
+                  "
+                >
+                  coeurfidele.com/partie/resultats
+                </div>
+              </div>
+              <div
+                style="
+                  position: absolute;
+                  top: -210px;
+                  left: 34%;
+                  width: 640px;
+                  height: 520px;
+                  border-radius: 50%;
+                  background: radial-gradient(
+                    circle,
+                    rgba(232, 184, 96, 0.28),
+                    rgba(27, 15, 32, 0) 68%
+                  );
+                  pointer-events: none;
+                "
+              ></div>
+              <div
+                style="
+                  flex: 1;
+                  min-height: 0;
+                  padding: 48px;
+                  display: flex;
+                  gap: 28px;
+                  position: relative;
+                  z-index: 1;
+                "
+              >
+                <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                  <div
+                    style="
+                      font-size: 13px;
+                      letter-spacing: 0.14em;
+                      text-transform: uppercase;
+                      color: rgba(246, 238, 230, 0.64);
+                      margin-bottom: 16px;
+                    "
+                  >
+                    Votre score de couple
+                  </div>
+                  <div style="display: flex; align-items: flex-end; gap: 24px; margin-bottom: 18px">
+                    <div
+                      style="
+                        font-family: 'Instrument Serif', serif;
+                        font-size: 104px;
+                        line-height: 0.86;
+                        color: #e8b860;
+                      "
+                    >
+                      312
+                    </div>
+                    <div
+                      style="
+                        padding: 9px 20px;
+                        border-radius: 100px;
+                        background: rgba(232, 184, 96, 0.16);
+                        color: #e8b860;
+                        font-size: 16px;
+                        font-weight: 600;
+                        margin-bottom: 12px;
+                      "
+                    >
+                      Niveau Inséparables
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      font-size: 18px;
+                      line-height: 1.55;
+                      color: rgba(246, 238, 230, 0.62);
+                      margin-bottom: 34px;
+                      max-width: 32em;
+                    "
+                  >
+                    Votre meilleur score. Vous êtes surtout d'accord sur l'argent et la
+                    transparence, un peu moins sur le téléphone.
+                  </div>
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: 1fr 1fr;
+                      gap: 14px;
+                      margin-bottom: 14px;
+                    "
+                  >
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 16px;
+                        background: linear-gradient(160deg, #3a1b33, #26122c);
+                        border: 1px solid rgba(232, 184, 96, 0.3);
+                        border-radius: 24px;
+                        padding: 22px;
+                      "
+                    >
+                      <div
+                        style="
+                          width: 44px;
+                          height: 44px;
+                          border-radius: 50%;
+                          background: linear-gradient(140deg, #8b2c56, #e8b860);
+                          flex-shrink: 0;
+                        "
+                      ></div>
+                      <div style="flex: 1">
+                        <div style="font-size: 17px; font-weight: 600">Aïssatou</div>
+                        <div style="font-size: 14px; color: #e8b860">Cœur d'Or</div>
+                      </div>
+                      <div style="font-family: 'Instrument Serif', serif; font-size: 32px">164</div>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 16px;
+                        background: #26132c;
+                        border: 1px solid rgba(246, 238, 230, 0.1);
+                        border-radius: 24px;
+                        padding: 22px;
+                      "
+                    >
+                      <div
+                        style="
+                          width: 44px;
+                          height: 44px;
+                          border-radius: 50%;
+                          background: linear-gradient(140deg, #e8b860, #8b2c56);
+                          flex-shrink: 0;
+                        "
+                      ></div>
+                      <div style="flex: 1">
+                        <div style="font-size: 17px; font-weight: 600">Malick</div>
+                        <div style="font-size: 14px; color: rgba(246, 238, 230, 0.66)">
+                          Cœur Sincère
+                        </div>
+                      </div>
+                      <div style="font-family: 'Instrument Serif', serif; font-size: 32px">148</div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      padding: 16px 22px;
+                      border-radius: 20px;
+                      border: 1px dashed rgba(246, 238, 230, 0.18);
+                      font-size: 15px;
+                      color: rgba(246, 238, 230, 0.66);
+                      margin-bottom: auto;
+                    "
+                  >
+                    <span>50 points débités à la validation</span
+                    ><span>Nouveau solde : 150 pts</span>
+                  </div>
+                  <div style="display: flex; gap: 14px; margin-top: 28px">
+                    <div
+                      style="
+                        padding: 18px 36px;
+                        border-radius: 100px;
+                        background: #e8b860;
+                        color: #170d1b;
+                        font-weight: 700;
+                        font-size: 17px;
+                      "
+                    >
+                      Partager notre carte
+                    </div>
+                    <div
+                      style="
+                        padding: 16px 30px;
+                        border-radius: 100px;
+                        border: 1px solid rgba(246, 238, 230, 0.2);
+                        font-size: 16px;
+                        color: rgba(246, 238, 230, 0.85);
+                      "
+                    >
+                      Revanche · 30 pts
+                    </div>
+                  </div>
+                </div>
+                <div style="width: 392px; flex-shrink: 0; display: flex; flex-direction: column">
+                  <div
+                    style="
+                      border-radius: 30px;
+                      background: linear-gradient(150deg, #8b2c56, #3a1b33 58%, #26122c);
+                      padding: 34px 30px;
+                      position: relative;
+                      overflow: hidden;
+                      box-shadow: 0 40px 80px -40px rgba(139, 44, 86, 0.75);
+                    "
+                  >
+                    <div
+                      style="
+                        position: absolute;
+                        top: -80px;
+                        right: -80px;
+                        width: 240px;
+                        height: 240px;
+                        border-radius: 50%;
+                        background: radial-gradient(
+                          circle,
+                          rgba(232, 184, 96, 0.4),
+                          rgba(0, 0, 0, 0) 70%
+                        );
+                      "
+                    ></div>
+                    <div style="position: relative">
+                      <div
+                        style="
+                          font-family: 'Instrument Serif', serif;
+                          font-size: 20px;
+                          margin-bottom: 56px;
+                        "
+                      >
+                        Cœur Fidèle
+                      </div>
+                      <div
+                        style="
+                          font-size: 13px;
+                          letter-spacing: 0.14em;
+                          text-transform: uppercase;
+                          color: rgba(246, 238, 230, 0.7);
+                          margin-bottom: 12px;
+                        "
+                      >
+                        Aïssatou est
+                      </div>
+                      <div
+                        style="
+                          font-family: 'Instrument Serif', serif;
+                          font-size: 50px;
+                          line-height: 1.02;
+                          color: #e8b860;
+                          margin-bottom: 30px;
+                        "
+                      >
+                        Cœur d'Or
+                      </div>
+                      <div
+                        style="
+                          height: 1px;
+                          background: rgba(246, 238, 230, 0.22);
+                          margin-bottom: 24px;
+                        "
+                      ></div>
+                      <div
+                        style="display: flex; justify-content: space-between; align-items: flex-end"
+                      >
+                        <div>
+                          <div
+                            style="
+                              font-size: 13px;
+                              color: rgba(246, 238, 230, 0.7);
+                              margin-bottom: 5px;
+                            "
+                          >
+                            Notre niveau
+                          </div>
+                          <div style="font-size: 19px; font-weight: 600">Inséparables</div>
+                        </div>
+                        <div style="font-size: 13px; color: rgba(246, 238, 230, 0.7)">
+                          coeurfidele.com
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      font-size: 14px;
+                      line-height: 1.55;
+                      color: rgba(246, 238, 230, 0.64);
+                      margin-top: 20px;
+                    "
+                  >
+                    Le score de Malick n'apparaît pas sur la carte. Ce que vous partagez ne parle
+                    que de vous.
+                  </div>
+                  <div style="margin-top: auto; display: flex; gap: 12px">
+                    <div
+                      style="
+                        flex: 1;
+                        text-align: center;
+                        padding: 16px;
+                        border-radius: 100px;
+                        border: 1px solid rgba(246, 238, 230, 0.2);
+                        font-size: 15px;
+                        color: rgba(246, 238, 230, 0.85);
+                      "
+                    >
+                      Enregistrer l'image
+                    </div>
+                    <div
+                      style="
+                        flex: 1;
+                        text-align: center;
+                        padding: 16px;
+                        border-radius: 100px;
+                        border: 1px solid rgba(246, 238, 230, 0.2);
+                        font-size: 15px;
+                        color: rgba(246, 238, 230, 0.85);
+                      "
+                    >
+                      Copier le lien
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 16px">
+            <div style="display: flex; align-items: center; gap: 12px">
+              <span style="font-family: 'Instrument Serif', serif; font-size: 20px; color: #e8b860"
+                >06</span
+              ><span style="font-size: 15px; color: rgba(246, 238, 230, 0.62)"
+                >Recharge de points</span
+              >
+            </div>
+            <div
+              data-screen-label="Web 06 Recharge"
+              style="
+                width: 1440px;
+                height: 900px;
+                border-radius: 20px;
+                overflow: hidden;
+                border: 1px solid rgba(246, 238, 230, 0.12);
+                box-shadow: 0 60px 110px -60px rgba(0, 0, 0, 0.9);
+                display: flex;
+                flex-direction: column;
+                background: #1b0f20;
+                position: relative;
+              "
+            >
+              <div
+                style="
+                  flex-shrink: 0;
+                  display: flex;
+                  align-items: center;
+                  gap: 16px;
+                  padding: 0 20px;
+                  height: 46px;
+                  background: #241129;
+                  border-bottom: 1px solid rgba(246, 238, 230, 0.1);
+                  position: relative;
+                  z-index: 3;
+                "
+              >
+                <div style="display: flex; gap: 7px">
+                  <span
+                    style="width: 11px; height: 11px; border-radius: 50%; background: #4a2b4f"
+                  ></span
+                  ><span
+                    style="width: 11px; height: 11px; border-radius: 50%; background: #4a2b4f"
+                  ></span
+                  ><span
+                    style="width: 11px; height: 11px; border-radius: 50%; background: #4a2b4f"
+                  ></span>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    max-width: 420px;
+                    padding: 6px 14px;
+                    border-radius: 100px;
+                    background: #170d1b;
+                    font-size: 13px;
+                    color: rgba(246, 238, 230, 0.64);
+                  "
+                >
+                  coeurfidele.com/points
+                </div>
+              </div>
+              <div
+                style="
+                  flex: 1;
+                  min-height: 0;
+                  position: relative;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  padding: 48px;
+                "
+              >
+                <div
+                  style="
+                    position: absolute;
+                    inset: 0;
+                    background: rgba(16, 9, 16, 0.66);
+                    backdrop-filter: blur(6px);
+                  "
+                ></div>
+                <div
+                  style="
+                    position: relative;
+                    width: 100%;
+                    max-width: 980px;
+                    background: #1e1023;
+                    border: 1px solid rgba(246, 238, 230, 0.14);
+                    border-radius: 32px;
+                    overflow: hidden;
+                    box-shadow: 0 60px 120px -50px rgba(0, 0, 0, 0.95);
+                    display: grid;
+                    grid-template-columns: 1.2fr 1fr;
+                  "
+                >
+                  <div style="padding: 44px 40px">
+                    <div
+                      style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 10px;
+                        padding: 10px 16px;
+                        border-radius: 100px;
+                        background: rgba(139, 44, 86, 0.24);
+                        border: 1px solid rgba(139, 44, 86, 0.44);
+                        font-size: 15px;
+                        margin-bottom: 26px;
+                      "
+                    >
+                      <span
+                        style="width: 7px; height: 7px; border-radius: 50%; background: #e8b860"
+                      ></span
+                      >Il vous reste une partie
+                    </div>
+                    <div
+                      style="
+                        font-family: 'Instrument Serif', serif;
+                        font-size: 42px;
+                        line-height: 1.06;
+                        margin-bottom: 10px;
+                      "
+                    >
+                      Rechargez, ou passez en illimité
+                    </div>
+                    <div
+                      style="font-size: 16px; color: rgba(246, 238, 230, 0.58); margin-bottom: 30px"
+                    >
+                      Vous avez joué 3 fois cette semaine. À ce rythme, l'abonnement vous coûterait
+                      moins cher.
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 12px">
+                      <div
+                        style="
+                          background: #26132c;
+                          border: 1px solid rgba(246, 238, 230, 0.1);
+                          border-radius: 24px;
+                          padding: 22px;
+                          display: flex;
+                          justify-content: space-between;
+                          align-items: center;
+                        "
+                      >
+                        <div>
+                          <div style="font-size: 17px; font-weight: 600; margin-bottom: 4px">
+                            Pack Découverte
+                          </div>
+                          <div style="font-size: 14px; color: rgba(246, 238, 230, 0.66)">
+                            500 pts · 490 F la partie
+                          </div>
+                        </div>
+                        <div style="font-size: 17px; font-weight: 700">4 900 F</div>
+                      </div>
+                      <div
+                        style="
+                          background: linear-gradient(160deg, #3a1b33, #26122c);
+                          border: 1px solid rgba(232, 184, 96, 0.5);
+                          border-radius: 24px;
+                          padding: 22px;
+                          position: relative;
+                          box-shadow: 0 30px 56px -32px rgba(232, 184, 96, 0.35);
+                        "
+                      >
+                        <div
+                          style="
+                            position: absolute;
+                            top: -11px;
+                            left: 22px;
+                            background: #e8b860;
+                            color: #170d1b;
+                            font-size: 11px;
+                            font-weight: 700;
+                            letter-spacing: 0.08em;
+                            text-transform: uppercase;
+                            padding: 5px 11px;
+                            border-radius: 100px;
+                          "
+                        >
+                          Rentable dès 6 parties
+                        </div>
+                        <div
+                          style="display: flex; justify-content: space-between; align-items: center"
+                        >
+                          <div>
+                            <div style="font-size: 17px; font-weight: 600; margin-bottom: 4px">
+                              Abonnement Duo
+                            </div>
+                            <div style="font-size: 14px; color: rgba(246, 238, 230, 0.7)">
+                              Illimité · toutes les catégories
+                            </div>
+                          </div>
+                          <div style="font-size: 17px; font-weight: 700; color: #e8b860">
+                            25 000 F / mois
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      padding: 44px 40px;
+                      border-left: 1px solid rgba(246, 238, 230, 0.12);
+                      background: #170d1b;
+                      display: flex;
+                      flex-direction: column;
+                    "
+                  >
+                    <div
+                      style="
+                        font-size: 12px;
+                        letter-spacing: 0.14em;
+                        text-transform: uppercase;
+                        color: rgba(246, 238, 230, 0.62);
+                        margin-bottom: 16px;
+                      "
+                    >
+                      Payer avec
+                    </div>
+                    <div
+                      style="
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 10px;
+                        margin-bottom: 24px;
+                      "
+                    >
+                      <div
+                        style="
+                          padding: 16px;
+                          border-radius: 18px;
+                          border: 1px solid #e8b860;
+                          background: rgba(232, 184, 96, 0.12);
+                          font-size: 15px;
+                          font-weight: 600;
+                          text-align: center;
+                        "
+                      >
+                        Wave
+                      </div>
+                      <div
+                        style="
+                          padding: 16px;
+                          border-radius: 18px;
+                          border: 1px solid rgba(246, 238, 230, 0.14);
+                          font-size: 15px;
+                          text-align: center;
+                          color: rgba(246, 238, 230, 0.8);
+                        "
+                      >
+                        Orange Money
+                      </div>
+                      <div
+                        style="
+                          padding: 16px;
+                          border-radius: 18px;
+                          border: 1px solid rgba(246, 238, 230, 0.14);
+                          font-size: 15px;
+                          text-align: center;
+                          color: rgba(246, 238, 230, 0.8);
+                        "
+                      >
+                        MTN MoMo
+                      </div>
+                      <div
+                        style="
+                          padding: 16px;
+                          border-radius: 18px;
+                          border: 1px solid rgba(246, 238, 230, 0.14);
+                          font-size: 15px;
+                          text-align: center;
+                          color: rgba(246, 238, 230, 0.8);
+                        "
+                      >
+                        Carte bancaire
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        font-size: 12px;
+                        letter-spacing: 0.14em;
+                        text-transform: uppercase;
+                        color: rgba(246, 238, 230, 0.62);
+                        margin-bottom: 12px;
+                      "
+                    >
+                      Numéro Wave
+                    </div>
+                    <div
+                      style="
+                        padding: 16px 18px;
+                        border-radius: 18px;
+                        background: #241129;
+                        border: 1px solid rgba(246, 238, 230, 0.14);
+                        font-size: 16px;
+                        margin-bottom: 20px;
+                      "
+                    >
+                      +221 77 ••• •• 42
+                    </div>
+                    <div
+                      style="
+                        font-size: 14px;
+                        line-height: 1.55;
+                        color: rgba(246, 238, 230, 0.64);
+                        margin-bottom: 24px;
+                      "
+                    >
+                      Les points vont dans le solde commun. Malick pourra les utiliser aussi.
+                    </div>
+                    <div
+                      style="
+                        margin-top: auto;
+                        text-align: center;
+                        padding: 18px;
+                        border-radius: 100px;
+                        background: #e8b860;
+                        color: #170d1b;
+                        font-weight: 700;
+                        font-size: 17px;
+                      "
+                    >
+                      Payer 4 900 F
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </x-dc>
+    <script
+      type="text/x-dc"
+      data-dc-script=""
+      data-props='{"pointsBalance":{"editor":"int","default":200,"min":0,"max":2000,"step":10,"tsType":"number","section":"Contenu"},"timerSeconds":{"editor":"int","default":32,"min":5,"max":45,"tsType":"number","section":"Contenu"},"showLockedCategories":{"editor":"boolean","default":true,"tsType":"boolean","section":"Contenu"}}'
+    >
+      class Component extends DCLogic {
+        renderVals() {
+          const showLocked = this.props.showLockedCategories ?? true;
+          const free = [
+            { name: 'Confiance & Jalousie', meta: '60 questions · gratuit', mark: 'Choisi', markColor: '#8B2C56', bg: 'rgba(139,44,86,.1)', border: '#8B2C56', chip: 'linear-gradient(140deg,#8B2C56,#E8B860)' },
+            { name: 'Réseaux sociaux & Téléphone', meta: '60 questions · gratuit', mark: 'Choisi', markColor: '#8B2C56', bg: 'rgba(139,44,86,.1)', border: '#8B2C56', chip: 'linear-gradient(140deg,#E8B860,#8B2C56)' },
+            { name: 'Ex et passé', meta: '60 questions', mark: '+', markColor: 'rgba(36,17,41,.66)', bg: '#fff', border: 'rgba(36,17,41,.14)', chip: '#EAD9C8' },
+            { name: 'Tentations du quotidien', meta: '60 questions', mark: '+', markColor: 'rgba(36,17,41,.76)', bg: '#fff', border: 'rgba(36,17,41,.14)', chip: '#EAD9C8' },
+            { name: 'Famille & Belle-famille', meta: '50 questions', mark: '+', markColor: 'rgba(36,17,41,.76)', bg: '#fff', border: 'rgba(36,17,41,.14)', chip: '#EAD9C8' },
+            { name: 'Argent & Transparence', meta: '50 questions', mark: '+', markColor: 'rgba(36,17,41,.76)', bg: '#fff', border: 'rgba(36,17,41,.14)', chip: '#EAD9C8' }
+          ];
+          const locked = [
+            { name: 'Projets & Engagement', meta: 'Abonnement Duo', mark: 'Verrouillé', markColor: '#6E5A66', bg: 'rgba(36,17,41,.05)', border: 'rgba(36,17,41,.1)', chip: 'rgba(36,17,41,.1)' },
+            { name: 'Mode Piment · 18+', meta: 'Abonnement Duo · accord des deux', mark: 'Verrouillé', markColor: '#6E5A66', bg: 'rgba(36,17,41,.05)', border: 'rgba(36,17,41,.1)', chip: 'rgba(36,17,41,.1)' }
+          ];
+          return {
+            pointsBalance: this.props.pointsBalance ?? 200,
+            timerSeconds: this.props.timerSeconds ?? 32,
+            categories: showLocked ? free.concat(locked) : free
+          };
+        }
+      }
+    </script>
+
+    <div id="__claude_design_branding">
+      <style>
+        #__claude_design_branding {
+          position: fixed;
+          right: 16px;
+          bottom: 16px;
+          z-index: 2147483646;
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          height: 30px;
+          padding: 0 5px 0 10px;
+          border-radius: 999px;
+          font-family:
+            'Anthropic Sans',
+            -apple-system,
+            BlinkMacSystemFont,
+            system-ui,
+            sans-serif;
+          font-size: 12.5px;
+          font-weight: 400;
+          line-height: 1;
+          letter-spacing: normal;
+          text-transform: none;
+          color: #141413;
+          background: rgba(255, 255, 255, 0.86);
+          -webkit-backdrop-filter: blur(24px);
+          backdrop-filter: blur(24px);
+          box-shadow:
+            0 0 0 0.5px rgba(31, 30, 29, 0.14),
+            0 2px 10px rgba(0, 0, 0, 0.09);
+        }
+        #__claude_design_branding * {
+          box-sizing: border-box;
+          margin: 0;
+        }
+        #__claude_design_branding a {
+          color: inherit;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          white-space: nowrap;
+        }
+        #__claude_design_branding a:hover span {
+          text-decoration: underline;
+        }
+        #__claude_design_branding svg {
+          flex: none;
+        }
+        #__claude_design_branding a svg {
+          color: #d97757;
+        }
+        #__claude_design_branding button {
+          width: 20px;
+          height: 20px;
+          padding: 0;
+          border-radius: 50%;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          color: currentColor;
+          opacity: 0.55;
+          border: 0;
+          background: none;
+          cursor: pointer;
+          flex: none;
+          font: inherit;
+          transition: opacity 0.14s;
+        }
+        #__claude_design_branding button:hover {
+          opacity: 1;
+          background: rgba(127, 127, 127, 0.22);
+        }
+        @media print {
+          #__claude_design_branding {
+            display: none;
+          }
+        }</style
+      ><a href="https://claude.com/product/design" target="_blank" rel="noopener noreferrer"
+        ><svg width="14" height="14" viewBox="0 0 20 21" fill="none" aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M9.99902 0C15.5258 0.000170936 19.999 4.50643 19.999 10.0547C19.999 11.7656 19.5863 12.9976 18.7861 13.8203C17.9924 14.6362 16.9465 14.9138 15.9854 15.0078C15.05 15.0993 14.0097 15.0262 13.2549 15.0186C12.8524 15.0145 12.5177 15.0267 12.2441 15.0703C11.9682 15.1144 11.8143 15.1813 11.7305 15.2432C11.4745 15.4322 11.3353 15.7121 11.2656 16.1602C11.2303 16.3875 11.2168 16.6362 11.209 16.9131C11.2017 17.1715 11.1986 17.4893 11.1807 17.7705C11.1469 18.2975 11.0495 19.0865 10.4199 19.5908C9.7846 20.0996 8.88652 20.1057 7.85449 19.877C7.36399 19.7682 6.88652 19.6232 6.42578 19.4453C2.66989 17.9949 0.000187748 14.3414 0 10.0547C0 4.50643 4.47223 0.000171048 9.99902 0ZM9.99902 1.60547C5.36781 1.60564 1.60547 5.38391 1.60547 10.0547C1.60566 13.6582 3.84823 16.7296 7.00391 17.9482C7.39027 18.0974 7.79085 18.2184 8.20215 18.3096C9.1375 18.5169 9.384 18.3633 9.41602 18.3379C9.4524 18.3087 9.54558 18.1915 9.5791 17.668C9.5947 17.4239 9.59473 17.1786 9.60352 16.8672C9.61179 16.5742 9.62831 16.2435 9.67969 15.9131C9.78359 15.2455 10.0474 14.4906 10.7764 13.9521C11.1479 13.6778 11.5842 13.5493 11.9912 13.4844C12.4007 13.4191 12.8434 13.4088 13.2705 13.4131C14.1753 13.4222 15.0071 13.4905 15.8291 13.4102C16.6257 13.3322 17.2249 13.1235 17.6357 12.7012C18.0401 12.2855 18.3935 11.5261 18.3936 10.0547C18.3936 5.38391 14.6302 1.60564 9.99902 1.60547ZM5.11621 9.86719C5.86386 9.91468 6.45486 10.5348 6.45508 11.2939C6.45506 12.0838 5.81519 12.7245 5.02539 12.7246C4.28481 12.7246 3.67573 12.1617 3.60254 11.4404L3.59473 11.2939L3.60156 11.1533C3.66942 10.4596 4.23282 9.91186 4.93359 9.86719H5.11621ZM14.9814 7.19141C15.729 7.23889 16.3199 7.85919 16.3203 8.61816C16.3203 9.40801 15.6804 10.0487 14.8906 10.0488C14.1501 10.0487 13.5409 9.48586 13.4678 8.76465L13.46 8.61816L13.4668 8.47754C13.5348 7.78403 14.0983 7.23618 14.7988 7.19141H14.9814ZM6.4541 4.93457C7.20161 4.9822 7.79275 5.60231 7.79297 6.36133C7.79288 7.151 7.15291 7.7917 6.36328 7.79199C5.62274 7.79199 5.01369 7.22903 4.94043 6.50781L4.93262 6.36133L4.93945 6.2207C5.00731 5.52698 5.5707 4.97922 6.27148 4.93457H6.4541ZM11.3867 3.59668C12.1343 3.64419 12.7253 4.26436 12.7256 5.02344C12.7256 5.81326 12.0857 6.45393 11.2959 6.4541C10.5553 6.4541 9.94622 5.89123 9.87305 5.16992L9.86523 5.02344L9.87207 4.88281C9.93996 4.18912 10.5033 3.64133 11.2041 3.59668H11.3867Z"
+          ></path></svg
+        ><span>Made with Claude Design</span></a
+      ><button type="button" aria-label="Dismiss" onclick="this.parentElement.remove()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path
+            d="M2 2l8 8M10 2l-8 8"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          ></path>
+        </svg>
+      </button>
+    </div>
+  </body>
+</html>

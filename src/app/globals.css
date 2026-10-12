@@ -1,0 +1,39 @@
+/* Tailwind v4 does NOT auto-discover `tailwind.config.ts` the way v3 did —
+   a JS/TS config is only loaded when the CSS points at it explicitly. Without
+   this directive every custom token in that file (ink, cream, wine, wine-deep,
+   rose, the plum scale, font-grotesk/serif) silently emits NO CSS: the classes
+   are written in the markup, Tailwind never generates a rule for them, and the
+   page renders with default colors. Verified: with this line the palette hexes
+   appear in the compiled output; without it they are absent. */
+@config '../../tailwind.config.ts';
+@import 'tailwindcss';
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slide-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}

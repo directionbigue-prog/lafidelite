@@ -1,0 +1,11 @@
+-- Enforce "one active couple per creator" at the DB level.
+--
+-- A user may create at most one PENDING/ACTIVE Couple at a time (PRD §9 R1),
+-- previously enforced applicatively only (see findActiveCoupleForUser).
+-- Two concurrent POST /api/couples from the same user could both pass that
+-- check and both create a PENDING couple. A plain unique index on
+-- creatorId would be wrong here: a DISSOLVED couple must still be able to
+-- coexist with a new PENDING/ACTIVE one for the same creator. Postgres
+-- partial (filtered) unique indexes express exactly this — Prisma's schema
+-- DSL cannot, so this index is added via raw SQL.
+CREATE UNIQUE INDEX "Couple_creator_active_unique" ON "Couple"("creatorId") WHERE status IN ('PENDING', 'ACTIVE');

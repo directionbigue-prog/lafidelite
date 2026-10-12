@@ -1,0 +1,704 @@
+generator client {
+  provider = "prisma-client-js"
+  // Why this list is not just "native" — the build OS and the run OS differ.
+  //
+  // Netlify builds on its Ubuntu image, so "native" resolves to
+  // debian-openssl-3.0.x, and then runs the function on AWS Lambda, which is
+  // Amazon Linux 2023 for every Node.js runtime we can be assigned
+  // (nodejs20.x and later). A Prisma Client that only carries the Debian
+  // query engine fails at the FIRST query with "Query Engine for runtime
+  // rhel-openssl-3.0.x could not be found" — a green build, a dead app.
+  //
+  // "native" stays first so local development and CI keep using the engine
+  // for the machine they run on.
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  // Nullable: OAuth-only users (e.g. signed up with Google) never set a
+  // password. Email/password signup still requires it; the auth route
+  // enforces presence at runtime.
+  passwordHash      String?
+  emailVerifiedAt   DateTime?
+  tokenVersion      Int       @default(0)
+  withdrawalPinHash String? // bcrypt hash of withdrawal PIN; null = no PIN set
+  // Optional display name — populated from OAuth profile on first sign-in.
+  // Email/password users can fill it later via /api/auth/me PATCH (future).
+  name              String?
+  // Optional avatar URL — populated from OAuth profile on first sign-in.
+  avatarUrl         String?
+  // App-wide role. USER is the default; ADMIN unlocks /admin back-office;
+  // SUPERADMIN can promote/demote other admins. Bootstrap an initial
+  // SUPERADMIN via `pnpm db:make-superadmin <email>` (see scripts).
+  role              String    @default("USER") // USER | ADMIN | SUPERADMIN
+  // Account status. ACTIVE = login + refresh allowed; SUSPENDED = both
+  // refused with 403 ACCOUNT_SUSPENDED. Mutated via /api/admin/users/[id]/status
+  // (ADMIN can suspend; only SUPERADMIN can restore).
+  status            String    @default("ACTIVE") // ACTIVE | SUSPENDED
+  // When this account used up its one free game. Null = the free game is
+  // still available. Claimed atomically by POST /api/games at the moment a
+  // session is CREATED (never when one is resumed), so two tabs racing can
+  // only consume it once - see that route and lib/server/game/free-game.ts.
+  //
+  // Per ACCOUNT rather than per couple, by product decision: each partner
+  // gets one free game at their first sign-in, so a couple starts with two.
+  freeGameUsedAt    DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  verificationCodes VerificationCode[]
+  uploads           FileUpload[]
+  notifications     Notification[]
+  notifPrefs        NotificationPreferences?
+  orders            Order[]
+  withdrawals       Withdrawal[]
+  oauthAccounts     OAuthAccount[]
+  adminActions      AdminAction[]
+  entitlements      Entitlement[]
+  connexions        ConnexionEvent[]
+
+  // Multi-tenancy is opt-in per project: by default no resource is org-scoped.
+  // Apps that need it (marketplace, B2B SaaS, classifieds) wire owner relations
+  // on their domain models.
+  ownedOrganizations Organization[]       @relation("OrgOwner")
+  memberships        OrganizationMember[] @relation("OrgMembership")
+  createdCouples     Couple[]             @relation("CoupleCreator")
+  joinedCouples      Couple[]             @relation("CouplePartner")
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Admin audit log — every back-office mutation is recorded here so we can
+// answer "who did what when" during incidents / compliance reviews.
+//
+// `action` is a free-form dotted string the UI groups by (e.g.
+// "withdrawal.cancel", "user.role_change", "order.refund").
+// `targetType` + `targetId` reference the affected row when applicable.
+// `metadata` carries the diff or extra context as JSON.
+//
+// Retention: not pruned automatically (compliance). If your jurisdiction
+// requires deletion after N years, add a cron in backend/src/index.ts
+// modeled on the WebhookLog purge.
+// ───────────────────────────────────────────────────────────────────────
+model AdminAction {
+  id         String   @id @default(cuid())
+  actorId    String
+  actor      User     @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  action     String
+  targetType String?
+  targetId   String?
+  metadata   Json?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([action, createdAt])
+  @@index([targetType, targetId])
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Multi-tenancy primitives — opt-in.
+//
+// Default project surface stays user-owned (`Order.userId`, `Withdrawal.userId`).
+// Apps that need orgs add `organizationId String?` to their domain models
+// case by case and use `requireOrgRole()` middleware to gate access.
+//
+// Slug must be unique app-wide (not just within an owner) so it can be
+// used as a stable URL segment.
+// ───────────────────────────────────────────────────────────────────────
+model Organization {
+  id        String               @id @default(cuid())
+  slug      String               @unique
+  name      String
+  ownerId   String
+  owner     User                 @relation("OrgOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  members   OrganizationMember[]
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  @@index([ownerId])
+}
+
+// Role precedence: OWNER > ADMIN > MEMBER. The owner is also a member row
+// (created in the same tx as the org) so list-my-orgs queries can join
+// uniformly via memberships.
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation("OrgMembership", fields: [userId], references: [id], onDelete: Cascade)
+  role           String       @default("MEMBER") // OWNER | ADMIN | MEMBER
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// OAuth identities — one User can have N linked providers (Google, GitHub, …).
+// (provider, providerAccountId) is unique so the same Google account can't
+// link twice. Email matching at sign-in is intentional: if a user signed up
+// with email/password and later "Sign in with Google" using the same email,
+// we link the Google account to the existing user instead of creating a
+// duplicate (see backend/src/routes/oauth.ts).
+// ───────────────────────────────────────────────────────────────────────
+model OAuthAccount {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          String // "google" | "github" | …
+  providerAccountId String // sub from the OIDC ID token
+  // Optional refresh token (encrypted at rest if you store one) — Google
+  // only returns it on first consent with `access_type=offline`. Most
+  // boilerplate flows don't need it; we keep the column for future use.
+  refreshToken      String?
+  createdAt         DateTime @default(now())
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model VerificationCode {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code      String
+  type      String // EMAIL_VERIFY | PASSWORD_RESET
+  expiresAt DateTime
+  usedAt    DateTime?
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now())
+
+  @@index([userId, type])
+  @@index([code, type])
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// File uploads — Cloudinary (column names kept from the R2 era; no migration needed)
+// ───────────────────────────────────────────────────────────────────────
+model FileUpload {
+  id        String   @id @default(cuid())
+  userId    String? // nullable — uploads can be anonymous if route allows
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  key       String   @unique // Cloudinary public_id (column name historical — was R2 object key)
+  filename  String
+  mimeType  String
+  sizeBytes Int
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Phase 2 — durable email queue rows
+// ───────────────────────────────────────────────────────────────────────
+model EmailJob {
+  id          String    @id @default(cuid())
+  to          String
+  subject     String
+  html        String
+  text        String?
+  status      String    @default("PENDING") // PENDING | SENT | FAILED | DEAD
+  attempts    Int       @default(0)
+  lastError   String?
+  scheduledAt DateTime  @default(now())
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([status, scheduledAt])
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Phase 2 — notifications (at-most-once via dedupeKey)
+// ───────────────────────────────────────────────────────────────────────
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  body      String
+  data      Json?
+  dedupeKey String    @unique
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+}
+
+model NotificationPreferences {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // JSON map of { eventType: { email: bool, inApp: bool } } — flexible without migrations.
+  prefs     Json     @default("{}")
+  updatedAt DateTime @updatedAt
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Outbox — durable side-effects (notifications, emails) emitted from
+// inside transactions (e.g. webhook handlers, withdrawal flow). Side-effect
+// rows are inserted in the same tx as the state change, then a worker
+// drains them. Survives crashes the previous postCommit-callback pattern
+// silently dropped.
+//
+// `kind` is a free-form string the dispatcher routes on
+// (e.g. "notification.payment_received", "email.payment_confirmation").
+// ───────────────────────────────────────────────────────────────────────
+model OutboxEvent {
+  id          String    @id @default(cuid())
+  kind        String
+  payload     Json
+  status      String    @default("PENDING") // PENDING | SENT | FAILED | DEAD
+  attempts    Int       @default(0)
+  lastError   String?
+  scheduledAt DateTime  @default(now())
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([status, scheduledAt])
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Phase 2 — webhook idempotency log
+// ───────────────────────────────────────────────────────────────────────
+model WebhookLog {
+  id          String    @id @default(cuid())
+  provider    String
+  externalId  String
+  eventType   String
+  payload     Json
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([externalId, eventType])
+  @@index([provider, createdAt])
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Phase 3 — payments (Order + Withdrawal)
+//
+// `amount` is stored in the smallest unit of `currency` (no decimals).
+// For XOF (FCFA, Senegal) that's 1 = 1 FCFA. For USD adapt to cents
+// at the call site — the schema is currency-agnostic.
+// ───────────────────────────────────────────────────────────────────────
+model Order {
+  id            String  @id @default(cuid())
+  userId        String? // nullable — guest checkout supported
+  user          User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  amount        Int // gross amount, smallest unit
+  currency      String  @default("XOF") // ISO 4217
+  status        String  @default("PENDING") // PENDING | PAID | EXPIRED | FAILED | REFUNDED
+  customerEmail String?
+  customerPhone String?
+  customerName  String?
+  metadata      Json? // app-specific fields
+
+  // Stripe-grade idempotency. Required header on POST /api/orders; replay
+  // with same value returns the original Order row instead of double-charging.
+  // Nullable so existing rows pre-migration don't break the @unique constraint.
+  idempotencyKey String? @unique
+
+  // Provider reference
+  provider         String // e.g. "bictorys"
+  providerChargeId String? @unique
+  paymentUrl       String? // checkout/redirect URL returned by provider
+  paymentMethod    String? // WAVE | ORANGE_MONEY | FREE_MONEY (set on PAID by webhook)
+
+  // Optional commission (for marketplace-style apps)
+  commissionAmount Int?
+  netAmount        Int?
+
+  // Lifecycle
+  expiresAt DateTime // PENDING expiry; not cleared on PAID (history)
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([status, expiresAt])
+  @@index([provider, providerChargeId])
+}
+
+model Withdrawal {
+  id          String @id @default(cuid())
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Restrict)
+  amount      Int // requested amount, smallest unit
+  currency    String @default("XOF")
+  status      String @default("PENDING") // PENDING | PROCESSING | COMPLETED | FAILED | CANCELLED
+  destination Json // { method: "WAVE" | "ORANGE_MONEY" | ..., phone: "+221...", accountName?: "..." }
+
+  // Provider reference
+  provider         String // e.g. "bictorys"
+  providerPayoutId String? @unique
+  failureReason    String?
+
+  requestedAt DateTime  @default(now())
+  processedAt DateTime?
+  completedAt DateTime?
+
+  @@index([userId, requestedAt])
+  @@index([status, requestedAt])
+  @@index([provider, providerPayoutId])
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Cœur Fidèle — "Espace Couple" pairing (PRD §9 R1).
+//
+// One row per pairing attempt. `status`:
+//   PENDING   — creator has generated an invite, waiting for a partner.
+//   ACTIVE    — partner joined; the couple is live.
+//   DISSOLVED — reserved for a future "leave/dissolve" flow (not exposed
+//               by any endpoint yet — see PRUNING note in the design spec).
+//
+// "One active couple per user" is enforced applicatively for the
+// partner side (see lib/server/couples/queries.ts) — a partner is only
+// ever assigned through the race-guarded `updateMany` in
+// POST /api/couples/join and the signup auto-join path, so the app-level
+// findActiveCoupleForUser check plus that guard together close the gap.
+//
+// For the creator side, it IS additionally enforced at the DB level: a
+// partial unique index (`Couple_creator_active_unique`, added by a raw-SQL
+// migration since Prisma's schema DSL can't express a filtered index)
+// enforces `UNIQUE (creatorId) WHERE status IN ('PENDING', 'ACTIVE')`. A
+// DISSOLVED couple can still coexist with a new PENDING/ACTIVE one for the
+// same creator — a plain `@@unique([creatorId])` would wrongly block that,
+// which is why the index has to be partial/filtered rather than declared
+// via `@@unique` here.
+// ───────────────────────────────────────────────────────────────────────
+model Couple {
+  id                            String    @id @default(cuid())
+  status                        String    @default("PENDING") // PENDING | ACTIVE | DISSOLVED
+  creatorId                     String
+  creator                       User      @relation("CoupleCreator", fields: [creatorId], references: [id], onDelete: Restrict)
+  partnerId                     String?
+  partner                       User?     @relation("CouplePartner", fields: [partnerId], references: [id], onDelete: Restrict)
+  inviteCode                    String    @unique
+  inviteExpiresAt               DateTime
+  pairedAt                      DateTime?
+  dissolvedAt                   DateTime?
+  createdAt                     DateTime  @default(now())
+  updatedAt                     DateTime  @updatedAt
+  disclaimerAcceptedByCreatorAt DateTime?
+  disclaimerAcceptedByPartnerAt DateTime?
+  cumulativeCoupleScore         Int       @default(0)
+
+  gameSessions   GameSession[]
+  questionUsages QuestionUsage[]
+  boardGames     BoardGame[]
+
+  @@index([creatorId])
+  @@index([partnerId])
+  @@index([inviteCode])
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Cœur Fidèle — game engine, pass-and-play (PRD §5, §9 R2-R4).
+//
+// Question is a shared content bank (never couple-scoped). A GameSession
+// is one played party for one couple: 3 GameRounds (Miroir, Scenario,
+// FaceAFace), 5 GameRoundQuestions each, locked in at session-create time
+// (see lib/server/game/question-selection.ts) so resuming after a closed
+// tab never re-draws different questions.
+//
+// Answer.userId is the couple's creatorId or partnerId — NOT necessarily
+// the calling session's auth.user.sub, because pass-and-play shares one
+// authenticated device between both partners (see the design note in
+// docs/superpowers/plans/2026-09-03-game-engine-lot1.md's Context). The
+// server trusts GameSession.activePlayerRole, a state-machine field, not
+// a second auth boundary.
+//
+// Answer.kind is 'OWN' for every round type, plus 'PREDICTION' only for
+// MIROIR questions (the guess at the partner's OWN answer). Scoring sums
+// speed bonus over 'OWN' rows only (15 per player) so a MIROIR question's
+// two answer rows (OWN + PREDICTION), submitted in one screen visit,
+// never double-count elapsed time.
+// ───────────────────────────────────────────────────────────────────────
+model Question {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  roundType String // MIROIR | SCENARIO | FACEAFACE
+  category  String
+  prompt    String
+  options   Json // [{id,text}] for MIROIR/FACEAFACE; [{id,text,weight}] for SCENARIO — weight NEVER serialized to a client, see Task 9
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roundQuestions GameRoundQuestion[]
+  usages         QuestionUsage[]
+
+  @@index([roundType, category, active])
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// "One IN_PROGRESS GameSession per couple" is enforced at the DB level by
+// a partial unique index (`GameSession_couple_in_progress_unique`) —
+// `UNIQUE (coupleId) WHERE status = 'IN_PROGRESS'`. GameSession.status has
+// no schema-level enum (String convention, see the Question/GameSession
+// doc comment above), so this filtered index cannot be expressed via
+// Prisma's DSL (no `@@unique` with a WHERE clause) and lives only as raw
+// SQL in prisma/migrations/20260903110000_couple_disclaimer_and_score/migration.sql
+// — despite that migration's filename mentioning only
+// "couple_disclaimer_and_score", it ALSO defines this GameSession index.
+//
+// Because schema.prisma has no matching declaration, a future
+// `prisma migrate dev` run will diff the shadow DB (which has the index)
+// against this file (which doesn't) and propose a migration that DROPs
+// `GameSession_couple_in_progress_unique`. That generated DROP INDEX
+// statement must be deleted from the new migration file before applying
+// it — accepting it as-is silently removes the one-in-progress-game
+// guarantee. (Mirrors the same raw-partial-index warning on the Couple
+// model above, for `Couple_creator_active_unique`.)
+// ───────────────────────────────────────────────────────────────────────
+model GameSession {
+  id                     String    @id @default(cuid())
+  coupleId               String
+  couple                 Couple    @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  status                 String    @default("IN_PROGRESS") // IN_PROGRESS | COMPLETED | ABANDONED
+  currentRoundNumber     Int       @default(1) // 1-3
+  currentQuestionNumber  Int       @default(1) // 1-5
+  phase                  String    @default("PASS_DEVICE") // PASS_DEVICE | ANSWERING | ROUND_REVEAL | ROUND_INTRO | COMPLETE
+  activePlayerRole       String // CREATOR | PARTNER
+  currentQuestionShownAt DateTime? // re-stamped on every fresh PASS_DEVICE -> ANSWERING transition; cleared back to null on every transition out of ANSWERING
+  jokersRemainingCreator Int       @default(2)
+  jokersRemainingPartner Int       @default(2)
+  startedAt              DateTime  @default(now())
+  completedAt            DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  rounds GameRound[]
+  result GameResult?
+
+  @@index([coupleId, status])
+}
+
+model GameRound {
+  id              String      @id @default(cuid())
+  gameSessionId   String
+  gameSession     GameSession @relation(fields: [gameSessionId], references: [id], onDelete: Cascade)
+  roundNumber     Int // 1-3
+  type            String // MIROIR | SCENARIO | FACEAFACE
+  status          String      @default("PENDING") // PENDING | IN_PROGRESS | COMPLETED
+  firstPlayerRole String // CREATOR | PARTNER — alternates per round, see lib/server/game/state-machine.ts
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  questions GameRoundQuestion[]
+
+  @@unique([gameSessionId, roundNumber])
+}
+
+model GameRoundQuestion {
+  id          String    @id @default(cuid())
+  gameRoundId String
+  gameRound   GameRound @relation(fields: [gameRoundId], references: [id], onDelete: Cascade)
+  questionId  String
+  question    Question  @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  orderIndex  Int // 0-4
+  createdAt   DateTime  @default(now())
+
+  answers Answer[]
+
+  @@unique([gameRoundId, orderIndex])
+}
+
+model Answer {
+  id                  String            @id @default(cuid())
+  gameRoundQuestionId String
+  gameRoundQuestion   GameRoundQuestion @relation(fields: [gameRoundQuestionId], references: [id], onDelete: Cascade)
+  gameSessionId       String // denormalized — session-wide scoring queries without a deep join
+  userId              String // Couple.creatorId or Couple.partnerId — see model-level doc comment above
+  kind                String // OWN | PREDICTION (PREDICTION only exists for MIROIR questions)
+  selectedOptionId    String?
+  isSkipped           Boolean           @default(false)
+  clientElapsedMs     Int? // raw client-reported timing, not trusted alone
+  effectiveElapsedMs  Int // server-validated value used for scoring — see lib/server/game/scoring.ts
+  answeredAt          DateTime          @default(now())
+
+  @@unique([gameRoundQuestionId, userId, kind])
+  @@index([gameSessionId])
+}
+
+// Per-couple anti-repetition tracking — see lib/server/game/question-selection.ts.
+model QuestionUsage {
+  id           String   @id @default(cuid())
+  coupleId     String
+  couple       Couple   @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  questionId   String
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  timesPlayed  Int      @default(1)
+  lastPlayedAt DateTime @default(now())
+
+  @@unique([coupleId, questionId])
+  @@index([coupleId])
+}
+
+// Computed once when a GameSession completes — immutable (never recomputed
+// on read) so the score a couple sees never changes between refreshes.
+model GameResult {
+  id                    String      @id @default(cuid())
+  gameSessionId         String      @unique
+  gameSession           GameSession @relation(fields: [gameSessionId], references: [id], onDelete: Cascade)
+  coupleScore           Int
+  complicityLevel       String // DECOUVERTE | COMPLICES | FUSIONNELS | INSEPARABLES
+  creatorTotalScore     Int
+  partnerTotalScore     Int
+  creatorMirrorPoints   Int
+  partnerMirrorPoints   Int
+  creatorFidelityScore  Int
+  partnerFidelityScore  Int
+  alignmentPointsShared Int
+  creatorSpeedBonus     Int
+  partnerSpeedBonus     Int
+  gapPercent            Float
+  gapMasked             Boolean
+  winnerRole            String? // CREATOR | PARTNER | TIE
+  conversationPrompts   Json
+  createdAt             DateTime    @default(now())
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Divertissements — jeux complémentaires au moteur de couple.
+//
+// Une seule table pour tous les jeux de plateau (`kind`), volontairement :
+// les dames arrivent en premier, le ludo et le jeu de mots suivront, et
+// aucun des trois n'a besoin de colonnes propres — leur état tient dans
+// `state`.
+//
+// `state` est OPAQUE au serveur. Contrairement au moteur de couple, le
+// moteur de dames tourne dans le navigateur : pas d'information cachée,
+// pas de score réel, et un seul appareil partagé par les deux joueurs — il
+// n'y a donc personne à tromper. Les routes valident la FORME de l'état
+// (lib/dames/etat-schema.ts) pour qu'un état corrompu ne fasse pas planter
+// la reprise, jamais la légalité des coups.
+//
+// Aucune écriture depuis ce modèle vers Couple.cumulativeCoupleScore ni
+// vers GameResult : une partie de dames ne dit rien de la complicité d'un
+// couple, et ne coûte ni la partie offerte ni de points.
+// ───────────────────────────────────────────────────────────────────────
+model BoardGame {
+  id        String    @id @default(cuid())
+  coupleId  String
+  couple    Couple    @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  kind      String // DAMES  (LUDO, MOTS à venir)
+  status    String    @default("IN_PROGRESS") // IN_PROGRESS | COMPLETED | ABANDONED
+  state     Json
+  // Compteur monotone de coups joués. Sert de garde anti-écrasement sur
+  // PUT /state : une sauvegarde partie plus tôt mais arrivée plus tard ne
+  // doit jamais recouvrir un plateau plus récent.
+  moveCount Int       @default(0)
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([coupleId, kind, status])
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// Entitlement — un droit d'accès acheté, et sa date de fin.
+//
+// Le modèle est volontairement ADDITIF : un compte peut porter plusieurs
+// lignes en même temps (un Essentiel en cours, un Intégral acheté
+// par-dessus, un renouvellement qui chevauche le précédent). Rien n'est
+// écrasé, rien n'est additionné — `packEffectif` (lib/game/packs.ts) retient
+// le meilleur droit encore valide. Un champ unique `User.packId` aurait
+// rendu un chevauchement impossible à représenter, et un remboursement
+// aurait effacé un droit que l'acheteur détenait encore par ailleurs.
+//
+// Il n'y a donc PAS d'index unique partiel ici, à la différence de Couple,
+// GameSession et BoardGame : plusieurs lignes ACTIVE pour un même compte
+// sont un état nominal, pas une anomalie.
+//
+// `packId` n'est pas une enum au niveau du schéma (convention String de ce
+// fichier) : les paliers sont définis dans lib/game/packs.ts, et un palier
+// retiré du registre après une vente doit rester lisible en base — la
+// résolution l'ignore plutôt que d'échouer.
+//
+// Qui paie : le droit appartient à un COMPTE, mais il ouvre les thèmes de
+// toutes les parties du COUPLE — il suffit qu'un des deux partenaires
+// détienne un pack. Voir lib/server/game/entitlements.ts pour le pourquoi.
+// ───────────────────────────────────────────────────────────────────────
+model Entitlement {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  packId String // ESSENTIEL | INTEGRAL | ANNUEL — voir lib/game/packs.ts
+  status String @default("ACTIVE") // ACTIVE | CANCELLED | REFUNDED
+
+  startedAt DateTime @default(now())
+  expiresAt DateTime
+
+  // La commande qui a payé ce droit, quand il vient d'un achat. Nullable
+  // parce qu'un droit peut aussi être accordé à la main (support, presse,
+  // `pnpm pack` en développement) — et unique pour qu'un webhook rejoué ne
+  // puisse pas octroyer deux fois le même mois.
+  orderId String? @unique
+
+  // Pourquoi ce droit existe, quand il n'a pas été acheté. Lu par le
+  // back-office : « offert par le support », « compte de démonstration ».
+  note String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status, expiresAt])
+}
+
+// Une connexion réussie, réduite à ce qui répond à la question posée.
+//
+// CE QUI N'EST PAS ICI EST LE POINT DU MODÈLE : pas d'adresse IP, pas de
+// chaîne « user-agent ». Seules deux valeurs dérivées sont gardées — une
+// classe d'appareil parmi quatre, un code pays sur deux lettres. L'IP
+// identifie un abonné ; le pays qu'on en déduit non, et c'est tout ce que la
+// console affiche. Garder l'IP « au cas où » serait un risque sans usage, et
+// les tables d'audit (`AdminAction`) qui la stockent le font pour une raison
+// précise que celle-ci n'a pas.
+//
+// `userId` est nullable et en cascade : nullable parce qu'une connexion peut
+// être enregistrée avant qu'on sache à qui elle appartient, en cascade parce
+// que supprimer un compte doit effacer ses traces de connexion.
+model ConnexionEvent {
+  id     String  @id @default(cuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // TELEPHONE | TABLETTE | ORDINATEUR | AUTRE — voir lib/admin/connexions.ts
+  appareil String
+
+  // ISO 3166-1 alpha-2, depuis l'en-tête `x-vercel-ip-country`. Nullable :
+  // absent en développement, et Vercel renvoie parfois un code inconnu.
+  pays String?
+
+  // Par quel chemin : MOT_DE_PASSE | VERIFICATION | GOOGLE.
+  methode String
+
+  createdAt DateTime @default(now())
+
+  // Les trois index servent les trois vues de la console, et chacun porte
+  // `createdAt` en second parce que toute requête est bornée dans le temps.
+  @@index([createdAt])
+  @@index([appareil, createdAt])
+  @@index([pays, createdAt])
+  @@index([userId, createdAt])
+}

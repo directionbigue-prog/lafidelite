@@ -1,0 +1,332 @@
+/* Styles globaux de la landing, repris du canevas Claude Design.
+ *
+ * Le canevas était une page autonome : ses règles visaient `html`, `body`,
+ * `a` et `::selection`. Ici la feuille est importée par `app/page.tsx`, et
+ * en App Router un import CSS est GLOBAL — ces sélecteurs s'appliqueraient
+ * donc à toute l'application, dont les écrans de jeu et du Salon qui ont
+ * leur propre charte.
+ *
+ * Les règles de document sont donc portées par la racine `.cf-landing` au
+ * lieu de `body`. Le rendu de la page est identique ; ce qui change est la
+ * portée, pas l'apparence. Les `@keyframes` gardent leurs noms d'origine :
+ * les styles inline du design les appellent par ces noms exacts. */
+
+html:has(.cf-landing) {
+  scroll-behavior: smooth;
+}
+
+.cf-landing {
+  margin: 0;
+  background: #170d1b;
+  color: #f6eee6;
+  font-family: 'Familjen Grotesk', system-ui, sans-serif;
+}
+
+.cf-landing a {
+  color: #e8b860;
+  text-decoration: none;
+}
+
+.cf-landing a:hover {
+  color: #f6eee6;
+}
+
+.cf-landing ::selection {
+  background: #e8b860;
+  color: #170d1b;
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slideMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes beat1 {
+  0%,
+  2% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  5%,
+  22% {
+    opacity: 1;
+    transform: none;
+  }
+  26%,
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes beat2 {
+  0%,
+  25% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  29%,
+  47% {
+    opacity: 1;
+    transform: none;
+  }
+  51%,
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes beat3 {
+  0%,
+  50% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  54%,
+  72% {
+    opacity: 1;
+    transform: none;
+  }
+  76%,
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes beat4 {
+  0%,
+  75% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  79%,
+  96% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes trackFill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes typeIn {
+  0%,
+  3% {
+    width: 0;
+  }
+  14%,
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes caretBlink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes tickIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes countUp {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes barGrow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-beat] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    position: relative !important;
+  }
+  [data-track] {
+    animation: none !important;
+    transform: scaleX(1) !important;
+  }
+  [data-stage] {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  [data-beat] + [data-beat] {
+    border-top: 1px solid rgba(246, 238, 230, 0.14);
+  }
+}
+
+/* Traitements de survol du canevas (attribut `style-hover`). */
+
+.cf-landing .cf-h1:hover {
+  background: #e8b860;
+}
+
+.cf-landing .cf-h2:hover {
+  background: #f6eee6;
+}
+
+.cf-landing .cf-h3:hover {
+  border-color: rgba(232, 184, 96, 0.4);
+}
+
+.cf-landing .cf-h4:hover {
+  background: #efe3d6;
+}
+
+.cf-landing .cf-h5:hover {
+  border-color: #e8b860;
+}
+
+/* ── Adaptation mobile ───────────────────────────────────────────────────
+ *
+ * Le canevas Claude Design a été dessiné pour le bureau. Son contenu est
+ * largement fluide — 84 `clamp()` dans la page — et tout tient dans 390 px
+ * SAUF le `<header>`, mesuré à 669 px : logo + huit liens de navigation +
+ * bouton « S'inscrire » sur une seule rangée sans retour à la ligne. Les
+ * 279 px de débordement décalaient la page entière vers la droite, ce qui
+ * donnait une page d'accueil tronquée au chargement sur téléphone.
+ *
+ * Tout ce qui suit vit dans une media query : le rendu bureau est celui du
+ * canevas, inchangé. Les `!important` ne sont pas un raccourci — la page
+ * porte ses styles en attribut `style`, et rien d'autre ne peut les
+ * surcharger depuis une feuille.
+ *
+ * Deux choix de mise en page méritent d'être explicités :
+ *
+ *   · Le header passe sur DEUX rangées (logo + CTA, puis la navigation)
+ *     plutôt que de replier les liens en menu déroulant. Un menu aurait
+ *     demandé de l'état, donc de faire de toute la page un composant
+ *     client — 106 Ko de JSX envoyés au navigateur pour un bouton.
+ *   · La navigation devient une bande défilante horizontalement. Les huit
+ *     liens restent tous atteignables sans en masquer aucun, et le dégradé
+ *     sur le bord droit signale qu'il y a plus à voir. C'est la seule
+ *     solution qui ne retire rien au canevas.
+ *
+ * Non corrigé, et volontairement : les textes sous 12 px du Salon sont les
+ * glyphes des plateaux (damier, grille de mots, awalé). Les agrandir
+ * déformerait des plateaux qui sont justes.
+ */
+@media (max-width: 760px) {
+  .cf-landing > header {
+    flex-wrap: wrap !important;
+    row-gap: 12px !important;
+    column-gap: 12px !important;
+    padding-top: 18px !important;
+    padding-bottom: 12px !important;
+  }
+
+  /* Rangée 2, pleine largeur : la navigation passe après le CTA. */
+  .cf-landing > header > nav {
+    order: 3;
+    flex: 0 0 100%;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    /* Déborde jusqu'aux bords de l'écran, puis se re-marge : la bande
+     * défile d'un bord à l'autre au lieu de s'arrêter dans la gouttière. */
+    margin-inline: calc(-1 * clamp(20px, 5vw, 72px));
+    padding-inline: clamp(20px, 5vw, 72px);
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent);
+  }
+
+  .cf-landing > header > nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Cibles tactiles : 15 px de texte nu font 18 px de haut. */
+  .cf-landing > header > nav > a {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+  }
+
+  .cf-landing > header > a,
+  .cf-landing footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+  }
+
+  /* Les deux cartouches du héros débordent leur carte de 14 px — un effet
+   * du canevas qui suppose une marge autour. Sous 380 px cette marge
+   * n'existe plus et le cartouche de droite sortait de l'écran. */
+  .cf-landing .cf-badge-left {
+    left: 0 !important;
+  }
+
+  .cf-landing .cf-badge-right {
+    right: 0 !important;
+  }
+}

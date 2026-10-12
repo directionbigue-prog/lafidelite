@@ -1,0 +1,62 @@
+# Configuration Netlify — elle ne déclare QUE ce qui ne peut pas être deviné.
+#
+# Pas de `command`, pas de `publish`, pas de `[[plugins]]`. L'adaptateur Next.js
+# de Netlify est appliqué automatiquement et la documentation déconseille
+# explicitement de l'épingler : « We recommend that you don't pin the adapter
+# version […] we will automatically use the latest version on each project
+# build for you. » Chaque réglage écrit ici serait une chose de plus qui peut
+# contredire la réalité — c'est la leçon que `vercel-json-shape.test.ts` garde
+# déjà pour l'autre hébergeur, où un `outputDirectory` figé avait survécu à la
+# refonte qui le rendait faux.
+#
+# `prisma generate` n'a pas besoin d'être ajouté à une commande de build : le
+# script `postinstall` du paquet le lance, et `pnpm install` exécute les
+# postinstall.
+#
+# ──────────────────────────────────────────────────────────────────────────
+# LES SIX TÂCHES DE FOND
+#
+# Vercel lit `vercel.json` et appelle les routes lui-même. Netlify n'a pas cet
+# équivalent : ses Scheduled Functions sont du code, pas une déclaration. Les
+# six coquilles de `netlify/functions/` appellent donc les routes déjà testées,
+# et `netlify-toml-shape.test.ts` exige que les deux listes — celle-ci et
+# l'inventaire de `src/app/api/cron/` — restent identiques. Sans ce test,
+# ajouter un septième cron le laisserait muet chez l'un des deux hébergeurs,
+# et un cron jamais appelé ne produit aucune erreur.
+#
+# LES RYTHMES SONT PLUS SERRÉS QUE CEUX DE `vercel.json`, ET C'EST VOULU. Les
+# six horaires quotidiens de l'autre fichier sont une concession au plan Hobby
+# de Vercel, qui REFUSE DE DÉPLOYER une expression sous-quotidienne. Netlify
+# n'a pas cette limite, donc on revient à des rythmes utiles. Le budget est
+# compté : ~410 invocations planifiées par jour, chacune déclenchant une
+# invocation de la fonction Next, soit ~25 000 par mois — le palier gratuit
+# en offre 125 000.
+#
+# L'ORDRE OUTBOX → FILE D'EMAILS EST DANS LES MINUTES. L'outbox ALIMENTE la
+# file : la vider après l'aurait laissée partir sans ce que l'outbox vient de
+# produire. Chez Vercel la séparation se joue sur l'heure, parce que le jitter
+# Hobby (±59 min) ne sort pas de l'heure déclarée. Ici il n'y a pas de jitter,
+# donc cinq minutes suffisent : minutes 0, 10, 20… contre 5, 15, 25…
+
+[functions."cron-outbox-drain"]
+schedule = "*/10 * * * *"
+
+[functions."cron-email-queue-drain"]
+schedule = "5-59/10 * * * *"
+
+# Les codes de vérification ne dépendent PAS de ces deux-là pour partir : une
+# route qui met un mail en file appelle `scheduleDrain()`, qui vide l'outbox et
+# la file dans le `after()` de la requête. Netlify supporte `next/after` en
+# plein. Ces crons sont le filet, pas le chemin.
+
+[functions."cron-verification-cleanup"]
+schedule = "20 * * * *"
+
+[functions."cron-order-expiration"]
+schedule = "*/15 * * * *"
+
+[functions."cron-webhook-log-purge"]
+schedule = "0 1 * * *"
+
+[functions."cron-email-job-purge"]
+schedule = "0 2 * * *"
