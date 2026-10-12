@@ -60,3 +60,8 @@ schedule = "0 1 * * *"
 
 [functions."cron-email-job-purge"]
 schedule = "0 2 * * *"
+
+# 18 h UTC = 18 h à Dakar : l'heure où un couple rentre et peut répondre à la
+# question du jour. Le cron vide lui-même ce qu'il met en file.
+[functions."cron-rappels-couple"]
+schedule = "0 18 * * *"

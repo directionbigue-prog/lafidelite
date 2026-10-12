@@ -81,6 +81,9 @@ export const COUPLES_ERROR_MESSAGES: Record<string, string> = {
   // n'aiderait personne.
   THEME_LOCKED: 'Ce thème n’est pas inclus dans votre pack. Voir les packs pour l’ouvrir.',
   SALON_LOCKED: 'Le Salon est inclus dans les packs Essentiel, Intégral et Annuel.',
+  // Rituel (/rituel) — la question du jour
+  DEJA_REPONDU: 'Cette personne a déjà répondu aujourd’hui. Passez le téléphone à l’autre !',
+  NO_DAILY_QUESTION: 'La question du jour n’est pas encore prête. Revenez un peu plus tard.',
   RESULTS_NOT_AVAILABLE: 'Aucun résultat disponible pour cette partie.',
   // Both emitted by GET /api/games/:id/rounds/:roundNumber. Like
   // NO_ACTIVE_GAME above, GAME_SESSION_NOT_FOUND covers both "no such

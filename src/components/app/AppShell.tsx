@@ -41,10 +41,11 @@ interface CoupleMeResponse {
   couple: { status?: string; partnerName?: string | null } | null;
 }
 
-export type AppSection = 'accueil' | 'salon' | 'reglages' | 'administration';
+export type AppSection = 'accueil' | 'rituel' | 'salon' | 'reglages' | 'administration';
 
 const NAV: { id: AppSection; label: string; href: string }[] = [
   { id: 'accueil', label: 'Accueil', href: '/jeu' },
+  { id: 'rituel', label: 'Rituel du jour', href: '/rituel' },
   { id: 'salon', label: 'Le Salon', href: '/salon' },
   { id: 'reglages', label: 'Réglages', href: '/settings' },
 ];

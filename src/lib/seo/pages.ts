@@ -281,6 +281,11 @@ export const PAGES: readonly PageReferencee[] = [
     indexable: false,
     raison: 'Console d’administration. Rien n’y a sa place dans un moteur.',
   },
+  {
+    chemin: '/rituel',
+    indexable: false,
+    raison: 'Derrière la session : la question du jour, la série et les souvenirs d’un couple.',
+  },
 ];
 
 /**

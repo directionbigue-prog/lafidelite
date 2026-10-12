@@ -44,6 +44,7 @@ const WATCHED = [
   path.join(APP_DIR, 'api', 'couples'),
   path.join(APP_DIR, 'api', 'auth'),
   path.join(APP_DIR, 'api', 'invites'),
+  path.join(APP_DIR, 'api', 'rituel'),
 ];
 
 /**

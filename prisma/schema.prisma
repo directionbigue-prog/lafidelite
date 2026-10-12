@@ -401,6 +401,7 @@ model Couple {
   gameSessions   GameSession[]
   questionUsages QuestionUsage[]
   boardGames     BoardGame[]
+  reponsesDuJour ReponseDuJour[]
 
   @@index([creatorId])
   @@index([partnerId])
@@ -442,6 +443,7 @@ model Question {
 
   roundQuestions GameRoundQuestion[]
   usages         QuestionUsage[]
+  reponsesDuJour ReponseDuJour[]
 
   @@index([roundType, category, active])
 }
@@ -663,6 +665,44 @@ model Entitlement {
   updatedAt DateTime @updatedAt
 
   @@index([userId, status, expiresAt])
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// La question du jour — le rituel quotidien, hors de toute partie.
+//
+// Une ligne par partenaire et par jour. Chacun répond pour lui-même
+// (`choixPropre`) et devine la réponse de l'autre (`choixDevine`), sur une
+// question MIROIR tirée de façon déterministe (lib/rituel/jour.ts). Les deux
+// réponses ne se dévoilent qu'une fois les deux lignes présentes, et
+// seulement LE JOUR MÊME : le garde-fou « aucune réponse passée n'est
+// consultable » vaut ici comme dans le jeu.
+//
+// `role` et non `userId`, pour la même raison que `Answer` : le jeu se joue
+// à deux sur UN appareil authentifié, donc l'identité de la session ne dit
+// pas qui tient le téléphone. L'unicité (couple, jour, rôle) suffit à
+// empêcher une double réponse.
+//
+// `questionId` est porté par chaque ligne : si la banque change en cours de
+// journée, la seconde réponse reprend la question de la première plutôt que
+// d'en tirer une autre.
+//
+// Rien ici n'écrit dans Couple.cumulativeCoupleScore ni dans GameResult : la
+// question du jour nourrit la série et les badges, pas le score.
+// ───────────────────────────────────────────────────────────────────────
+model ReponseDuJour {
+  id          String   @id @default(cuid())
+  coupleId    String
+  couple      Couple   @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  jour        String // AAAA-MM-JJ, en UTC (= heure de Dakar)
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  role        String // CREATOR | PARTNER
+  choixPropre String
+  choixDevine String
+  createdAt   DateTime @default(now())
+
+  @@unique([coupleId, jour, role])
+  @@index([coupleId, jour])
 }
 
 // Une connexion réussie, réduite à ce qui répond à la question posée.

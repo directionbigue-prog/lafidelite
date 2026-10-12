@@ -52,10 +52,12 @@ import { roundLabel, TOTAL_ROUNDS } from '@/lib/game/round-labels';
 import { complicityLevelLabel } from '@/lib/game/resultats';
 import { DisclaimerGate } from '@/components/game/DisclaimerGate';
 import { Alert } from '@/components/ui/Alert';
-import { Button } from '@/components/ui/Button';
+import { Button, ButtonLink } from '@/components/ui/Button';
 import { AppShell } from '@/components/app/AppShell';
 import { complicityProgress } from '@/lib/game/complicity-progress';
 import { dashboardGreeting } from '@/lib/game/greeting';
+import type { EtatSerie } from '@/lib/rituel/serie';
+import { joursLibelle, legendeSerie } from '@/lib/rituel/ecran';
 
 interface CoupleMeResponse {
   couple: CoupleMeCouple;
@@ -99,6 +101,9 @@ export default function JeuStartPage() {
     level: string | null;
     gamesPlayed: number;
   } | null>(null);
+  // The streak card. Fetched on its own and never awaited by the rest of the
+  // screen: a failed lookup hides the card, it never costs the dashboard.
+  const [serie, setSerie] = useState<EtatSerie | null>(null);
   // Bumping this re-runs the load effect. It is what the error state's
   // "Réessayer" and the waiting state's "Vérifier à nouveau" buttons do —
   // without it, a single failed fetch would strand the user on a screen
@@ -148,6 +153,11 @@ export default function JeuStartPage() {
       const active = couple !== null && couple.status === 'ACTIVE' ? couple : null;
 
       setPartnerName(active?.partnerName ?? null);
+      if (active) {
+        api<{ serie: EtatSerie }>('/api/rituel')
+          .then((res) => !cancelled && setSerie(res.serie))
+          .catch(() => undefined);
+      }
       setStanding(
         active
           ? {
@@ -336,6 +346,25 @@ export default function JeuStartPage() {
                 </section>
               )}
             </div>
+          )}
+
+          {/*
+            The daily ritual: the reason to come back on the evenings with no
+            twelve minutes to spare. Its whole logic lives on /rituel; this
+            card only says where the streak stands and points there.
+          */}
+          {serie && (
+            <section className="flex flex-col gap-4 rounded-3xl border border-gold/30 bg-plum-card p-6 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.14em] text-gold">
+                  Rituel du jour · {joursLibelle(serie.actuelle)}
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-cream/70">{legendeSerie(serie)}</p>
+              </div>
+              <ButtonLink href="/rituel" variant="secondary">
+                Question du jour
+              </ButtonLink>
+            </section>
           )}
 
           {/*

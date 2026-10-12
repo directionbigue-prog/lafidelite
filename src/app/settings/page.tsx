@@ -20,7 +20,9 @@
 // products; it now matches the rest.
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { rappelsActifs } from '@/lib/rituel/ecran';
+import { TYPE_RAPPEL } from '@/lib/rituel/rappel';
 import { api, ApiError } from '@/lib/api';
 import { useAuth, useUser } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -42,6 +44,79 @@ const SETTINGS_ERROR_OVERRIDES: Record<string, string> = {
   INVALID_CREDENTIALS: 'Mot de passe actuel incorrect.',
   PASSWORD_ALREADY_SET: 'Un mot de passe est déjà défini. Utilisez « changer le mot de passe ».',
 };
+
+/**
+ * Les rappels du soir (cron `rappels-couple`). Activés par défaut, comme
+ * toute préférence de ce dépôt ; ce réglage est la promesse que le mail
+ * lui-même fait (« Vous pouvez couper ces rappels dans vos Réglages »).
+ */
+function RappelsSection() {
+  const { toast } = useToast();
+  const [actifs, setActifs] = useState<boolean | null>(null);
+  const [envoi, setEnvoi] = useState(false);
+
+  useEffect(() => {
+    let annule = false;
+    api<{ prefs: unknown }>('/api/notifications/prefs')
+      .then((res) => !annule && setActifs(rappelsActifs(res.prefs, TYPE_RAPPEL)))
+      // Sans lecture, on n'affiche pas d'interrupteur plutôt qu'un faux état.
+      .catch(() => undefined);
+    return () => {
+      annule = true;
+    };
+  }, []);
+
+  if (actifs === null) return null;
+
+  async function basculer() {
+    const voulu = !actifs;
+    setEnvoi(true);
+    try {
+      await api('/api/notifications/prefs', {
+        method: 'PATCH',
+        body: { prefs: { [TYPE_RAPPEL]: { email: voulu } } },
+      });
+      setActifs(voulu);
+      toast(voulu ? 'Rappels activés.' : 'Rappels désactivés.', 'success');
+    } catch {
+      toast('Le réglage n’a pas pu être enregistré. Réessayez.', 'error');
+    } finally {
+      setEnvoi(false);
+    }
+  }
+
+  return (
+    <section className="flex flex-col gap-4 rounded-2xl border border-cream/16 bg-plum-card p-6">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col">
+          <h2 className="font-serif text-xl">Rappels par email</h2>
+          <span className="mt-1 text-xs leading-relaxed text-cream/50">
+            Un petit mot le soir si vous n’êtes pas venus depuis deux jours. Jamais plus d’un par
+            absence.
+          </span>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={actifs}
+          aria-label="Rappels par email"
+          disabled={envoi}
+          onClick={() => void basculer()}
+          className={`relative h-7 w-12 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
+            actifs ? 'bg-gold' : 'bg-cream/20'
+          }`}
+        >
+          <span
+            aria-hidden
+            className={`absolute top-1 h-5 w-5 rounded-full bg-ink transition-[left] ${
+              actifs ? 'left-6' : 'left-1'
+            }`}
+          />
+        </button>
+      </div>
+    </section>
+  );
+}
 
 export default function SettingsPage() {
   const user = useUser();
@@ -211,6 +286,8 @@ export default function SettingsPage() {
             )}
           </div>
         </section>
+
+        <RappelsSection />
 
         {/*
           No "Retour au jeu" link any more: the sidebar carries Accueil on

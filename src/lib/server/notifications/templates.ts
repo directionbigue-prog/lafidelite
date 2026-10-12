@@ -20,6 +20,7 @@
  */
 
 import type { CreateNotificationInput } from './index';
+import { cleRappel, TYPE_RAPPEL } from '@/lib/rituel/rappel';
 
 export function welcomeNotification(userId: string, email: string): CreateNotificationInput {
   return {
@@ -28,6 +29,22 @@ export function welcomeNotification(userId: string, email: string): CreateNotifi
     title: 'Welcome!',
     body: `Glad to have you on board, ${email}.`,
     dedupeKey: `welcome:${userId}`,
+  };
+}
+
+/**
+ * Le rappel doux du cron `rappels-couple`. La clé porte le dernier jour
+ * d'activité du couple : une absence ne déclenche qu'un rappel, et une
+ * nouvelle absence (après un retour) en autorise un autre.
+ */
+export function rappelCouple(userId: string, dernierJourActif: string): CreateNotificationInput {
+  return {
+    userId,
+    type: TYPE_RAPPEL,
+    title: 'Une question vous attend',
+    body: 'Votre question du jour vous attend, à deux.',
+    data: { dernierJourActif },
+    dedupeKey: cleRappel(userId, dernierJourActif),
   };
 }
 
