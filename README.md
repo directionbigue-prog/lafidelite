@@ -242,7 +242,7 @@ pnpm format && pnpm lint && pnpm typecheck && pnpm test    # avant tout commit
 pnpm build                                                  # avant tout déploiement
 ```
 
-**2 470 tests sur 209 fichiers.** Deux choses à savoir avant d'en écrire un :
+**2 486 tests sur 210 fichiers.** Deux choses à savoir avant d'en écrire un :
 
 - **Il n'y a ni jsdom ni Testing Library.** Vitest tourne en environnement
   `node`, aucun composant ne peut être monté. La logique d'un écran vit dans un

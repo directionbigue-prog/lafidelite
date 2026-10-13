@@ -293,6 +293,12 @@ export const PAGES: readonly PageReferencee[] = [
     raison: 'Le retour de paiement d’une commande : propre à un compte, jamais public.',
   },
   {
+    chemin: '/acheter/[pack]',
+    indexable: false,
+    dynamique: true,
+    raison: 'Le passage vers la caisse : il ouvre une commande pour la session en cours.',
+  },
+  {
     chemin: '/rituel',
     indexable: false,
     raison: 'Derrière la session : la question du jour, la série et les souvenirs d’un couple.',

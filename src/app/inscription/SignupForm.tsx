@@ -22,6 +22,7 @@ import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { GoogleButton } from '@/components/auth/GoogleButton';
 import { InviteBanner, inviteCreatorName, type InviteState } from '@/components/auth/InviteBanner';
+import { destinationSure } from '@/lib/auth/lien-google';
 
 interface InviteInfo {
   valid: boolean;
@@ -33,6 +34,9 @@ export function SignupForm({ googleEnabled }: { googleEnabled: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inviteCode = searchParams.get('invite');
+  // `?next=` — posé par /acheter/[pack] : après la vérification de l'email,
+  // le paiement du pack choisi s'ouvre. Propagé jusqu'à /verify-email.
+  const next = searchParams.get('next');
 
   // `?email=` vient de la carte d’accueil, qui soumet un GET vers cette
   // page. Sans ce pré-remplissage, le visiteur saisirait son adresse deux
@@ -93,7 +97,11 @@ export function SignupForm({ googleEnabled }: { googleEnabled: boolean }) {
       });
       // Signup issues no cookies by design — /verify-email is what signs
       // the user in, once they enter the emailed code.
-      router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      router.push(
+        `/verify-email?email=${encodeURIComponent(email)}${
+          next ? `&next=${encodeURIComponent(destinationSure(next))}` : ''
+        }`,
+      );
     } catch (err) {
       setError(
         err instanceof ApiError
@@ -105,7 +113,11 @@ export function SignupForm({ googleEnabled }: { googleEnabled: boolean }) {
     }
   }
 
-  const nextAfterOAuth = inviteCode ? `/invite/${inviteCode}` : '/jeu';
+  const nextAfterOAuth = inviteCode
+    ? `/invite/${inviteCode}`
+    : next
+      ? destinationSure(next)
+      : '/jeu';
 
   return (
     <div className="flex flex-col gap-6">
@@ -115,7 +127,12 @@ export function SignupForm({ googleEnabled }: { googleEnabled: boolean }) {
         </h1>
         <p className="text-sm text-cream/60">
           Déjà un compte ?{' '}
-          <Link href="/connexion" className="font-semibold text-gold hover:text-cream">
+          <Link
+            href={
+              next ? `/connexion?next=${encodeURIComponent(destinationSure(next))}` : '/connexion'
+            }
+            className="font-semibold text-gold hover:text-cream"
+          >
             Se connecter
           </Link>
         </p>

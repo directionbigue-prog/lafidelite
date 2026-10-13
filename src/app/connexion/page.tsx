@@ -17,12 +17,19 @@ import { metadataDePage } from '@/lib/seo/pages';
 // lui qui alimente aussi le sitemap, donc les deux ne peuvent pas diverger.
 export const metadata: Metadata = metadataDePage('/connexion');
 
-export default function ConnexionPage() {
+export default async function ConnexionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string | string[] }>;
+}) {
   const googleEnabled = tryCreateGoogleProvider() !== undefined;
+  // `?next=` — posé par /acheter/[pack] pour revenir ouvrir le paiement.
+  const brut = (await searchParams).next;
+  const next = (Array.isArray(brut) ? brut[0] : brut) ?? null;
 
   return (
     <AuthSplitLayout aside={<LoginAside />}>
-      <LoginForm googleEnabled={googleEnabled} />
+      <LoginForm googleEnabled={googleEnabled} next={next} />
     </AuthSplitLayout>
   );
 }

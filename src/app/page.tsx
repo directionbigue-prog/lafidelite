@@ -66,6 +66,7 @@
 import { Fragment } from 'react';
 import './landing.css';
 import { buildLandingDesignData, TOTAL_QUESTIONS } from '@/lib/landing/design-data';
+import { cheminAchat } from '@/lib/game/pack-choisi';
 import { SignupCard } from '@/components/landing/SignupCard';
 import { Marque } from '@/components/ui/Marque';
 
@@ -2878,7 +2879,7 @@ export default function Home() {
                   ))}
                 </div>
                 <a
-                  href={card.gratuit ? PLAY_HREF : '#inscription'}
+                  href={card.gratuit ? PLAY_HREF : cheminAchat(card.id)}
                   style={{
                     marginTop: 'auto',
                     textAlign: 'center',
@@ -2901,12 +2902,12 @@ export default function Home() {
           </div>
           <div style={{ marginTop: '22px', fontSize: '15px', color: 'rgba(246,238,230,.64)' }}>
             {/* La phrase du canevas — « les points ne sont jamais débités » —
-                décrivait une monnaie inexistante, et présentait les cinq moyens
-                de paiement comme disponibles. /tarifs dit déjà l'inverse ; deux
-                pages du même site ne peuvent pas répondre différemment à
-                « puis-je payer aujourd'hui ? ». */}
-            Wave, Orange Money, MTN MoMo, Moov et carte bancaire arrivent. Rien n'est débitable
-            aujourd'hui, et nous préférons le dire.
+                décrivait une monnaie inexistante. Elle a ensuite cédé la place à
+                « rien n'est débitable aujourd'hui », vrai jusqu'au 13/10/2026 :
+                depuis, PayTech encaisse, et chaque carte payante ouvre sa caisse.
+                Ne nommer ici que les moyens que PayTech propose réellement. */}
+            Paiement sécurisé par PayTech : Wave, Orange Money, Free Money ou carte bancaire. Le
+            pack s'ouvre dès que le paiement est confirmé.
           </div>
         </section>
         <section

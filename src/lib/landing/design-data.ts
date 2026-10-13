@@ -136,11 +136,12 @@ const PRICING_CARDS: readonly PricingCard[] = PACKS_VISIBLES.map((pack) => {
     // mettent en avant deux packs différents se contredisent devant le client.
     misEnAvant: pack.id === 'INTEGRAL',
     gratuit,
-    // Rien n'est débitable aujourd'hui et ces boutons mènent au formulaire
-    // d'inscription, pas à une caisse. « Acheter le pack » et « S'abonner »
-    // nommaient donc des actions qui n'existent pas — le mensonge d'interface
-    // que /tarifs refuse explicitement en n'affichant aucun bouton d'achat.
-    ctaLabel: gratuit ? 'Commencer' : 'Créer notre Espace Couple',
+    // Depuis le 13/10/2026 une carte payante mène à `/acheter/[pack]`, qui
+    // ouvre la caisse PayTech (après inscription ou connexion si besoin).
+    // Le libellé dit donc ce que fait le clic. Avant, ces boutons menaient au
+    // formulaire d'inscription et portaient « Créer notre Espace Couple » —
+    // vrai tant que rien n'était débitable.
+    ctaLabel: gratuit ? 'Commencer' : `Choisir ${pack.nom}`,
   };
 });
 

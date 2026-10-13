@@ -17,6 +17,7 @@ import { Field } from '@/components/ui/Field';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { MESSAGE_RENVOI, PISTES_SI_RIEN_NE_VIENT } from '@/lib/auth/verification-renvoi';
+import { destinationApresConnexion, packChoisiMemorise } from '@/lib/game/pack-choisi';
 
 export function VerifyEmailForm() {
   const router = useRouter();
@@ -60,8 +61,10 @@ export function VerifyEmailForm() {
       // `/jeu` rather than `/couple/creer`: it resolves every couple state
       // itself, which matters here because signing up through an invite
       // link pairs the user during signup — sending them to "create your
-      // Espace Couple" would show a screen they are already past.
-      router.push('/jeu');
+      // Espace Couple" would show a screen they are already past. A pack
+      // chosen before signing up (`?next=`, or the local memory of /acheter
+      // when the emailed link dropped it) opens its payment instead.
+      router.push(destinationApresConnexion(params.get('next'), packChoisiMemorise()));
     } catch (err) {
       setError(
         err instanceof ApiError

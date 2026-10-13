@@ -18,8 +18,21 @@ import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { GoogleButton } from '@/components/auth/GoogleButton';
 import { ComptesAppareil } from '@/components/auth/ComptesAppareil';
+import { destinationSure } from '@/lib/auth/lien-google';
+import { destinationApresConnexion, packChoisiMemorise } from '@/lib/game/pack-choisi';
 
-export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
+/**
+ * `next` : où revenir après la connexion (`?next=` de l'URL). Posé par
+ * `/acheter/[pack]`, pour qu'un pack choisi sans session ouvre son paiement
+ * dès que la session existe. Validé : un chemin du site seulement.
+ */
+export function LoginForm({
+  googleEnabled,
+  next,
+}: {
+  googleEnabled: boolean;
+  next: string | null;
+}) {
   const router = useRouter();
   const { refresh } = useAuth();
   const [email, setEmail] = useState('');
@@ -42,8 +55,9 @@ export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
       // `/jeu` resolves every couple state itself (no couple ->
       // /couple/creer, PENDING -> /couple/attente, ACTIVE -> the game), so
       // a returning couple lands on the game rather than on a setup screen
-      // they finished weeks ago.
-      router.push('/jeu');
+      // they finished weeks ago. A pack chosen before signing in (`next`, or
+      // the local memory of /acheter) takes precedence: its payment opens.
+      router.push(destinationApresConnexion(next, packChoisiMemorise()));
     } catch (err) {
       setError(
         err instanceof ApiError
@@ -61,7 +75,14 @@ export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
         <h1 className="font-serif text-[clamp(28px,5vw,36px)] leading-tight">Se connecter</h1>
         <p className="text-sm text-cream/60">
           Pas encore de compte ?{' '}
-          <Link href="/inscription" className="font-semibold text-gold hover:text-cream">
+          <Link
+            href={
+              next
+                ? `/inscription?next=${encodeURIComponent(destinationSure(next))}`
+                : '/inscription'
+            }
+            className="font-semibold text-gold hover:text-cream"
+          >
             Créer un compte
           </Link>
         </p>
@@ -73,7 +94,7 @@ export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
 
       {googleEnabled && (
         <>
-          <GoogleButton next="/jeu" />
+          <GoogleButton next={next ? destinationSure(next) : '/jeu'} />
           <div className="flex items-center gap-4" aria-hidden>
             <span className="h-px flex-1 bg-cream/14" />
             <span className="text-[11px] uppercase tracking-[0.14em] text-cream/40">
