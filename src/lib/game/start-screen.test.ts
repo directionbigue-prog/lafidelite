@@ -42,10 +42,16 @@ describe('coupleGateRedirect', () => {
     expect(coupleGateRedirect(null, 'ADMIN')).toBe('/admin');
   });
 
-  it('keeps the normal flow for a plain user, an unknown role, or an admin mid-pairing', () => {
+  it('sends an admin with a never-accepted invite (PENDING) to /admin too', () => {
+    // The real super-admin account carried exactly this, and was bounced to
+    // the pairing flow on every sign-in.
+    expect(coupleGateRedirect({ status: 'PENDING' }, 'SUPERADMIN')).toBe('/admin');
+  });
+
+  it('keeps the normal flow for a plain user or an unknown role; an ACTIVE couple plays', () => {
     expect(coupleGateRedirect(null, 'USER')).toBe('/couple/creer');
     expect(coupleGateRedirect(null, undefined)).toBe('/couple/creer');
-    expect(coupleGateRedirect({ status: 'PENDING' }, 'SUPERADMIN')).toBe('/couple/creer');
+    expect(coupleGateRedirect({ status: 'PENDING' }, 'USER')).toBe('/couple/creer');
     expect(coupleGateRedirect(activeCouple({ partnerName: 'Awa' }), 'SUPERADMIN')).toBeNull();
   });
 });

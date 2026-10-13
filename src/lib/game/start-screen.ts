@@ -49,12 +49,16 @@ export type CoupleMeCouple =
  * Un compte d'administration sans aucun couple va à /admin plutôt qu'au
  * parcours d'appariement (décision du 13/10/2026) : il vient superviser, pas
  * jouer, et l'obliger à inviter un partenaire n'a aucun sens. Ce n'est qu'un
- * aiguillage — chaque route /api/admin/* revérifie le rôle. Un admin qui a
- * lui-même commencé un couple (PENDING) garde le parcours normal.
+ * aiguillage — chaque route /api/admin/* revérifie le rôle.
+ *
+ * Y compris avec un couple PENDING : la première version l'exceptait, et le
+ * compte super-admin réel portait justement une invitation jamais acceptée —
+ * il était renvoyé à l'appariement à chaque connexion. Un admin qui veut
+ * jouer passe par /couple/creer lui-même ; seul un couple ACTIVE l'amène au jeu.
  */
 export function coupleGateRedirect(couple: CoupleMeCouple, role?: string): string | null {
   if (couple !== null && couple.status === 'ACTIVE') return null;
-  if (couple === null && (role === 'ADMIN' || role === 'SUPERADMIN')) return '/admin';
+  if (role === 'ADMIN' || role === 'SUPERADMIN') return '/admin';
   return '/couple/creer';
 }
 
