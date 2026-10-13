@@ -31,8 +31,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       auth.headers.set('x-request-id', ctx.requestId);
       return auth;
     }
+    // Disponible = la vidéo est configurée ET il y a quelqu'un à appeler. Le
+    // bouton s'affichait pour tout compte, y compris sans couple actif (le
+    // super-admin, un couple en attente) : le clic menait à une erreur.
+    let disponible = dailyConfigure();
+    if (disponible) {
+      const couple = await findActivatedCoupleForUser(prisma, auth.user.sub);
+      disponible = Boolean(couple?.partnerId);
+    }
     return NextResponse.json(
-      { disponible: dailyConfigure() },
+      { disponible },
       { status: 200, headers: { 'x-request-id': ctx.requestId } },
     );
   });

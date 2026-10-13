@@ -28,7 +28,7 @@ import {
 } from 'react';
 import type { DailyCall } from '@daily-co/daily-js';
 import { api } from '@/lib/api';
-import { gameErrorMessage } from '@/lib/game/api-result';
+import { messageErreurAppel } from '@/lib/video/erreurs';
 import { pistesDepuis, type ParticipantBrut, type Pistes } from '@/lib/video/pistes';
 import { estSignalPartie, SIGNAL_PARTIE } from '@/lib/video/distance';
 
@@ -151,13 +151,16 @@ export function VideoProvider({ children }: { children: ReactNode }) {
         void nettoyer();
       });
       appel.on('error', (ev) => {
-        setErreur(
-          ev?.errorMsg
-            ? 'L’appel a été interrompu. Vérifiez votre connexion et relancez-le.'
-            : 'L’appel a été interrompu.',
-        );
+        // La vraie cause, pas « vérifiez votre connexion » : c'est ce message
+        // générique qui a caché `account-missing-payment-method` (lib/video/erreurs.ts).
+        setErreur(messageErreurAppel(ev));
         setStatut('erreur');
         void nettoyer();
+      });
+      // Caméra refusée ou absente : Daily n'échoue pas, l'appel continue sans
+      // image. On le dit, sinon le partenaire voit un carré noir sans raison.
+      appel.on('camera-error', (ev) => {
+        setErreur(messageErreurAppel(ev));
       });
 
       await appel.join({ url, token });
@@ -166,11 +169,7 @@ export function VideoProvider({ children }: { children: ReactNode }) {
       setStatut('en-appel');
       relirePistes();
     } catch (err) {
-      setErreur(
-        err instanceof Error && /permission|NotAllowed/i.test(err.message)
-          ? 'Autorisez la caméra et le micro dans votre navigateur pour lancer l’appel.'
-          : gameErrorMessage(err),
-      );
+      setErreur(messageErreurAppel(err));
       setStatut('erreur');
       await nettoyer();
     }

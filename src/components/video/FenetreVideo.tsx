@@ -128,6 +128,10 @@ export function FenetreVideo() {
         </div>
       </div>
 
+      {/* Un avertissement non fatal (caméra refusée, absente, occupée) :
+          l'appel continue, mais on dit pourquoi l'image manque. */}
+      {v.erreur && <p className="px-3 pt-2.5 text-xs leading-snug text-rose">{v.erreur}</p>}
+
       <div className="flex items-center justify-between gap-2 px-3 py-2.5">
         <div className="flex gap-2">
           <button
