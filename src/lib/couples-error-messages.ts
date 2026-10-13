@@ -59,6 +59,9 @@ export const COUPLES_ERROR_MESSAGES: Record<string, string> = {
   // /api/invites/[code]/accept refuses a cross-site Origin. A real visitor
   // only meets it if the link was opened through some odd proxy.
   CSRF_ORIGIN_MISMATCH: 'Ouvrez le lien d’invitation directement dans votre navigateur.',
+  // Plusieurs comptes sur l'appareil (/api/auth/comptes).
+  COMPTE_INCONNU:
+    'Ce compte n’est plus ouvert sur cet appareil. Connectez-vous avec son email et son mot de passe.',
   // Achat d'un pack (/api/orders) — lus par le bouton « Choisir ce pack ».
   PACK_NOT_FOR_SALE: 'Ce pack n’est pas proposé à l’achat.',
   PAYMENT_PROVIDER_UNCONFIGURED:

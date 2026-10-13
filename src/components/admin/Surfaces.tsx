@@ -13,7 +13,8 @@
 // requêtes — vient de `lib/admin/console.ts`, qui est pur et testé.
 
 import { useCallback, useEffect, useState } from 'react';
-import { api, ApiError } from '@/lib/api';
+import { ApiError } from '@/lib/api';
+import { apiAdmin } from '@/lib/admin/api-admin';
 import { ListeAdmin, Pastille, type Colonne } from './ListeAdmin';
 import {
   libelleStatut,
@@ -148,7 +149,7 @@ export function Retraits({ peutAnnuler }: { peutAnnuler: boolean }) {
     setEnCours(r.id);
     setErreur(null);
     try {
-      await api(`/admin/withdrawals/${r.id}/cancel`, { method: 'POST' });
+      await apiAdmin(`/admin/withdrawals/${r.id}/cancel`, { method: 'POST' });
       recharger();
     } catch (e) {
       setErreur(
@@ -349,7 +350,7 @@ export function Limiteurs() {
     setChargement(true);
     setErreur(null);
     try {
-      setDonnees(await api<ReponseLimiteurs>('/admin/rate-limits'));
+      setDonnees(await apiAdmin<ReponseLimiteurs>('/admin/rate-limits'));
     } catch (e) {
       setErreur(
         messageErreurAdmin(

@@ -17,6 +17,7 @@ import { Field } from '@/components/ui/Field';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { GoogleButton } from '@/components/auth/GoogleButton';
+import { ComptesAppareil } from '@/components/auth/ComptesAppareil';
 
 export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
   const router = useRouter();
@@ -65,6 +66,10 @@ export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
           </Link>
         </p>
       </header>
+
+      {/* Les comptes déjà ouverts sur cet appareil : un clic, sans mot de
+          passe. Ne rend rien quand il n'y en a pas. */}
+      <ComptesAppareil mode="connexion" />
 
       {googleEnabled && (
         <>

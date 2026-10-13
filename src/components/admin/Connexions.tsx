@@ -11,7 +11,8 @@
 // calculé.
 
 import { useCallback, useEffect, useState } from 'react';
-import { api, ApiError } from '@/lib/api';
+import { ApiError } from '@/lib/api';
+import { apiAdmin } from '@/lib/admin/api-admin';
 import { GRANULARITES, type Granularite } from '@/lib/admin/connexions';
 import { messageErreurAdmin } from '@/lib/admin/console';
 
@@ -62,7 +63,7 @@ export function Connexions() {
     setChargement(true);
     setErreur(null);
     try {
-      setDonnees(await api<Reponse>(`/admin/connexions?granularite=${g}`));
+      setDonnees(await apiAdmin<Reponse>(`/admin/connexions?granularite=${g}`));
     } catch (e) {
       setErreur(
         messageErreurAdmin(

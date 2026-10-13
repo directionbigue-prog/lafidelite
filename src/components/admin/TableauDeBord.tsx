@@ -8,7 +8,8 @@
 // affiche. Il se relit toutes les 60 secondes tant que l'onglet est ouvert.
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { api, ApiError } from '@/lib/api';
+import { ApiError } from '@/lib/api';
+import { apiAdmin } from '@/lib/admin/api-admin';
 import { messageErreurAdmin } from '@/lib/admin/console';
 import {
   nombreLisible,
@@ -108,7 +109,7 @@ export function TableauDeBord() {
   const charger = useCallback(async () => {
     setChargement(true);
     try {
-      setD(await api<Donnees>('/admin/tableau-de-bord'));
+      setD(await apiAdmin<Donnees>('/admin/tableau-de-bord'));
       setErreur(null);
     } catch (e) {
       if (e instanceof ApiError && e.status === 403) setRefuse(true);

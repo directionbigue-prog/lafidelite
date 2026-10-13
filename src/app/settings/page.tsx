@@ -33,6 +33,7 @@ import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { FocusLayout } from '@/components/ui/FocusLayout';
 import { AppShell } from '@/components/app/AppShell';
+import { ComptesAppareil } from '@/components/auth/ComptesAppareil';
 
 /**
  * Codes whose wording depends on being HERE rather than on a sign-in
@@ -288,6 +289,8 @@ export default function SettingsPage() {
         </section>
 
         <RappelsSection />
+
+        <ComptesAppareil mode="reglages" />
 
         {/*
           No "Retour au jeu" link any more: the sidebar carries Accueil on

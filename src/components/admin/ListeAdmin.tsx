@@ -15,7 +15,8 @@
 // tout ce qui serait écrit ici échapperait aux tests.
 
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
-import { api, ApiError } from '@/lib/api';
+import { ApiError } from '@/lib/api';
+import { apiAdmin } from '@/lib/admin/api-admin';
 import { construireRequete, messageErreurAdmin } from '@/lib/admin/console';
 
 export interface Colonne<T> {
@@ -50,7 +51,7 @@ export function ListeAdmin<T extends { id: string }>({
 }: {
   titre: string;
   description?: string;
-  /** Sans `/api` : `api()` le préfixe, comme partout ailleurs. */
+  /** Sans `/api` : `apiAdmin()` le préfixe (voir lib/admin/api-admin.ts). */
   chemin: string;
   colonnes: Colonne<T>[];
   filtres?: Filtre[];
@@ -70,7 +71,7 @@ export function ListeAdmin<T extends { id: string }>({
       setChargement(true);
       setErreur(null);
       try {
-        const r = await api<Page<T>>(construireRequete(chemin, { ...valeurs, cursor }));
+        const r = await apiAdmin<Page<T>>(construireRequete(chemin, { ...valeurs, cursor }));
         // Une page suivante s'AJOUTE ; un rechargement filtré REMPLACE. Sans
         // cette distinction, changer un filtre empilerait les résultats sur
         // les précédents et le tableau mentirait sur ce qu'il montre.

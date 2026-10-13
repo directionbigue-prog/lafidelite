@@ -76,7 +76,7 @@ describe('masquer le lien ne protège rien', () => {
   // into this page. » Le lien conditionnel est de l'ergonomie — éviter
   // d'offrir une action qui reviendrait en 403.
   it('la console interroge toujours le serveur pour connaître ses droits', () => {
-    expect(pageAdmin).toContain("api<Moi>('/admin/me')");
+    expect(pageAdmin).toContain("apiAdmin<Moi>('/admin/me')");
     // Et elle traite le 403 comme une réponse normale, pas comme une panne.
     expect(pageAdmin).toContain('setRefuse(true)');
   });

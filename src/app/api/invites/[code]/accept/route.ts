@@ -33,6 +33,7 @@ import {
   setCsrfCookie,
 } from '@/lib/server/auth';
 import { adresseInvite } from '@/lib/couples/compte-invite';
+import { origineEtrangere } from '@/lib/server/origine';
 
 const Body = z.object({ name: z.string().trim().min(1).max(100) });
 
@@ -57,16 +58,6 @@ const STATUT: Record<Refus, number> = {
 class InviteRefusee extends Error {
   constructor(readonly code: Refus) {
     super(code);
-  }
-}
-
-function origineEtrangere(req: NextRequest): boolean {
-  const origin = req.headers.get('origin');
-  if (!origin) return false;
-  try {
-    return new URL(origin).host !== (req.headers.get('host') ?? req.nextUrl.host);
-  } catch {
-    return true;
   }
 }
 

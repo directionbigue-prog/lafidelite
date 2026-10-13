@@ -18,7 +18,8 @@
 'use client';
 
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { api, ApiError } from '@/lib/api';
+import { ApiError } from '@/lib/api';
+import { apiAdmin } from '@/lib/admin/api-admin';
 import { useUser } from '@/contexts/AuthContext';
 import { AppShell } from '@/components/app/AppShell';
 import { Connexions } from '@/components/admin/Connexions';
@@ -98,7 +99,7 @@ export default function AdminPage() {
     let vivant = true;
     (async () => {
       try {
-        const r = await api<Moi>('/admin/me');
+        const r = await apiAdmin<Moi>('/admin/me');
         if (vivant) setMoi(r);
       } catch (e) {
         if (!vivant) return;
@@ -133,7 +134,7 @@ export default function AdminPage() {
           cursor: cursor ?? null,
           limite: 25,
         });
-        const r = await api<Page>(chemin);
+        const r = await apiAdmin<Page>(chemin);
         setPage((precedent) =>
           cursor && precedent
             ? { items: [...precedent.items, ...r.items], nextCursor: r.nextCursor }
@@ -180,7 +181,7 @@ export default function AdminPage() {
     setErreur(null);
     setSucces(null);
     try {
-      await api(`/admin/users/${cible.id}/role`, {
+      await apiAdmin(`/admin/users/${cible.id}/role`, {
         method: 'PATCH',
         body: { role: nouveauRole },
       });
@@ -251,7 +252,7 @@ export default function AdminPage() {
     setErreur(null);
     setSucces(null);
     try {
-      await api(`/admin/users/${cible.id}/status`, {
+      await apiAdmin(`/admin/users/${cible.id}/status`, {
         method: 'PATCH',
         body: corpsChangementStatut(action.sens, verifiee.raison),
       });
