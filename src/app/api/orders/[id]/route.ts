@@ -26,8 +26,12 @@ export async function GET(
     if (auth instanceof NextResponse) return auth;
 
     const { id } = await routeCtx.params;
+    // `derniere` = la commande la plus récente du compte : c'est l'URL fixe
+    // qu'un tableau de bord de prestataire peut porter, quand il ne sait pas
+    // renvoyer l'identifiant de la commande.
     const order = await prisma.order.findFirst({
-      where: { id, userId: auth.user.sub },
+      where: id === 'derniere' ? { userId: auth.user.sub } : { id, userId: auth.user.sub },
+      ...(id === 'derniere' ? { orderBy: { createdAt: 'desc' as const } } : {}),
       select: { id: true, status: true, amount: true, currency: true, metadata: true },
     });
     if (!order) {

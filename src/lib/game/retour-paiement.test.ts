@@ -33,3 +33,19 @@ describe('etatDuRetour', () => {
     expect(doitRelire({ kind: 'trop-long' })).toBe(false);
   });
 });
+
+describe('etatDuRetour — retour d’annulation', () => {
+  it('une commande non payée revenue par l’URL d’échec est annulée, tout de suite', () => {
+    expect(etatDuRetour({ status: 'PENDING', droit: null }, 0, 'echec')).toEqual({
+      kind: 'annule',
+    });
+    expect(etatDuRetour({ status: 'FAILED', droit: null }, 0, 'echec')).toEqual({ kind: 'annule' });
+    expect(doitRelire({ kind: 'annule' })).toBe(false);
+  });
+
+  it('un paiement confirmé l’emporte sur l’URL, et « succes » ne prouve rien', () => {
+    const droit = { packId: 'INTEGRAL', status: 'ACTIVE', expiresAt: '2026-11-12T00:00:00.000Z' };
+    expect(etatDuRetour({ status: 'PAID', droit }, 0, 'echec').kind).toBe('ouvert');
+    expect(etatDuRetour({ status: 'PENDING', droit: null }, 0, 'succes').kind).toBe('attente');
+  });
+});

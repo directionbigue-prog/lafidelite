@@ -16,17 +16,31 @@ export type EtatRetour =
   | { kind: 'paye-sans-droit' }
   | { kind: 'attente' }
   | { kind: 'echec' }
+  | { kind: 'annule' }
   | { kind: 'trop-long' };
 
 /** Au-delà, on cesse de relire et on dit au client quoi faire. */
 export const TENTATIVES_MAX = 40; // × 3 s ≈ 2 minutes
 
-export function etatDuRetour(commande: CommandeLue, tentatives: number): EtatRetour {
+/**
+ * `issue` est le paramètre que NOUS avons mis dans l'URL de retour
+ * (`succes` ou `echec`). Il ne prouve rien : un paiement PAID l'emporte
+ * toujours, et `succes` ne fait jamais annoncer un pack. Mais `echec` sur une
+ * commande non payée veut dire « le client a annulé sur la page du
+ * prestataire » — sans lui, l'écran affichait « Confirmation du paiement… »
+ * pendant deux minutes à quelqu'un qui venait d'annuler.
+ */
+export function etatDuRetour(
+  commande: CommandeLue,
+  tentatives: number,
+  issue?: string | null,
+): EtatRetour {
   if (commande.status === 'PAID') {
     return commande.droit && commande.droit.status === 'ACTIVE'
       ? { kind: 'ouvert', packId: commande.droit.packId, expiresAt: commande.droit.expiresAt }
       : { kind: 'paye-sans-droit' };
   }
+  if (issue === 'echec') return { kind: 'annule' };
   if (commande.status === 'PENDING') {
     return tentatives >= TENTATIVES_MAX ? { kind: 'trop-long' } : { kind: 'attente' };
   }

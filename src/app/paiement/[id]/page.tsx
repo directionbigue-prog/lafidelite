@@ -1,6 +1,10 @@
 'use client';
 
-// /paiement/[id] — le retour depuis la page de paiement Bictorys.
+// /paiement/[id] — le retour depuis la page de paiement (PayTech, Bictorys).
+//
+// `id` vaut l'identifiant de la commande, ou `derniere` : l'URL fixe que
+// le tableau de bord PayTech peut porter (« la dernière commande du compte »).
+// `?issue=echec` = le client a annulé chez le prestataire.
 //
 // Les décisions vivent dans lib/game/retour-paiement.ts : l'écran relit la
 // commande toutes les 3 secondes tant qu'elle est en attente, et n'annonce
@@ -18,8 +22,16 @@ import {
   type EtatRetour,
 } from '@/lib/game/retour-paiement';
 
-export default function RetourPaiementPage({ params }: { params: Promise<{ id: string }> }) {
+export default function RetourPaiementPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ issue?: string | string[] }>;
+}) {
   const { id } = use(params);
+  const brut = use(searchParams).issue;
+  const issue = Array.isArray(brut) ? brut[0] : brut;
   const [etat, setEtat] = useState<EtatRetour>({ kind: 'attente' });
   const [introuvable, setIntrouvable] = useState(false);
 
@@ -32,7 +44,7 @@ export default function RetourPaiementPage({ params }: { params: Promise<{ id: s
       try {
         const commande = await api<CommandeLue>(`/api/orders/${encodeURIComponent(id)}`);
         if (!vivant) return;
-        const suivant = etatDuRetour(commande, tentatives);
+        const suivant = etatDuRetour(commande, tentatives, issue);
         setEtat(suivant);
         tentatives += 1;
         if (doitRelire(suivant)) minuteur = setTimeout(() => void lire(), 3000);
@@ -51,7 +63,7 @@ export default function RetourPaiementPage({ params }: { params: Promise<{ id: s
       vivant = false;
       if (minuteur) clearTimeout(minuteur);
     };
-  }, [id]);
+  }, [id, issue]);
 
   return (
     <AppShell active="accueil">
@@ -81,6 +93,8 @@ function titre(etat: EtatRetour, introuvable: boolean): string {
       return 'La confirmation tarde';
     case 'echec':
       return 'Le paiement n’a pas abouti';
+    case 'annule':
+      return 'Paiement annulé';
   }
 }
 
@@ -135,6 +149,19 @@ function corps(etat: EtatRetour, introuvable: boolean) {
             Votre opérateur n’a pas encore confirmé. Si vous avez validé le paiement, le pack
             s’ouvrira dès que la confirmation arrivera : rechargez cette page dans quelques minutes.
           </p>
+          <ButtonLink href="/jeu" variant="ghost">
+            Retour à l’accueil
+          </ButtonLink>
+        </>
+      );
+    case 'annule':
+      return (
+        <>
+          <p className="text-[15px] leading-relaxed text-cream/70">
+            Vous avez quitté la page de paiement : aucun montant n’a été prélevé. Vous pouvez
+            choisir un pack quand vous voulez.
+          </p>
+          <ButtonLink href="/tarifs">Choisir un pack</ButtonLink>
           <ButtonLink href="/jeu" variant="ghost">
             Retour à l’accueil
           </ButtonLink>
