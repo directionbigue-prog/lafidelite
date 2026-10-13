@@ -43,6 +43,7 @@ import { z } from 'zod';
 import { verifyCsrf } from '@/lib/server/auth';
 import { requireAuth } from '@/lib/server/middleware';
 import { makeRequestContext, withRequestContext } from '@/lib/server/observability/request-context';
+import { log } from '@/lib/server/observability/log';
 import { prisma } from '@/lib/server/prisma';
 import { CircuitOpenError } from '@/lib/server/payments/circuit-breaker';
 import {
@@ -270,7 +271,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // payment. Surface this as the same 503 PAYMENT_PROVIDER_UNCONFIGURED
     // disposition (boot-time misconfig). In dev/test we keep the
     // localhost fallback so local development still works.
-    const envPublicUrl = process.env.PUBLIC_URL;
+    //
+    // Cleaned before use: on 2026-10-13 production's PUBLIC_URL began with a
+    // BOM (U+FEFF, written by PowerShell when the variable was set), so every
+    // success/cancel URL handed to PayTech was invalid — 422 from PayTech,
+    // 502 PAYMENT_FAILED here, every pack purchase dead. `trim()` removes the
+    // BOM as well as stray spaces; the trailing slash would double the `/`.
+    const envPublicUrl = process.env.PUBLIC_URL?.trim().replace(/\/+$/, '') || undefined;
     if (!envPublicUrl && process.env.NODE_ENV === 'production') {
       return NextResponse.json(
         {
@@ -383,6 +390,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         data: { status: 'FAILED' },
       });
       const message = err instanceof Error ? err.message : 'Unknown payment error';
+      // Logged: the client only ever shows the French PAYMENT_FAILED text, so
+      // without this line the provider's actual reason (invalid key, invalid
+      // URL…) existed nowhere — four failed purchases left no trace on
+      // 2026-10-13. The message is the provider's, never a credential.
+      log.warn('order charge failed', { orderId: order.id, provider: provider.name, message });
       return NextResponse.json(
         { error: 'PAYMENT_FAILED', message },
         { status: 502, headers: { 'x-request-id': ctx.requestId } },

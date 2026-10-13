@@ -495,6 +495,34 @@ describe('POST /api/orders [Wave 1] — config guards', () => {
 
     expect(res.status).toBe(201);
   });
+
+  it('nettoie PUBLIC_URL : ni BOM, ni espace, ni barre finale ne partent chez le prestataire', async () => {
+    // 13/10/2026 : PUBLIC_URL valait « (U+FEFF)https://www.coeurfidele.net » en
+    // production (posée depuis PowerShell, qui préfixe un BOM). PayTech
+    // refusait alors success_url et cancel_url (422 « … invalid ») et chaque
+    // achat de pack finissait en 502 PAYMENT_FAILED, sans un mot dans les logs.
+    prismaMock.order.findUnique.mockResolvedValue(null as never);
+    prismaMock.order.create.mockResolvedValue(seededOrder() as never);
+    prismaMock.order.update.mockResolvedValue(seededOrder() as never);
+    process.env.PUBLIC_URL = '\uFEFFhttps://www.coeurfidele.net/ ';
+
+    const res = await POST(
+      makePost({ amount: 1000, currency: 'XOF' }, { idempotencyKey: 'bom-key' }),
+    );
+
+    expect(res.status).toBe(201);
+    const fournisseur = mockGetProvider.mock.results[0]?.value as {
+      charge: ReturnType<typeof vi.fn>;
+    };
+    const entree = fournisseur.charge.mock.calls[0]?.[0] as {
+      successUrl: string;
+      failureUrl: string;
+    };
+    expect(entree.successUrl).toBe(
+      'https://www.coeurfidele.net/paiement/order_seed_1?issue=succes',
+    );
+    expect(entree.failureUrl).toBe('https://www.coeurfidele.net/paiement/order_seed_1?issue=echec');
+  });
 });
 
 describe('POST /api/orders [Wave 1] — validation', () => {
