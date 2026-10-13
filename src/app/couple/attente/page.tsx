@@ -11,7 +11,7 @@ import { api } from '@/lib/api';
 import { useUser } from '@/contexts/AuthContext';
 import { AuthSplitLayout } from '@/components/auth/AuthSplitLayout';
 import { OnboardingAside } from '@/components/auth/OnboardingAside';
-import { Button, buttonClass } from '@/components/ui/Button';
+import { Button, ButtonLink, buttonClass } from '@/components/ui/Button';
 
 interface CoupleStatus {
   couple:
@@ -138,6 +138,14 @@ export default function AttenteCouplePage() {
           >
             Relancer sur WhatsApp
           </a>
+
+          {/* Le Salon n'attend personne (depuis le 13/10/2026) : on y joue à
+              deux sur cet appareil, avec qui est à côté. Ce lien est le seul
+              chemin vers lui tant que le couple n'est pas actif — cet écran
+              n'a pas la barre de navigation de l'app. */}
+          <ButtonLink href="/salon" variant="ghost">
+            En attendant, jouer au Salon
+          </ButtonLink>
         </div>
 
         {showLink && (

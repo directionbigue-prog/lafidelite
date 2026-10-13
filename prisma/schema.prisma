@@ -64,6 +64,8 @@ model User {
   adminActions      AdminAction[]
   entitlements      Entitlement[]
   connexions        ConnexionEvent[]
+  // Les parties du Salon d'un compte SANS couple actif — voir BoardGame.
+  partiesSalonSolo  BoardGame[]          @relation("BoardGameSolo")
 
   // Multi-tenancy is opt-in per project: by default no resource is org-scoped.
   // Apps that need it (marketplace, B2B SaaS, classifieds) wire owner relations
@@ -597,10 +599,21 @@ model GameResult {
 // vers GameResult : une partie de dames ne dit rien de la complicité d'un
 // couple, et ne coûte ni la partie offerte ni de points.
 // ───────────────────────────────────────────────────────────────────────
+//
+// UN SEUL PROPRIÉTAIRE, le couple OU un compte (depuis le 13/10/2026). Un
+// compte sans couple actif joue au Salon avec qui est à côté de lui, sur
+// le même appareil : la partie est alors rangée sous `userId`, et
+// `coupleId` reste vide. La contrainte CHECK
+// `BoardGame_un_seul_proprietaire` (SQL brut, comme les index partiels)
+// interdit les deux à la fois et aucun des deux. Une partie solo reste au
+// compte quand il s'apparie plus tard : elle n'est simplement plus lue,
+// puisque les routes servent alors les parties du couple.
 model BoardGame {
   id        String    @id @default(cuid())
-  coupleId  String
-  couple    Couple    @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  coupleId  String?
+  couple    Couple?   @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?     @relation("BoardGameSolo", fields: [userId], references: [id], onDelete: Cascade)
   kind      String // DAMES  (LUDO, MOTS à venir)
   status    String    @default("IN_PROGRESS") // IN_PROGRESS | COMPLETED | ABANDONED
   state     Json
@@ -614,6 +627,7 @@ model BoardGame {
   updatedAt DateTime  @updatedAt
 
   @@index([coupleId, kind, status])
+  @@index([userId, kind, status])
 }
 
 // ───────────────────────────────────────────────────────────────────────

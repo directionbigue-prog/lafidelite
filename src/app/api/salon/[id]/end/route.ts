@@ -10,7 +10,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { requireAuth } from '@/lib/server/middleware';
 import { verifyCsrf } from '@/lib/server/auth';
 import { prisma } from '@/lib/server/prisma';
-import { findActivatedCoupleForUser } from '@/lib/server/couples/queries';
+import { partiesDe, proprietaireDuSalon } from '@/lib/server/salon/proprietaire';
 import { makeRequestContext, withRequestContext } from '@/lib/server/observability/request-context';
 
 const ISSUES = ['COMPLETED', 'ABANDONED'] as const;
@@ -43,16 +43,12 @@ export async function POST(
       );
     }
 
-    const couple = await findActivatedCoupleForUser(prisma, auth.user.sub);
-    if (couple === null) {
-      return NextResponse.json(
-        { error: 'COUPLE_REQUIRED', message: 'Il faut un Espace Couple actif pour jouer.' },
-        { status: 403, headers: { 'x-request-id': ctx.requestId } },
-      );
-    }
+    // Le couple actif, ou l'appelant seul — même résolution que POST.
+    const proprietaire = await proprietaireDuSalon(prisma, auth.user.sub);
+    const siennes = partiesDe(proprietaire);
 
     const partie = await prisma.boardGame.findFirst({
-      where: { id, coupleId: couple.id },
+      where: { id, ...siennes },
       select: { id: true },
     });
     if (partie === null) {
@@ -62,13 +58,14 @@ export async function POST(
       );
     }
 
-    // `coupleId` dans le `where` de l'écriture, comme dans celui de la
+    // Le propriétaire (`siennes` : le `coupleId`, ou le `userId` d'un compte
+    // seul) dans le `where` de l'écriture, comme dans celui de la
     // lecture ci-dessus : `id` est la clé primaire et rien ne réaffecte un
     // `coupleId`, donc ce n'est pas une faille — c'est une écriture qui ne
     // dépend plus du `findFirst` qui la précède pour être correcte. C'est
     // ce motif-là qui sera recopié pour le prochain jeu.
     await prisma.boardGame.updateMany({
-      where: { id, coupleId: couple.id, status: 'IN_PROGRESS' },
+      where: { id, ...siennes, status: 'IN_PROGRESS' },
       data: { status: outcome, endedAt: new Date() },
     });
 

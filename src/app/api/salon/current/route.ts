@@ -7,7 +7,7 @@ import 'server-only';
 import { NextResponse, type NextRequest } from 'next/server';
 import { requireAuth } from '@/lib/server/middleware';
 import { prisma } from '@/lib/server/prisma';
-import { findActivatedCoupleForUser } from '@/lib/server/couples/queries';
+import { partiesDe, proprietaireDuSalon } from '@/lib/server/salon/proprietaire';
 import { makeRequestContext, withRequestContext } from '@/lib/server/observability/request-context';
 // Même liste, même garde, même schéma que POST /api/salon — partagés
 // plutôt que redéclarés : la copie locale ne rétrécissait pas le type et
@@ -31,16 +31,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const couple = await findActivatedCoupleForUser(prisma, auth.user.sub);
-    if (couple === null) {
-      return NextResponse.json(
-        { error: 'COUPLE_REQUIRED', message: 'Il faut un Espace Couple actif pour jouer.' },
-        { status: 403, headers: { 'x-request-id': ctx.requestId } },
-      );
-    }
+    // Le couple actif, ou l'appelant seul — même résolution que POST.
+    const proprietaire = await proprietaireDuSalon(prisma, auth.user.sub);
 
     const trouvee = await prisma.boardGame.findFirst({
-      where: { coupleId: couple.id, kind, status: 'IN_PROGRESS' },
+      where: { ...partiesDe(proprietaire), kind, status: 'IN_PROGRESS' },
       select: { id: true, kind: true, status: true, state: true, moveCount: true },
     });
 

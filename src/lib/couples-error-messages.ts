@@ -10,6 +10,8 @@
 //       ? (COUPLES_ERROR_MESSAGES[err.code] ?? err.message)
 //       : 'Une erreur est survenue.',
 //   );
+import { MESSAGE_SALON_VERROUILLE } from '@/lib/salon/verrou';
+
 export const COUPLES_ERROR_MESSAGES: Record<string, string> = {
   ALREADY_IN_COUPLE: 'Vous appartenez déjà à un Espace Couple.',
   INVITE_EXPIRED: "Ce lien d'invitation a expiré.",
@@ -98,7 +100,9 @@ export const COUPLES_ERROR_MESSAGES: Record<string, string> = {
   // l'écran a déjà grisé les cartes concernées. Le dire une troisième fois
   // n'aiderait personne.
   THEME_LOCKED: 'Ce thème n’est pas inclus dans votre pack. Voir les packs pour l’ouvrir.',
-  SALON_LOCKED: 'Le Salon est inclus dans les packs Essentiel, Intégral et Annuel.',
+  // Dérivé du registre des packs : la phrase en dur nommait des paliers que
+  // la boutique n'affichait plus (voir lib/salon/verrou.ts).
+  SALON_LOCKED: MESSAGE_SALON_VERROUILLE,
   // Rituel (/rituel) — la question du jour
   DEJA_REPONDU: 'Cette personne a déjà répondu aujourd’hui. Passez le téléphone à l’autre !',
   NO_DAILY_QUESTION: 'La question du jour n’est pas encore prête. Revenez un peu plus tard.',

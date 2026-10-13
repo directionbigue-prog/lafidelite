@@ -181,6 +181,20 @@ describe('PUT /api/salon/[id]/state', () => {
     expect(res.status).toBe(200);
   });
 
+  it('sauvegarde la partie d’un compte seul, bornée à SON compte', async () => {
+    // Sans ce branchement, un compte sans partenaire pouvait créer une
+    // partie (POST) mais pas la sauvegarder : 403 à chaque coup, invisible
+    // puisque le client sauvegarde en tâche de fond.
+    prismaMock.couple.findFirst.mockResolvedValue(null);
+    prismaMock.boardGame.updateMany.mockResolvedValue({ count: 1 } as never);
+    const res = await PUT(makeReq({ state: positionDepart(), moveCount: 5 }), { params });
+    expect(res.status).toBe(200);
+    const lecture = prismaMock.boardGame.findFirst.mock.calls[0]?.[0]?.where;
+    expect(lecture).toMatchObject({ id: 'bg-1', userId: 'user-1', coupleId: null });
+    const ecriture = prismaMock.boardGame.updateMany.mock.calls[0]?.[0]?.where;
+    expect(ecriture).toMatchObject({ id: 'bg-1', userId: 'user-1', coupleId: null });
+  });
+
   it('répond 404, pas 403, pour une partie qui n’est pas celle du couple', async () => {
     // Ne jamais révéler qu'une partie existe chez quelqu'un d'autre —
     // motif déjà établi par requireOrgRole dans ce dépôt.

@@ -99,20 +99,26 @@ si l'un d'eux repasse sous la barre.
 
 | Palier | Prix | Thèmes | Salon | Parties |
 |---|---|---|---|---|
-| Découverte | gratuit | 1 — Confiance & Jalousie | non | une offerte |
-| Essentiel | 4 900 FCFA / mois | 6 | inclus | illimitées |
-| Intégral | 9 900 FCFA / mois | 8 | inclus | illimitées |
-| Annuel | 118 800 FCFA / an | 8 | inclus | illimitées |
+| Découverte | gratuit | 1 — Confiance & Jalousie | non | une offerte par couple |
+| Week-end | 2 000 FCFA / 2 jours | les 8 | inclus | illimitées |
+| Semaine | 4 900 FCFA / 7 jours | les 8 | inclus | illimitées |
+| Mois | 9 900 FCFA / 30 jours | les 8 | inclus | illimitées |
+
+Les paliers payants diffèrent par la **durée**, pas par le contenu. L'ancien
+Annuel est retiré de la vente mais reste dans le registre : les droits déjà
+payés vont à leur terme.
 
 Tout vient de [`lib/game/packs.ts`](src/lib/game/packs.ts) : la page de
 tarifs affiche avec, le sélecteur de thèmes grise avec, la route de création
 refuse avec. Le droit appartient à un **compte**, l'accès au **couple** — il
 suffit qu'un des deux partenaires détienne un pack.
 
-**Les moyens de paiement ne sont pas intégrés.** `/tarifs` annonce les prix sans
-bouton d'achat, et le dit. Le tunnel existe pourtant côté plateforme
-(`POST /api/orders` → Bictorys → webhook) : c'est dans la transaction qui passe
-la commande à `PAID` que le droit devra être créé.
+**Le paiement passe par PayTech** (Wave, Orange Money, Free Money, carte) dès
+que `PAYTECH_API_KEY` et `PAYTECH_API_SECRET` sont posées, par Bictorys sinon.
+`POST /api/orders` lit le prix dans le registre, le client est renvoyé vers
+`/paiement/[id]`, et c'est le webhook du fournisseur
+(`/api/webhooks/paytech`) qui passe la commande à `PAID` et ouvre le pack, dans
+la même transaction.
 
 ### Le Salon — et pourquoi les règles tournent dans le navigateur
 
@@ -122,6 +128,10 @@ C'est une décision : ces jeux n'ont aucune information cachée, aucun score ré
 et les deux joueurs partagent un écran — une validation serveur ne protégerait
 rien tout en coûtant un aller-retour par coup. Le serveur persiste le plateau et
 n'en vérifie que la **forme**.
+
+**Le Salon n'exige pas de partenaire.** Un compte sans couple actif y joue avec
+qui est assis à côté de lui ; ses parties sont rangées sous son compte
+(`BoardGame.userId`) au lieu du couple. L'accès reste le même : un pack payant.
 
 ---
 
@@ -232,7 +242,7 @@ pnpm format && pnpm lint && pnpm typecheck && pnpm test    # avant tout commit
 pnpm build                                                  # avant tout déploiement
 ```
 
-**2 193 tests sur 184 fichiers.** Deux choses à savoir avant d'en écrire un :
+**2 470 tests sur 209 fichiers.** Deux choses à savoir avant d'en écrire un :
 
 - **Il n'y a ni jsdom ni Testing Library.** Vitest tourne en environnement
   `node`, aucun composant ne peut être monté. La logique d'un écran vit dans un

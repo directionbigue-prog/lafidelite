@@ -13,7 +13,7 @@ import { coupleErrorMessage } from '@/lib/couples-error-messages';
 import { AuthSplitLayout } from '@/components/auth/AuthSplitLayout';
 import { OnboardingAside } from '@/components/auth/OnboardingAside';
 import { Alert } from '@/components/ui/Alert';
-import { Button } from '@/components/ui/Button';
+import { Button, ButtonLink } from '@/components/ui/Button';
 
 interface CoupleStatus {
   couple: null | { status: 'PENDING' } | { status: 'ACTIVE' };
@@ -84,6 +84,13 @@ export default function CreerCouplePage() {
         <Button onClick={() => void onCreate()} disabled={creating}>
           {creating ? 'Création…' : 'Créer notre Espace Couple'}
         </Button>
+
+        {/* Le Salon n'exige pas de partenaire (depuis le 13/10/2026) : on y
+            joue à deux sur cet appareil. Cet écran n'a pas la barre de
+            navigation de l'app, d'où ce lien. */}
+        <ButtonLink href="/salon" variant="ghost">
+          Jouer au Salon sans partenaire
+        </ButtonLink>
       </div>
     </AuthSplitLayout>
   );

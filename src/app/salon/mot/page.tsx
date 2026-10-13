@@ -64,9 +64,8 @@ import { appareilConfirmeInitial, phaseEcran, type MancheAvecMot } from '@/lib/m
 import { commencerPartie, sauvegarderEtat, terminerPartie } from '@/lib/salon/api';
 import type { EtatMot } from '@/lib/mot/etat';
 
-interface CoupleMeResponse {
-  couple: { partnerName?: string | null } | null;
-}
+import { nomDuSecondJoueur, type CoupleMeResponse } from '@/lib/salon/second-joueur';
+import { MESSAGE_SALON_VERROUILLE } from '@/lib/salon/verrou';
 
 /**
  * Traduit l'échec du chargement de la partie, pour le joueur — jamais le
@@ -82,9 +81,7 @@ function messageEchecChargement(err: unknown): string {
       // connexion — un joueur qui vérifie son wifi pendant que le serveur
       // lui dit, correctement, qu'il n'a pas d'abonnement.
       case 'SALON_LOCKED':
-        return 'Le Salon est inclus dans les packs Essentiel, Intégral et Annuel.';
-      case 'COUPLE_REQUIRED':
-        return 'Il faut un Espace Couple actif pour jouer à deux.';
+        return MESSAGE_SALON_VERROUILLE;
       case 'INVALID_KIND':
         return 'Ce jeu n’est pas disponible pour le moment.';
       default:
@@ -254,7 +251,7 @@ export default function MotPage() {
     let annule = false;
     api<CoupleMeResponse>('/api/couples/me')
       .then((res) => {
-        if (!annule) setNomPartenaire(res.couple?.partnerName ?? null);
+        if (!annule) setNomPartenaire(nomDuSecondJoueur(res));
       })
       .catch(() => undefined);
     return () => {

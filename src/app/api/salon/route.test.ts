@@ -112,11 +112,107 @@ describe('POST /api/salon', () => {
     expect((await res.json()).error).toBe('INVALID_KIND');
   });
 
-  it('refuse un appelant sans couple actif', async () => {
-    prismaMock.couple.findFirst.mockResolvedValue(null);
-    const res = await POST(makeReq({ kind: 'DAMES' }));
-    expect(res.status).toBe(403);
-    expect((await res.json()).error).toBe('COUPLE_REQUIRED');
+  it('range la partie d’un couple actif sous le couple, jamais sous le compte', async () => {
+    prismaMock.boardGame.findFirst.mockResolvedValue(null);
+    prismaMock.boardGame.create.mockResolvedValue({
+      id: 'bg-1',
+      kind: 'DAMES',
+      status: 'IN_PROGRESS',
+      state: positionDepart(),
+      moveCount: 0,
+    } as never);
+
+    await POST(makeReq({ kind: 'DAMES' }));
+    const { data } = prismaMock.boardGame.create.mock.calls[0]![0] as {
+      data: Record<string, unknown>;
+    };
+    expect(data.coupleId).toBe('couple-1');
+    expect(data).not.toHaveProperty('userId');
+  });
+
+  describe('compte sans couple actif (depuis le 13/10/2026)', () => {
+    beforeEach(() => {
+      prismaMock.couple.findFirst.mockResolvedValue(null);
+    });
+
+    it('ouvre le Salon et range la partie sous le compte', async () => {
+      prismaMock.boardGame.findFirst.mockResolvedValue(null);
+      prismaMock.boardGame.create.mockResolvedValue({
+        id: 'bg-solo',
+        kind: 'DAMES',
+        status: 'IN_PROGRESS',
+        state: positionDepart(),
+        moveCount: 0,
+      } as never);
+
+      const res = await POST(makeReq({ kind: 'DAMES' }));
+      expect(res.status).toBe(201);
+      expect((await res.json()).id).toBe('bg-solo');
+
+      const { data } = prismaMock.boardGame.create.mock.calls[0]![0] as {
+        data: Record<string, unknown>;
+      };
+      expect(data.userId).toBe('user-1');
+      // Un seul propriétaire : la contrainte CHECK refuserait les deux.
+      expect(data).not.toHaveProperty('coupleId');
+    });
+
+    it('cherche la partie en cours parmi les SIENNES seulement', async () => {
+      prismaMock.boardGame.findFirst.mockResolvedValue(null);
+      prismaMock.boardGame.create.mockResolvedValue({
+        id: 'bg-solo',
+        kind: 'DAMES',
+        status: 'IN_PROGRESS',
+        state: positionDepart(),
+        moveCount: 0,
+      } as never);
+
+      await POST(makeReq({ kind: 'DAMES' }));
+      const { where } = prismaMock.boardGame.findFirst.mock.calls[0]![0] as {
+        where: Record<string, unknown>;
+      };
+      expect(where).toMatchObject({ userId: 'user-1', coupleId: null, status: 'IN_PROGRESS' });
+    });
+
+    it('décide de l’accès sur son seul pack', async () => {
+      prismaMock.boardGame.findFirst.mockResolvedValue(null);
+      prismaMock.boardGame.create.mockResolvedValue({
+        id: 'bg-solo',
+        kind: 'DAMES',
+        status: 'IN_PROGRESS',
+        state: positionDepart(),
+        moveCount: 0,
+      } as never);
+
+      await POST(makeReq({ kind: 'DAMES' }));
+      const { where } = prismaMock.entitlement.findMany.mock.calls[0]![0] as {
+        where: { userId: unknown };
+      };
+      expect(where.userId).toEqual({ in: ['user-1'] });
+    });
+
+    it('lui refuse le Salon sans pack payant, comme à un couple', async () => {
+      prismaMock.entitlement.findMany.mockResolvedValue([] as never);
+      const res = await POST(makeReq({ kind: 'DAMES' }));
+      expect(res.status).toBe(403);
+      expect((await res.json()).error).toBe('SALON_LOCKED');
+      expect(prismaMock.boardGame.create).not.toHaveBeenCalled();
+    });
+
+    it('rattrape la course sur l’index du compte (deux onglets, même seconde)', async () => {
+      prismaMock.boardGame.findFirst.mockResolvedValueOnce(null).mockResolvedValueOnce({
+        id: 'bg-gagnant',
+        kind: 'DAMES',
+        status: 'IN_PROGRESS',
+        state: positionDepart(),
+        moveCount: 0,
+      } as never);
+      prismaMock.boardGame.create.mockRejectedValue(p2002(['userId', 'kind']));
+
+      const res = await POST(makeReq({ kind: 'DAMES' }));
+      expect(res.status).toBe(200);
+      expect((await res.json()).id).toBe('bg-gagnant');
+    });
   });
 
   it('ne touche jamais au score du couple ni à la partie offerte', async () => {

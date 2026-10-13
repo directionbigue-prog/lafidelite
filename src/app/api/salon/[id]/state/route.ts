@@ -29,7 +29,7 @@ import { Prisma } from '@prisma/client';
 import { requireAuth } from '@/lib/server/middleware';
 import { verifyCsrf } from '@/lib/server/auth';
 import { prisma } from '@/lib/server/prisma';
-import { findActivatedCoupleForUser } from '@/lib/server/couples/queries';
+import { partiesDe, proprietaireDuSalon } from '@/lib/server/salon/proprietaire';
 import { makeRequestContext, withRequestContext } from '@/lib/server/observability/request-context';
 import { estUnJeu, parseEtat } from '@/lib/salon/jeux';
 
@@ -85,18 +85,15 @@ export async function PUT(
       );
     }
 
-    const couple = await findActivatedCoupleForUser(prisma, auth.user.sub);
-    if (couple === null) {
-      return NextResponse.json(
-        { error: 'COUPLE_REQUIRED', message: 'Il faut un Espace Couple actif pour jouer.' },
-        { status: 403, headers: { 'x-request-id': ctx.requestId } },
-      );
-    }
+    // Le couple actif, ou l'appelant seul — même résolution que POST.
+    const proprietaire = await proprietaireDuSalon(prisma, auth.user.sub);
+    const siennes = partiesDe(proprietaire);
 
-    // 404 et non 403 : une partie qui n'est pas celle de ce couple ne doit
-    // pas révéler son existence. Motif déjà établi par requireOrgRole.
+    // 404 et non 403 : une partie qui n'est pas celle de ce couple (ou de
+    // ce compte seul) ne doit pas révéler son existence. Motif déjà établi
+    // par requireOrgRole.
     const partie = await prisma.boardGame.findFirst({
-      where: { id, coupleId: couple.id, status: 'IN_PROGRESS' },
+      where: { id, ...siennes, status: 'IN_PROGRESS' },
       select: { id: true, kind: true },
     });
     if (partie === null) {
@@ -128,12 +125,13 @@ export async function PUT(
     // de l'écriture une seule opération atomique : un `findFirst` suivi
     // d'un `update` laisserait une fenêtre entre les deux.
     //
-    // `coupleId` y figure aussi, alors que le `findFirst` ci-dessus l'a
+    // Le propriétaire (`siennes` : le `coupleId`, ou le `userId` d'un compte
+    // seul) y figure aussi, alors que le `findFirst` ci-dessus l'a
     // déjà exigé et que `id` est la clé primaire : ce n'est pas une faille
     // qu'on referme, c'est une écriture qui se défend seule. Le jour où ce
     // motif sera recopié pour le ludo, il partira juste.
     const ecrit = await prisma.boardGame.updateMany({
-      where: { id, coupleId: couple.id, status: 'IN_PROGRESS', moveCount: { lt: moveCount } },
+      where: { id, ...siennes, status: 'IN_PROGRESS', moveCount: { lt: moveCount } },
       data: { state: etat as unknown as Prisma.InputJsonValue, moveCount },
     });
 

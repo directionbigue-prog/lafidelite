@@ -1,7 +1,8 @@
 // POST /api/salon — commencer ou reprendre une partie.
 //
 // Idempotent par construction : s'il existe déjà une partie IN_PROGRESS de
-// ce jeu pour le couple, on la renvoie. C'est aussi ce qui fait de cette
+// ce jeu pour le couple (ou pour le compte seul, s'il n'a pas de couple
+// actif), on la renvoie. C'est aussi ce qui fait de cette
 // route le bouton « Reprendre » — le client n'a pas à distinguer les deux
 // cas, et l'index unique partiel BoardGame_couple_kind_in_progress_unique
 // garantit qu'il n'y en a jamais deux.
@@ -13,13 +14,18 @@ import { Prisma } from '@prisma/client';
 import { requireAuth } from '@/lib/server/middleware';
 import { verifyCsrf } from '@/lib/server/auth';
 import { prisma } from '@/lib/server/prisma';
-import { findActivatedCoupleForUser } from '@/lib/server/couples/queries';
-import { packDuCouple } from '@/lib/server/game/entitlements';
+import {
+  packDuProprietaire,
+  partiesDe,
+  proprietaireAEcrire,
+  proprietaireDuSalon,
+} from '@/lib/server/salon/proprietaire';
 import { makeRequestContext, withRequestContext } from '@/lib/server/observability/request-context';
 // La liste des jeux, la garde qui rétrécit le type et l'état initial vivent
 // dans `lib/salon/jeux.ts` : ils doivent s'étendre ensemble, et cette route
 // n'était pas seule à les lire (voir current/route.ts).
 import { estUnJeu, etatInitial, parseEtat } from '@/lib/salon/jeux';
+import { MESSAGE_SALON_VERROUILLE } from '@/lib/salon/verrou';
 
 // Deux appels concurrents (les deux membres du couple ouvrent le Salon au
 // même instant) peuvent tous les deux passer la lecture `findFirst`
@@ -36,8 +42,15 @@ function isUniqueConstraintError(err: unknown): err is Prisma.PrismaClientKnownR
 function isInProgressRaceConflict(err: Prisma.PrismaClientKnownRequestError): boolean {
   const target = err.meta?.target;
   const targets = Array.isArray(target) ? target : typeof target === 'string' ? [target] : [];
+  // Deux index partiels, un par propriétaire : celui du couple et, depuis
+  // que le Salon s'ouvre aux comptes seuls, celui du compte — un même compte
+  // peut ouvrir le même jeu sur deux onglets dans la même seconde.
   return targets.some(
-    (t) => t.includes('coupleId') || t.includes('BoardGame_couple_kind_in_progress_unique'),
+    (t) =>
+      t.includes('coupleId') ||
+      t.includes('userId') ||
+      t.includes('BoardGame_couple_kind_in_progress_unique') ||
+      t.includes('BoardGame_user_kind_in_progress_unique'),
   );
 }
 
@@ -65,13 +78,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const couple = await findActivatedCoupleForUser(prisma, auth.user.sub);
-    if (couple === null) {
-      return NextResponse.json(
-        { error: 'COUPLE_REQUIRED', message: 'Il faut un Espace Couple actif pour jouer.' },
-        { status: 403, headers: { 'x-request-id': ctx.requestId } },
-      );
-    }
+    // Le couple actif, ou l'appelant seul : depuis le 13/10/2026 un compte
+    // sans partenaire joue au Salon avec qui est assis à côté de lui (voir
+    // lib/server/salon/proprietaire.ts). Plus de `COUPLE_REQUIRED` ici.
+    const proprietaire = await proprietaireDuSalon(prisma, auth.user.sub);
 
     // Le Salon est offert avec tout pack payant, et avec eux seuls. C'est
     // la seule porte : le palier Découverte sert à essayer le jeu du
@@ -81,12 +91,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // `PUT /state` et `/end` restent ouverts, pour qu'un pack qui expire au
     // milieu d'une partie de ludo ne laisse pas un plateau inachevé et
     // irrécupérable sur l'écran des joueurs.
-    const pack = await packDuCouple(prisma, couple);
+    const pack = await packDuProprietaire(prisma, proprietaire);
     if (!pack.salon) {
       return NextResponse.json(
         {
           error: 'SALON_LOCKED',
-          message: 'Le Salon est inclus dans les packs Essentiel, Intégral et Annuel.',
+          message: MESSAGE_SALON_VERROUILLE,
           pack: pack.id,
         },
         { status: 403, headers: { 'x-request-id': ctx.requestId } },
@@ -122,7 +132,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
      * qui vaut moins qu'une ligne recopiée deux fois.
      */
     const existante: PartieSelectionnee | null = await prisma.boardGame.findFirst({
-      where: { coupleId: couple.id, kind, status: 'IN_PROGRESS' },
+      where: { ...partiesDe(proprietaire), kind, status: 'IN_PROGRESS' },
       select: selection,
     });
     if (existante !== null) {
@@ -136,7 +146,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
       creee = await prisma.boardGame.create({
         data: {
-          coupleId: couple.id,
+          ...proprietaireAEcrire(proprietaire),
           kind,
           state: etatInitial(kind) as Prisma.InputJsonValue,
         },
@@ -149,7 +159,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         // rattrape et on renvoie la partie gagnante — le même résultat que
         // si `existante` l'avait trouvée du premier coup.
         const gagnante = await prisma.boardGame.findFirst({
-          where: { coupleId: couple.id, kind, status: 'IN_PROGRESS' },
+          where: { ...partiesDe(proprietaire), kind, status: 'IN_PROGRESS' },
           select: selection,
         });
         if (gagnante !== null) {

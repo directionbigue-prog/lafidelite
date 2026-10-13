@@ -74,6 +74,17 @@ describe('POST /api/salon/[id]/end', () => {
     expect(where).toMatchObject({ id: 'bg-1', coupleId: 'couple-1', status: 'IN_PROGRESS' });
   });
 
+  it('termine la partie d’un compte seul, bornée à SON compte', async () => {
+    prismaMock.couple.findFirst.mockResolvedValue(null);
+    prismaMock.boardGame.updateMany.mockResolvedValue({ count: 1 } as never);
+    const res = await POST(makeReq({ outcome: 'COMPLETED' }), { params });
+    expect(res.status).toBe(200);
+    const lecture = prismaMock.boardGame.findFirst.mock.calls[0]?.[0]?.where;
+    expect(lecture).toMatchObject({ id: 'bg-1', userId: 'user-1', coupleId: null });
+    const ecriture = prismaMock.boardGame.updateMany.mock.calls[0]?.[0]?.where;
+    expect(ecriture).toMatchObject({ id: 'bg-1', userId: 'user-1', coupleId: null });
+  });
+
   it('n’écrit jamais vers le score du couple', async () => {
     prismaMock.boardGame.updateMany.mockResolvedValue({ count: 1 } as never);
     await POST(makeReq({ outcome: 'COMPLETED' }), { params });

@@ -78,6 +78,24 @@ describe('GET /api/salon/current', () => {
     expect(res.status).toBe(400);
   });
 
+  it('lit les parties du couple actif', async () => {
+    prismaMock.boardGame.findFirst.mockResolvedValue(null);
+    await GET(makeReq());
+    const where = prismaMock.boardGame.findFirst.mock.calls[0]?.[0]?.where;
+    expect(where).toMatchObject({ coupleId: 'couple-1', kind: 'DAMES', status: 'IN_PROGRESS' });
+  });
+
+  it('lit les parties du compte seul quand il n’a pas de couple actif', async () => {
+    // Avant le 13/10/2026 : 403 COUPLE_REQUIRED, et le menu du Salon ne
+    // pouvait rien proposer à reprendre à un compte sans partenaire.
+    prismaMock.couple.findFirst.mockResolvedValue(null);
+    prismaMock.boardGame.findFirst.mockResolvedValue(null);
+    const res = await GET(makeReq());
+    expect(res.status).toBe(200);
+    const where = prismaMock.boardGame.findFirst.mock.calls[0]?.[0]?.where;
+    expect(where).toMatchObject({ userId: 'user-1', coupleId: null, status: 'IN_PROGRESS' });
+  });
+
   it('renvoie 401 quand l’appelant n’est pas authentifié, avant tout accès à la base', async () => {
     const { NextResponse } = await import('next/server');
     (requireAuth as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(
