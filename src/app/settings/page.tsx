@@ -91,8 +91,8 @@ function RappelsSection() {
         <div className="flex flex-col">
           <h2 className="font-serif text-xl">Rappels par email</h2>
           <span className="mt-1 text-xs leading-relaxed text-cream/50">
-            Un petit mot le soir si vous n’êtes pas venus depuis deux jours. Jamais plus d’un par
-            absence.
+            Quand votre partenaire a répondu à la question du jour, quand votre flamme va
+            s’éteindre, ou après deux jours d’absence. Jamais plus d’un mail par occasion.
           </span>
         </div>
         <button

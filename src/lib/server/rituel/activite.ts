@@ -11,12 +11,21 @@ import type { Activite } from '@/lib/rituel/badges';
 import { jourDe } from '@/lib/rituel/jour';
 import { revelation } from '@/lib/rituel/question-du-jour';
 
+export interface MembreRituel {
+  id: string;
+  email: string;
+  name: string | null;
+  status: string;
+}
+
 export interface CoupleRituel {
   id: string;
   creatorId: string;
   pairedAt: Date | null;
   creatorName: string | null;
   partnerName: string | null;
+  /** Pour les mails du rituel ; jamais renvoyé tel quel à un client. */
+  membres: { CREATOR: MembreRituel; PARTNER: MembreRituel | null };
 }
 
 /**
@@ -35,8 +44,8 @@ export async function trouverCoupleRituel(
       id: true,
       creatorId: true,
       pairedAt: true,
-      creator: { select: { name: true } },
-      partner: { select: { name: true } },
+      creator: { select: { id: true, email: true, name: true, status: true } },
+      partner: { select: { id: true, email: true, name: true, status: true } },
     },
   });
   if (!c) return null;
@@ -46,6 +55,7 @@ export async function trouverCoupleRituel(
     pairedAt: c.pairedAt,
     creatorName: c.creator.name,
     partnerName: c.partner?.name ?? null,
+    membres: { CREATOR: c.creator, PARTNER: c.partner },
   };
 }
 

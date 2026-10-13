@@ -20,6 +20,12 @@ import { verifyCsrf } from '@/lib/server/auth';
 import { prisma } from '@/lib/server/prisma';
 import { makeRequestContext, withRequestContext } from '@/lib/server/observability/request-context';
 import { trouverCoupleRituel, type CoupleRituel } from '@/lib/server/rituel/activite';
+import { envoyerMailRituel } from '@/lib/server/rituel/notifier';
+import { getEmailQueue } from '@/lib/server/queues/email-queue-singleton';
+import { scheduleDrain } from '@/lib/server/outbox/drain-now';
+import { origineDepuis } from '@/lib/server/app-url';
+import { createLogger } from '@/lib/server/logger';
+import { cleATonTour, mailATonTour, TYPE_A_TON_TOUR } from '@/lib/rituel/rappel';
 import { choisirQuestionDuJour, jourDe } from '@/lib/rituel/jour';
 import {
   choixValide,
@@ -28,6 +34,8 @@ import {
   revelation,
   type Option,
 } from '@/lib/rituel/question-du-jour';
+
+const log = createLogger();
 
 interface QuestionChargee {
   id: string;
@@ -206,6 +214,34 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     const apres = await etat(couple, jour);
+
+    // « À ton tour ! » — seulement si l'autre n'a pas encore répondu, après
+    // la réponse et sans jamais la faire échouer : un mail est un bonus, la
+    // réponse enregistrée est ce que l'utilisateur est venu faire.
+    const autre = role === 'CREATOR' ? 'PARTNER' : 'CREATOR';
+    const destinataire = couple.membres[autre];
+    if (destinataire && !apres.lignes.some((l) => l.role === autre)) {
+      try {
+        const envoye = await envoyerMailRituel(prisma, getEmailQueue(), {
+          destinataire,
+          type: TYPE_A_TON_TOUR,
+          titre: 'À votre tour !',
+          dedupeKey: cleATonTour(destinataire.id, jour),
+          mail: mailATonTour({
+            prenom: destinataire.name,
+            auteur: couple.membres[role]?.name ?? null,
+            origine: origineDepuis(req.headers),
+          }),
+        });
+        if (envoye) scheduleDrain(ctx.requestId);
+      } catch (err) {
+        log.warn('rituel: « à ton tour » non envoyé', {
+          requestId: ctx.requestId,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+
     return NextResponse.json(
       {
         ...corps(couple, jour, question, apres.lignes),

@@ -38,6 +38,9 @@ import {
   type ResultsSection,
 } from '@/lib/game/resultats';
 import { buttonClass } from '@/components/ui/Button';
+import { nouveauxBadges, type EtatBadge } from '@/lib/rituel/badges';
+import type { EtatSerie } from '@/lib/rituel/serie';
+import { joursLibelle } from '@/lib/rituel/ecran';
 import { FocusLayout } from '@/components/ui/FocusLayout';
 
 interface CoupleMeResponse {
@@ -63,6 +66,24 @@ export default function ResultatsPage({ params }: { params: Promise<{ id: string
   const router = useRouter();
 
   const [state, setState] = useState<ScreenState>({ kind: 'loading' });
+  // Finir chaque partie sur une victoire : les badges débloqués aujourd'hui
+  // et la flamme. Chargé à part et jamais attendu — un échec ici retire le
+  // bandeau, jamais le résultat.
+  const [fete, setFete] = useState<{ nouveaux: EtatBadge[]; serie: EtatSerie } | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    api<{ aujourdhui: string; serie: EtatSerie; badges: EtatBadge[] }>('/api/rituel')
+      .then((p) => {
+        if (!cancelled)
+          setFete({ nouveaux: nouveauxBadges(p.badges, p.aujourdhui), serie: p.serie });
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;
@@ -139,6 +160,38 @@ export default function ResultatsPage({ params }: { params: Promise<{ id: string
           <ResultsSectionView key={section.kind} section={section} />
         ))}
       </div>
+
+      {/*
+        After the result, never inside it: the result's section order is
+        fixed by `buildResultsSections`, and this banner is not part of the
+        game's score — it is the ritual's (badges, streak), sealed apart.
+      */}
+      {fete && (fete.nouveaux.length > 0 || fete.serie.actuelle > 0) && (
+        <section className="rounded-2xl border border-gold/40 bg-plum-card p-5 text-center">
+          {fete.nouveaux.length > 0 && (
+            <>
+              <p className="text-[10px] uppercase tracking-[0.14em] text-gold">
+                {fete.nouveaux.length > 1 ? 'Nouveaux badges débloqués' : 'Nouveau badge débloqué'}
+              </p>
+              <ul className="mt-2 flex flex-col gap-1">
+                {fete.nouveaux.map((b) => (
+                  <li key={b.id}>
+                    <span className="font-serif text-xl text-cream">{b.titre}</span>
+                    <span className="block text-sm text-cream/60">{b.description}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          {fete.serie.actuelle > 0 && (
+            <p className={`text-sm text-cream/70 ${fete.nouveaux.length > 0 ? 'mt-3' : ''}`}>
+              Flamme :{' '}
+              <span className="font-semibold text-gold">{joursLibelle(fete.serie.actuelle)}</span>{' '}
+              d’affilée.
+            </p>
+          )}
+        </section>
+      )}
 
       <div className="mt-auto flex flex-col items-center gap-3 pt-4">
         <button type="button" onClick={() => router.push('/jeu')} className={CTA_CLASS}>

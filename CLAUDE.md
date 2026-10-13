@@ -13,7 +13,7 @@ The product is two things sharing one account and one device:
 1. **Le jeu du couple** (`/jeu`, `/api/games/*`) — the core loop. Two partners pair into an *Espace Couple*, then play a **pass-and-play** session of 3 rounds (Miroir, Scénario, Face-à-Face) that ends in an immutable `GameResult` and a complicity level.
 2. **Le Salon** (`/salon`, `/api/salon/*`) — five light board games on the same shared device, deliberately sealed off from the couple's score.
 
-**66 API routes; 2319 unit tests across 191 files, all green** (counted 2026-10-13). The UI is shipped and opinionated (see *Design system* below), and it is in French.
+**66 API routes; 2326 unit tests across 191 files, all green** (counted 2026-10-13). Under heavy machine load a few bcrypt-bound auth tests can time out; re-run with `--maxWorkers=3` before suspecting a regression. The UI is shipped and opinionated (see *Design system* below), and it is in French.
 
 Origin: bootstrapped from the `izikit` starter (itself ported from `amadou-template` on 2026-05-07 through 7 phases: auth → OAuth/notifs → admin → uploads/withdrawals → webhooks/cron → docs/tests → final pass). The starter's generic surface — auth, payments, admin back-office, webhooks, cron, uploads, withdrawals — is still live and still load-bearing; the couple game sits on top of it.
 
@@ -106,6 +106,7 @@ The twelve routes shipped with **no screen at all** until 2026-10-02; `/admin` (
 - **A day counts only when the couple did something TOGETHER**: a completed game, or BOTH partners answering the daily question. The Salon does not count — it stays sealed.
 - **One grace day per 7 calendar days**; the missed day protects the streak but is not added to its length.
 - **The daily question reveals nothing until both have answered, and only on that day** ([question-du-jour.ts](src/lib/rituel/question-du-jour.ts)) — the "no past answer is consultable" guardrail applies here too; the journal holds dates and titles only. The answering role comes from the body (pass-and-play), uniqueness is the `(coupleId, jour, role)` index, and the day is always the SERVER's UTC date (= Dakar time). It touches neither `cumulativeCoupleScore` nor `GameResult`.
+- **Three ritual emails, one switch.** « À ton tour » (sent from `POST /api/rituel/question-du-jour` when the other partner has not answered yet, one per partner per day, never revealing the answer, never failing the request), « flamme en danger » (cron, only when a ≥2-day streak dies at midnight without play tonight) and the absence reminder below — the cron sends at most ONE of the last two per couple per evening. All three go through [rituel/notifier.ts](src/lib/server/rituel/notifier.ts) and obey the single `RAPPEL_COUPLE` preference.
 - **Reminders: one per absence, 2 to 14 days, opt-out.** The dedupe key carries the last active day, so a re-run never re-sends; the notification is created first and the email enqueued only if it was new. Users switch them off in `/settings` (event `RAPPEL_COUPLE`). No email is sent — and no notification is created — while the email queue is unconfigured, so a reminder is never "consumed" unsent.
 
 ## Files Claude must NOT modify (battle-tested)

@@ -16,7 +16,38 @@
 
 import { ecartEnJours } from './jour';
 
+/**
+ * La préférence qui gouverne TOUS les mails du rituel — le rappel d'absence,
+ * « à ton tour » et « flamme en danger ». Un seul interrupteur dans les
+ * Réglages : trois cases pour trois variantes du même geste seraient trois
+ * occasions de ne pas trouver celle qu'on cherche.
+ */
 export const TYPE_RAPPEL = 'RAPPEL_COUPLE';
+export const TYPE_A_TON_TOUR = 'RITUEL_A_TON_TOUR';
+export const TYPE_FLAMME = 'RITUEL_FLAMME_EN_DANGER';
+
+/** Une seule relance « à ton tour » par partenaire et par jour. */
+export function cleATonTour(userId: string, jour: string): string {
+  return `rituel-a-ton-tour:${userId}:${jour}`;
+}
+
+/** Une seule alerte « flamme en danger » par partenaire et par jour. */
+export function cleFlamme(userId: string, jour: string): string {
+  return `rituel-flamme:${userId}:${jour}`;
+}
+
+/**
+ * La flamme vaut-elle une alerte ce soir ? Seulement si elle existe vraiment
+ * (deux jours au moins — prévenir qu'une série d'un jour va s'éteindre ne
+ * protège rien) et si elle s'éteint pour de bon sans partie aujourd'hui.
+ */
+export function flammeAAlerter(s: {
+  actuelle: number;
+  joueAujourdhui: boolean;
+  enDanger: boolean;
+}): boolean {
+  return s.actuelle >= 2 && !s.joueAujourdhui && s.enDanger;
+}
 export const ABSENCE_MIN_JOURS = 2;
 export const ABSENCE_MAX_JOURS = 14;
 
@@ -78,5 +109,55 @@ export function mailRappel(args: {
       `<p>${echapper(record)}</p>` +
       `<p><a href="${echapper(lien)}">Répondre à la question du jour</a></p>` +
       `<p style="color:#888;font-size:12px">Vous pouvez couper ces rappels dans vos Réglages.</p>`,
+  };
+}
+
+function pied(lien: string, action: string): { html: string; text: string } {
+  return {
+    text: `\n\n${lien}\n\nVous pouvez couper ces emails dans vos Réglages.`,
+    html:
+      `<p><a href="${echapper(lien)}">${echapper(action)}</a></p>` +
+      `<p style="color:#888;font-size:12px">Vous pouvez couper ces emails dans vos Réglages.</p>`,
+  };
+}
+
+/**
+ * « Awa a répondu » — le levier le plus fort du rituel, parce que c'est le
+ * partenaire qui appelle, pas l'application. Ne dit JAMAIS ce qu'il a
+ * répondu : la réponse se dévoile quand les deux ont joué, pas dans un mail.
+ */
+export function mailATonTour(args: {
+  prenom: string | null;
+  auteur: string | null;
+  origine: string;
+}): MailRappel {
+  const bonjour = args.prenom ? `Bonjour ${args.prenom},` : 'Bonjour,';
+  const qui = args.auteur ?? 'Votre partenaire';
+  const corps = `${qui} vient de répondre à la question du jour, et a essayé de deviner votre réponse. À votre tour : les deux réponses se dévoilent dès que vous avez joué.`;
+  const p = pied(`${args.origine.replace(/\/+$/, '')}/rituel`, 'Répondre à mon tour');
+  return {
+    subject: `${qui} a répondu — à votre tour !`,
+    text: `${bonjour}\n\n${corps}${p.text}`,
+    html: `<p>${echapper(bonjour)}</p><p>${echapper(corps)}</p>${p.html}`,
+  };
+}
+
+/** « Votre flamme de 6 jours s'éteint ce soir. » */
+export function mailFlamme(args: {
+  prenom: string | null;
+  partenaire: string | null;
+  jours: number;
+  origine: string;
+}): MailRappel {
+  const bonjour = args.prenom ? `Bonjour ${args.prenom},` : 'Bonjour,';
+  const avec = args.partenaire ? ` avec ${args.partenaire}` : '';
+  const corps =
+    `Votre série de ${args.jours} jours${avec} s’éteint à minuit si vous ne jouez pas ensemble ce soir. ` +
+    `Une question du jour à deux suffit à la garder allumée.`;
+  const p = pied(`${args.origine.replace(/\/+$/, '')}/rituel`, 'Garder la flamme');
+  return {
+    subject: `Votre flamme de ${args.jours} jours vacille`,
+    text: `${bonjour}\n\n${corps}${p.text}`,
+    html: `<p>${echapper(bonjour)}</p><p>${echapper(corps)}</p>${p.html}`,
   };
 }

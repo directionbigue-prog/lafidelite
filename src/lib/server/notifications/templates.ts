@@ -20,7 +20,6 @@
  */
 
 import type { CreateNotificationInput } from './index';
-import { cleRappel, TYPE_RAPPEL } from '@/lib/rituel/rappel';
 
 export function welcomeNotification(userId: string, email: string): CreateNotificationInput {
   return {
@@ -32,21 +31,10 @@ export function welcomeNotification(userId: string, email: string): CreateNotifi
   };
 }
 
-/**
- * Le rappel doux du cron `rappels-couple`. La clé porte le dernier jour
- * d'activité du couple : une absence ne déclenche qu'un rappel, et une
- * nouvelle absence (après un retour) en autorise un autre.
- */
-export function rappelCouple(userId: string, dernierJourActif: string): CreateNotificationInput {
-  return {
-    userId,
-    type: TYPE_RAPPEL,
-    title: 'Une question vous attend',
-    body: 'Votre question du jour vous attend, à deux.',
-    data: { dernierJourActif },
-    dedupeKey: cleRappel(userId, dernierJourActif),
-  };
-}
+// Les notifications du rituel (rappel d'absence, « à ton tour », flamme en
+// danger) ne passent pas par ici : elles ont un mail attaché et passent
+// toutes par `lib/server/rituel/notifier.ts`, qui applique la même règle —
+// clé déterministe, notification d'abord, mail seulement si elle est neuve.
 
 /**
  * Example: notification dispatched after a successful payment.

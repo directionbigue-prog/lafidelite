@@ -1,7 +1,27 @@
 import { describe, expect, it } from 'vitest';
 import { choixValide, optionsPubliques, revelation } from './question-du-jour';
-import { etapeQuestion, nomDe, rappelsActifs, dateCourte, legendeSerie } from './ecran';
-import { cleRappel, doitRelancer, mailRappel } from './rappel';
+import {
+  etapeQuestion,
+  nomDe,
+  rappelsActifs,
+  dateCourte,
+  legendeSerie,
+  compteARebours,
+  msAvantProchaineQuestion,
+  prochainObjectif,
+  phraseObjectif,
+} from './ecran';
+import {
+  cleATonTour,
+  cleFlamme,
+  cleRappel,
+  doitRelancer,
+  flammeAAlerter,
+  mailATonTour,
+  mailFlamme,
+  mailRappel,
+} from './rappel';
+import { etatDesBadges } from './badges';
 
 describe('optionsPubliques', () => {
   it('reconstruit chaque option avec id et text seulement', () => {
@@ -130,5 +150,61 @@ describe('rappel', () => {
     expect(m.html).not.toContain('<script>');
     expect(m.html).toContain('https://www.coeurfidele.net/rituel');
     expect(m.text).toContain('5 jours');
+  });
+});
+
+describe('astuces', () => {
+  it('compte à rebours jusqu’à minuit UTC', () => {
+    const ms = msAvantProchaineQuestion(new Date('2026-10-13T18:48:00.000Z'));
+    expect(compteARebours(ms)).toBe('5 h 12');
+    expect(compteARebours(42 * 60_000)).toBe('42 min');
+    expect(compteARebours(10_000)).toBe('moins d’une minute');
+  });
+
+  it('le prochain objectif de série se compte depuis la série EN COURS, pas le record', () => {
+    const badges = etatDesBadges({
+      forme: null,
+      parties: [],
+      quotidiennes: ['01', '02', '03', '04', '05', '06'].map((j) => ({
+        jour: `2026-10-${j}`,
+        telepathie: false,
+      })),
+    });
+    // Record 6, mais série en cours 1 : « Une semaine à deux » est à 6 jours.
+    const o = prochainObjectif(badges, { actuelle: 1 });
+    expect(o).not.toBeNull();
+    expect(phraseObjectif(o!)).not.toContain('Plus que 1 jour');
+  });
+
+  it('propose le badge le plus proche et accorde le pluriel', () => {
+    const badges = etatDesBadges({ forme: null, parties: [], quotidiennes: [] });
+    const o = prochainObjectif(badges, { actuelle: 2 });
+    expect(o).toEqual({ titre: 'L’étincelle', reste: 1, unite: 'jour' });
+    expect(phraseObjectif(o!)).toBe('Plus que 1 jour d’affilée pour le badge « L’étincelle ».');
+  });
+
+  it('n’alerte la flamme que si elle compte et s’éteint vraiment ce soir', () => {
+    expect(flammeAAlerter({ actuelle: 5, joueAujourdhui: false, enDanger: true })).toBe(true);
+    expect(flammeAAlerter({ actuelle: 1, joueAujourdhui: false, enDanger: true })).toBe(false);
+    expect(flammeAAlerter({ actuelle: 5, joueAujourdhui: true, enDanger: false })).toBe(false);
+    expect(flammeAAlerter({ actuelle: 5, joueAujourdhui: false, enDanger: false })).toBe(false);
+  });
+
+  it('une clé par partenaire et par jour pour « à ton tour » et la flamme', () => {
+    expect(cleATonTour('u1', '2026-10-13')).toBe(cleATonTour('u1', '2026-10-13'));
+    expect(cleATonTour('u1', '2026-10-13')).not.toBe(cleATonTour('u1', '2026-10-14'));
+    expect(cleFlamme('u1', '2026-10-13')).not.toBe(cleATonTour('u1', '2026-10-13'));
+  });
+
+  it('« à ton tour » nomme l’auteur sans jamais dire ce qu’il a répondu', () => {
+    const m = mailATonTour({ prenom: 'Moussa', auteur: 'Awa <b>', origine: 'https://x.test' });
+    expect(m.subject).toContain('Awa');
+    expect(m.html).not.toContain('<b>');
+    expect(m.text).toContain('https://x.test/rituel');
+  });
+
+  it('la flamme annonce sa longueur', () => {
+    const m = mailFlamme({ prenom: null, partenaire: 'Awa', jours: 6, origine: 'https://x.test' });
+    expect(m.subject).toBe('Votre flamme de 6 jours vacille');
   });
 });

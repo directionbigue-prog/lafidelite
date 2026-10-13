@@ -74,6 +74,78 @@ export function rappelsActifs(prefs: unknown, type: string): boolean {
   return (evenement as { email?: unknown }).email !== false;
 }
 
+/** Millisecondes avant minuit UTC — l'heure où la question du jour change. */
+export function msAvantProchaineQuestion(maintenant: Date): number {
+  const demain = Date.UTC(
+    maintenant.getUTCFullYear(),
+    maintenant.getUTCMonth(),
+    maintenant.getUTCDate() + 1,
+  );
+  return Math.max(0, demain - maintenant.getTime());
+}
+
+/** « 5 h 12 », « 42 min », « moins d’une minute ». */
+export function compteARebours(ms: number): string {
+  const minutes = Math.floor(ms / 60_000);
+  if (minutes < 1) return 'moins d’une minute';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m} min`;
+  return `${h} h ${String(m).padStart(2, '0')}`;
+}
+
+export interface Objectif {
+  titre: string;
+  reste: number;
+  /** « jour », « partie », « question du jour » — accordé par `phraseObjectif`. */
+  unite: 'jour' | 'partie' | 'question';
+}
+
+/**
+ * Le badge le plus proche, pour finir chaque écran sur « plus que 2 jours ».
+ *
+ * Pour une série, ce qui reste se compte depuis la série EN COURS, pas
+ * depuis le record : un couple dont le record est 6 mais la série actuelle
+ * 1 a encore 6 jours devant lui pour « Une semaine à deux », pas un.
+ * Les badges sans compteur (niveaux, télépathes) ne sont pas proposés : on
+ * ne peut pas dire « plus que N » pour eux sans mentir.
+ */
+export function prochainObjectif(
+  badges: readonly {
+    famille: string;
+    titre: string;
+    cible: number;
+    valeur: number;
+    obtenuLe: string | null;
+  }[],
+  serie: { actuelle: number },
+): Objectif | null {
+  let meilleur: Objectif | null = null;
+  for (const b of badges) {
+    if (b.obtenuLe || b.cible <= 1) continue;
+    let o: Objectif | null = null;
+    if (b.famille === 'serie')
+      o = { titre: b.titre, reste: b.cible - serie.actuelle, unite: 'jour' };
+    else if (b.famille === 'parties')
+      o = { titre: b.titre, reste: b.cible - b.valeur, unite: 'partie' };
+    else if (b.famille === 'quotidien')
+      o = { titre: b.titre, reste: b.cible - b.valeur, unite: 'question' };
+    if (o && o.reste > 0 && (!meilleur || o.reste < meilleur.reste)) meilleur = o;
+  }
+  return meilleur;
+}
+
+export function phraseObjectif(o: Objectif): string {
+  const pluriel = o.reste > 1;
+  const unite =
+    o.unite === 'jour'
+      ? `jour${pluriel ? 's' : ''} d’affilée`
+      : o.unite === 'partie'
+        ? `partie${pluriel ? 's' : ''}`
+        : `question${pluriel ? 's' : ''} du jour à deux`;
+  return `Plus que ${o.reste} ${unite} pour le badge « ${o.titre} ».`;
+}
+
 /** « 1 jour » / « 12 jours ». */
 export function joursLibelle(n: number): string {
   return `${n} jour${n > 1 ? 's' : ''}`;

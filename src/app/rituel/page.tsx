@@ -30,6 +30,10 @@ import {
   joursLibelle,
   legendeSerie,
   nomDe,
+  compteARebours,
+  msAvantProchaineQuestion,
+  prochainObjectif,
+  phraseObjectif,
 } from '@/lib/rituel/ecran';
 
 interface ProgressionResponse {
@@ -89,7 +93,9 @@ export default function RituelPage() {
           </h1>
         </header>
 
-        {progression.kind === 'ok' && <CarteSerie serie={progression.data.serie} />}
+        {progression.kind === 'ok' && (
+          <CarteSerie serie={progression.data.serie} badges={progression.data.badges} />
+        )}
 
         {question.kind === 'loading' && (
           <p role="status" className="text-sm text-cream/60">
@@ -128,7 +134,9 @@ export default function RituelPage() {
   );
 }
 
-function CarteSerie({ serie }: { serie: EtatSerie }) {
+function CarteSerie({ serie, badges }: { serie: EtatSerie; badges: EtatBadge[] }) {
+  // Le prochain badge à portée : chaque visite repart avec un « plus que N ».
+  const objectif = prochainObjectif(badges, serie);
   return (
     <section className="flex items-center gap-5 rounded-3xl bg-gradient-to-br from-plum to-plum-deep2 p-6 sm:p-8">
       {/*
@@ -152,8 +160,34 @@ function CarteSerie({ serie }: { serie: EtatSerie }) {
           {joursLibelle(serie.actuelle)}
         </p>
         <p className="mt-2 text-sm leading-relaxed text-cream/60">{legendeSerie(serie)}</p>
+        {objectif && (
+          <p className="mt-1.5 text-sm font-semibold text-gold">{phraseObjectif(objectif)}</p>
+        )}
       </div>
     </section>
+  );
+}
+
+/**
+ * « Prochaine question dans 5 h 12 » — l'attente devient un rendez-vous.
+ * Rafraîchi chaque minute ; la page est rendue côté client seulement (elle
+ * attend l'utilisateur), donc lire l'horloge ici ne crée pas d'écart
+ * d'hydratation.
+ */
+function ProchaineQuestion() {
+  const [maintenant, setMaintenant] = useState(() => new Date());
+  useEffect(() => {
+    const t = setInterval(() => setMaintenant(new Date()), 60_000);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <p className="text-sm text-cream/60">
+      Parlez-en ce soir. Prochaine question dans{' '}
+      <span className="font-semibold text-cream">
+        {compteARebours(msAvantProchaineQuestion(maintenant))}
+      </span>
+      .
+    </p>
   );
 }
 
@@ -246,7 +280,8 @@ function QuestionDuJour({
         <div className="flex flex-col gap-3">
           <p className="text-sm leading-relaxed text-cream/70">
             C’est noté. Les réponses se dévoilent quand {nomDe(donnees.noms, etape.manquant)} aura
-            répondu à son tour : passez-lui le téléphone, ou laissez-le répondre depuis le sien.
+            répondu à son tour : passez-lui le téléphone, ou laissez-le répondre depuis le sien. Si
+            ses rappels sont activés, un email le prévient que c’est à son tour.
           </p>
           <div>
             <Button variant="secondary" onClick={() => setRoleChoisi(etape.manquant)}>
@@ -282,9 +317,7 @@ function QuestionDuJour({
               );
             })}
           </ul>
-          <p className="text-sm text-cream/60">
-            Parlez-en ce soir. Une nouvelle question vous attend demain.
-          </p>
+          <ProchaineQuestion />
           <div>
             <ButtonLink href="/jeu" variant="secondary">
               Lancer une vraie partie
