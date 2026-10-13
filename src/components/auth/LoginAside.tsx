@@ -28,10 +28,12 @@ export function LoginAside() {
       </div>
 
       <div className="rounded-2xl border border-cream/14 bg-ink/50 p-5">
-        <p className="text-[10px] uppercase tracking-[0.14em] text-cream/50">Un seul téléphone</p>
+        <p className="text-[10px] uppercase tracking-[0.14em] text-cream/50">
+          Côte à côte ou à distance
+        </p>
         <p className="mt-2 text-sm leading-relaxed text-cream/70">
-          Une seule personne se connecte : vous vous passez ensuite l’appareil quand l’écran le
-          demande. Inutile de vous connecter chacun de votre côté.
+          Ensemble, une seule personne se connecte et vous vous passez l’appareil. Loin l’un de
+          l’autre, connectez-vous chacun sur votre téléphone et lancez l’appel vidéo.
         </p>
       </div>
     </AsideShell>

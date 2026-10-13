@@ -37,17 +37,17 @@
 //     séquence animée et la promesse de clôture ont suivi, et les cellules
 //     du code sont passées de six chiffres à huit caractères Crockford,
 //     comme le vrai générateur.
-//   · LE MODE « DEUX TÉLÉPHONES » n'en fait plus partie non plus. La page
-//     promettait « Chacun son téléphone, en même temps » et présentait le
-//     téléphone unique comme un repli pour qui n'en aurait pas. C'était
-//     l’inverse : le moteur est pass-and-play sur UN SEUL appareil
-//     authentifié — `Answer.userId` vaut `creatorId` ou `partnerId`, et la
-//     frontière de tour est `activePlayerRole`, pas une seconde session.
-//     Livrer le simultané demanderait deux sessions et du temps réel, et
-//     casserait l’invariant que CLAUDE.md protège explicitement. La page
-//     décrit donc ce qui existe, y compris le masquage de l’écran, dont
-//     `jeu/[id]/passe` porte la formulation exacte.
-//     dit en toutes lettres.
+//   · LE MODE « DEUX TÉLÉPHONES » a été retiré puis REMIS, et l'ordre
+//     compte. La page promettait « Chacun son téléphone, en même temps »
+//     quand le moteur ne savait jouer que sur un appareil : promesse retirée.
+//     Le 13/10/2026 le mode à distance est livré (`lib/video/distance.ts`,
+//     appel vidéo Daily) : chacun joue sur son téléphone, TOUR À TOUR, et
+//     l'écran de celui qui attend suit la partie. La page le dit à nouveau —
+//     mais jamais « en même temps » : le moteur garde une seule
+//     `activePlayerRole` à la fois. `categories.test.ts` tient les deux bouts.
+//   · LE RITUEL DU JOUR (question du jour, flamme, badges, rappels) et
+//     l'APPEL VIDÉO ont chacun leur section, écrite d'après ce que font
+//     `lib/rituel/` et `lib/video/` — pas d'après une maquette.
 //   · Les liens du footer (Confidentialité, CGU, Support, English) et
 //     plusieurs CTA pointent sur « # », comme dans la maquette.
 //
@@ -159,6 +159,12 @@ export default function Home() {
             <a href="#apercu-anime" style={{ color: 'inherit' }}>
               La démo
             </a>
+            <a href="#a-distance" style={{ color: 'inherit' }}>
+              À distance
+            </a>
+            <a href="#rituel" style={{ color: 'inherit' }}>
+              Le rituel
+            </a>
             <a href="#categories" style={{ color: 'inherit' }}>
               Catégories
             </a>
@@ -229,7 +235,7 @@ export default function Home() {
               <span
                 style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#E8B860' }}
               ></span>
-              Un seul téléphone · 12 minutes
+              Côte à côte ou à distance · 12 minutes
             </div>
             <h1
               style={{
@@ -258,8 +264,9 @@ export default function Home() {
                 textWrap: 'pretty',
               }}
             >
-              Cœur Fidèle est un jeu de couple en 15 questions. Trois manches, un téléphone qu'on se
-              passe, un score commun. On rit, on se découvre, et on finit la partie du même côté.
+              Cœur Fidèle est un jeu de couple en 15 questions. Trois manches, un score commun — sur
+              un téléphone qu’on se passe, ou chacun sur le sien en se voyant en vidéo, même à des
+              milliers de kilomètres. On rit, on se découvre, et on finit la partie du même côté.
             </p>
             <SignupCard ctaLabel={ctaLabel} />
             <div
@@ -1100,8 +1107,8 @@ export default function Home() {
                 margin: '0',
               }}
             >
-              Un seul téléphone, que vous vous passez. Quand vient le tour de l’autre, votre écran
-              se masque : aucune réponse n’apparaît avant la fin de la manche.
+              Un téléphone que vous vous passez, ou chacun le sien à distance, tour à tour. Dans les
+              deux cas, aucune réponse n’apparaît avant la fin de la manche.
             </p>
           </div>
           <div
@@ -1246,6 +1253,236 @@ export default function Home() {
             </div>
           </div>
         </section>
+        {/*
+          À distance — l'appel vidéo et le jeu sur deux téléphones. Chaque
+          phrase correspond à du code : salle Daily privée à deux places sans
+          enregistrement (`server/video/daily.ts`), écran d'attente qui suit la
+          partie (`lib/video/distance.ts`), secret des réponses inchangé
+          (`game/response-shaping.ts`). Le jeu se joue tour à tour, et cette
+          section ne promet rien d'autre (voir categories.test.ts).
+        */}
+        <section
+          id="a-distance"
+          style={{
+            position: 'relative',
+            zIndex: '3',
+            maxWidth: '1440px',
+            margin: '0 auto',
+            padding: 'clamp(64px,8vw,120px) clamp(20px,5vw,72px)',
+          }}
+        >
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit,minmax(min(340px, 100%),1fr))',
+              gap: 'clamp(32px,4vw,64px)',
+              alignItems: 'center',
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: '13px',
+                  letterSpacing: '.12em',
+                  textTransform: 'uppercase',
+                  color: '#E8B860',
+                  marginBottom: '18px',
+                }}
+              >
+                Nouveau · Appel vidéo
+              </div>
+              <h2
+                style={{
+                  fontFamily: "'Instrument Serif',serif",
+                  fontWeight: '400',
+                  fontSize: 'clamp(34px,4.4vw,60px)',
+                  lineHeight: '1.05',
+                  margin: '0 0 20px',
+                  maxWidth: '13em',
+                }}
+              >
+                Elle à Paris, lui à Dakar. <em style={{ color: '#E8B860' }}>Même partie.</em>
+              </h2>
+              <p
+                style={{
+                  fontSize: '17px',
+                  lineHeight: '1.6',
+                  color: 'rgba(246,238,230,.7)',
+                  maxWidth: '30em',
+                  margin: '0',
+                }}
+              >
+                Lancez l’appel vidéo depuis votre Espace Couple : vous vous voyez, vous vous
+                entendez, et chacun joue sur son téléphone, tour à tour. Quand c’est à l’autre de
+                répondre, votre écran affiche « Awa répond… » et avance tout seul dès qu’elle a
+                joué.
+              </p>
+            </div>
+            <div style={{ display: 'grid', gap: '16px' }}>
+              {[
+                {
+                  titre: 'Une salle rien qu’à vous deux',
+                  texte:
+                    'Personne d’autre ne peut y entrer : l’accès est donné par Cœur Fidèle, à vous deux seulement. L’appel n’est jamais enregistré.',
+                },
+                {
+                  titre: 'Rien à installer',
+                  texte:
+                    'L’appel s’ouvre dans le navigateur, sur téléphone comme sur ordinateur, et reste à l’écran pendant toute la partie.',
+                },
+                {
+                  titre: 'Le secret tient, même à distance',
+                  texte:
+                    'La réponse de l’autre reste cachée jusqu’à la fin de la manche, exactement comme sur un seul téléphone.',
+                },
+              ].map((c) => (
+                <div
+                  key={c.titre}
+                  style={{
+                    background: '#221029',
+                    border: '1px solid rgba(246,238,230,.08)',
+                    borderRadius: '6px',
+                    padding: '22px 26px',
+                  }}
+                >
+                  <h3 style={{ fontSize: '18px', fontWeight: '600', margin: '0 0 8px' }}>
+                    {c.titre}
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: '15px',
+                      lineHeight: '1.6',
+                      color: 'rgba(246,238,230,.66)',
+                      margin: '0',
+                    }}
+                  >
+                    {c.texte}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+        {/*
+          Le rituel du jour — d'après `lib/rituel/` : une question MIROIR par
+          jour, dévoilée quand les deux ont répondu ; une série qui ne compte
+          que les jours À DEUX, avec un jour de grâce tous les sept jours ; douze
+          badges et un journal qui ne garde que des dates et des titres ; trois
+          mails au plus, sous un seul interrupteur.
+        */}
+        <section
+          id="rituel"
+          style={{
+            position: 'relative',
+            zIndex: '3',
+            maxWidth: '1440px',
+            margin: '0 auto',
+            padding: '0 clamp(20px,5vw,72px) clamp(64px,8vw,120px)',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+              gap: '24px',
+              marginBottom: 'clamp(36px,5vw,60px)',
+            }}
+          >
+            <h2
+              style={{
+                fontFamily: "'Instrument Serif',serif",
+                fontWeight: '400',
+                fontSize: 'clamp(34px,4.4vw,60px)',
+                lineHeight: '1.05',
+                margin: '0',
+                maxWidth: '14em',
+              }}
+            >
+              Une minute par jour, pour ne jamais perdre le fil
+            </h2>
+            <p
+              style={{
+                fontSize: '16px',
+                color: 'rgba(246,238,230,.7)',
+                maxWidth: '26em',
+                margin: '0',
+              }}
+            >
+              Les soirs sans douze minutes devant vous, le rituel du jour suffit : une question,
+              deux réponses, et votre flamme reste allumée.
+            </p>
+          </div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit,minmax(min(240px, 100%),1fr))',
+              gap: '20px',
+            }}
+          >
+            {[
+              {
+                n: '01',
+                titre: 'La question du jour',
+                texte:
+                  'Chaque jour, une nouvelle question. Chacun répond pour soi et devine la réponse de l’autre. Tout se dévoile quand vous avez répondu tous les deux.',
+              },
+              {
+                n: '02',
+                titre: 'Votre flamme',
+                texte:
+                  'Jouez ou répondez ensemble chaque jour pour entretenir votre série. Un soir d’oubli ? Un jour de grâce tous les sept jours la protège.',
+              },
+              {
+                n: '03',
+                titre: 'Badges et souvenirs',
+                texte:
+                  'Premier pas, Télépathes, Flamme éternelle… et un journal de vos moments forts — des dates, jamais vos réponses.',
+              },
+              {
+                n: '04',
+                titre: 'Un mot quand il le faut',
+                texte:
+                  '« Awa a répondu, à votre tour ! » ou « votre flamme vacille ». Jamais plus d’un mail par occasion, et un seul clic pour les couper.',
+              },
+            ].map((c) => (
+              <div
+                key={c.n}
+                style={{
+                  background: '#221029',
+                  border: '1px solid rgba(246,238,230,.08)',
+                  borderRadius: '6px',
+                  padding: 'clamp(24px,2.6vw,32px)',
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "'Instrument Serif',serif",
+                    fontSize: '40px',
+                    color: '#E8B860',
+                    lineHeight: '1',
+                  }}
+                >
+                  {c.n}
+                </div>
+                <h3 style={{ fontSize: '20px', fontWeight: '600', margin: '14px 0 10px' }}>
+                  {c.titre}
+                </h3>
+                <p
+                  style={{
+                    fontSize: '15px',
+                    lineHeight: '1.6',
+                    color: 'rgba(246,238,230,.66)',
+                    margin: '0',
+                  }}
+                >
+                  {c.texte}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
         <section
           id="apercu"
           style={{
@@ -1294,8 +1531,8 @@ export default function Home() {
                 margin: '0 0 28px',
               }}
             >
-              Une question à la fois, quatre réponses, un compteur discret. Le solde de points reste
-              en haut de l'écran, et le score du couple s'affiche avant les scores individuels.
+              Une question à la fois, quatre réponses, un chrono discret. À la fin, le score du
+              couple s'affiche avant les scores individuels.
             </p>
             <div
               style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '30em' }}

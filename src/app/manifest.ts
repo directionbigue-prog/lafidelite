@@ -14,7 +14,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Cœur Fidèle',
     short_name: 'Cœur Fidèle',
     description:
-      'Un jeu de couple à deux sur un seul téléphone. Trois manches, et un score commun.',
+      'Un jeu de couple à deux, côte à côte ou à distance en vidéo. Trois manches, et un score commun.',
     lang: 'fr',
     start_url: '/jeu',
     display: 'standalone',

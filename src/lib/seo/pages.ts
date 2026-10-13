@@ -118,7 +118,7 @@ export const PAGES: readonly PageReferencee[] = [
     frequence: 'weekly',
     titre: 'Cœur Fidèle — le jeu de couple sur la fidélité',
     description:
-      'Un jeu à deux sur un seul téléphone. Trois manches, des questions qu’on n’ose pas poser, et un score commun — jamais l’un contre l’autre.',
+      'Un jeu à deux, côte à côte ou à distance en vidéo. Trois manches, des questions qu’on n’ose pas poser, et un score commun — jamais l’un contre l’autre.',
   },
   {
     chemin: '/tarifs',

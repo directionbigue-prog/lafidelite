@@ -237,29 +237,44 @@ describe('the landing page tells the truth about the question bank', () => {
     expect(gratuits.map((c) => c.name)).toEqual(['Confiance & Jalousie']);
   });
 
-  // Le mode « deux téléphones », que la page a promis longtemps : bandeau,
-  // chapô, une section entière, une puce de palier, la FAQ — et jusqu'à la
-  // description des métadonnées, celle que reprennent les moteurs de
-  // recherche et les aperçus de liens partagés. Le moteur, lui, est
-  // pass-and-play sur UN appareil : `Answer.userId` vaut `creatorId` ou
-  // `partnerId`, et la frontière de tour est `activePlayerRole`, pas une
-  // seconde session. La promesse était donc infaisable autant que fausse.
+  // Le jeu sur deux téléphones — d'abord une promesse fausse, maintenant vraie,
+  // et ce test suit les deux temps.
   //
-  // On retire les lignes de COMMENTAIRE avant de chercher. L'en-tête de
-  // `page.tsx` raconte cette correction et cite forcément les formules
-  // fautives ; chercher le mot dans tout le fichier ferait échouer le test
-  // sur sa propre explication. C'est le piège déjà rencontré avec les prix :
-  // ce qui compte est la PROMESSE affichée, pas le mot écrit quelque part.
-  it('never promises a two-device game the engine cannot play', () => {
-    const promesses = [/deux téléphones/i, /chacun son téléphone/i, /deux écrans/i];
-    const cibles: Record<string, string> = {
-      'app/page.tsx': landing,
-      'lib/landing/design-data.ts': designData,
-      'app/layout.tsx': readFileSync(path.join(APP_DIR, 'layout.tsx'), 'utf8'),
-    };
+  // Jusqu'au 13/10/2026 la page promettait « chacun son téléphone » alors que
+  // le moteur ne savait jouer que sur UN appareil. Ce test interdisait donc la
+  // formule. Depuis, le mode à distance existe (`lib/video/distance.ts`) : le
+  // téléphone qui attend affiche « X répond… » et suit la partie. Deux
+  // téléphones sont donc une promesse TENABLE — mais seulement tant que ce
+  // mode est câblé. Le premier test l'exige : la page peut promettre deux
+  // téléphones parce que l'écran d'attente sait attendre.
+  //
+  // Ce qui reste faux, c'est le SIMULTANÉ. Le moteur joue tour à tour : une
+  // seule `activePlayerRole` à la fois. « Répondez en même temps » serait la
+  // même promesse infaisable qu'avant, sous un autre mot.
+  //
+  // On retire les lignes de COMMENTAIRE avant de chercher : l'en-tête de
+  // `page.tsx` raconte cette histoire et cite forcément les formules.
+  const cibles = (): Record<string, string> => ({
+    'app/page.tsx': landing,
+    'lib/landing/design-data.ts': designData,
+    'app/layout.tsx': readFileSync(path.join(APP_DIR, 'layout.tsx'), 'utf8'),
+  });
+  const sansCommentaires = (source: string) => source.replace(/^[ \t]*(\/\/|\*|\/\*).*$/gm, '');
 
-    for (const [nom, source] of Object.entries(cibles)) {
-      const rendu = source.replace(/^[ \t]*(\/\/|\*|\/\*).*$/gm, '');
+  it('promises two phones only while the remote mode is actually wired', () => {
+    const promet = Object.values(cibles()).some((s) =>
+      /chacun (son|sur son) téléphone|deux téléphones/i.test(sansCommentaires(s)),
+    );
+    if (!promet) return;
+    const passe = readFileSync(path.join(APP_DIR, 'jeu', '[id]', 'passe', 'page.tsx'), 'utf8');
+    expect(passe, "l'écran d'attente à distance n'est plus câblé").toContain('decisionAttente');
+    expect(passe).toContain('useSuiviPartie');
+  });
+
+  it('never promises simultaneous play — the engine plays turn by turn', () => {
+    const promesses = [/en même temps/i, /simultan/i, /au même moment/i];
+    for (const [nom, source] of Object.entries(cibles())) {
+      const rendu = sansCommentaires(source);
       for (const promesse of promesses) {
         expect(promesse.test(rendu), `${nom} promet « ${promesse.source} »`).toBe(false);
       }

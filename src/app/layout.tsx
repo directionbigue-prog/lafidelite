@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     template: '%s · Cœur Fidèle',
   },
   description:
-    'Cœur Fidèle est un jeu de couple en 15 questions. Trois manches, un téléphone qu’on se passe, un score commun.',
+    'Cœur Fidèle est un jeu de couple en 15 questions. Trois manches, un score commun — côte à côte sur un téléphone, ou à distance en vidéo.',
   applicationName: 'Cœur Fidèle',
   alternates: { canonical: '/' },
   // Par défaut : indexable. Chaque segment privé renverse ce réglage dans son
@@ -61,13 +61,13 @@ export const metadata: Metadata = {
     url: '/',
     title: 'Cœur Fidèle — le jeu de couple sur la fidélité',
     description:
-      'Un jeu à deux sur un seul téléphone. Trois manches, et un score commun — jamais l’un contre l’autre.',
+      'Un jeu à deux, côte à côte ou à distance en vidéo. Trois manches, et un score commun — jamais l’un contre l’autre.',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Cœur Fidèle — le jeu de couple sur la fidélité',
     description:
-      'Un jeu à deux sur un seul téléphone. Trois manches, et un score commun — jamais l’un contre l’autre.',
+      'Un jeu à deux, côte à côte ou à distance en vidéo. Trois manches, et un score commun — jamais l’un contre l’autre.',
   },
   // `icon.svg` et `apple-icon.png` sont détectés par convention de fichier :
   // Next écrit les <link> lui-même, et les redéclarer ici les dupliquerait.

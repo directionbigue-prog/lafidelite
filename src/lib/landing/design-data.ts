@@ -23,7 +23,13 @@
 // tenu cette frontière tant que la carte d'inscription était cliente ; elle
 // ne l'est plus, et `categories.test.ts` vérifie maintenant la règle sur
 // TOUS les composants client du dépôt plutôt que sur un fichier nommé.
-import { LIBELLE_DEVISE, PACKS_VISIBLES, packDecouverte, palierDuTheme } from '@/lib/game/packs';
+import {
+  LIBELLE_DEVISE,
+  PACKS_PAYANTS,
+  PACKS_VISIBLES,
+  packDecouverte,
+  palierDuTheme,
+} from '@/lib/game/packs';
 import type { Pack } from '@/lib/game/packs';
 import { NOMS_THEMES } from '@/lib/game/themes';
 import { QUESTIONS_SEED } from '../../../prisma/seed-data/questions';
@@ -366,7 +372,7 @@ export function buildLandingDesignData(options: LandingDesignOptions = {}): Land
       {
         num: '01',
         q: 'Faut-il que l’autre ait un smartphone ?',
-        a: 'Non, un seul suffit : le jeu se joue sur un téléphone que vous vous passez, et l’écran se masque à chaque tour — aucune réponse n’apparaît avant la fin de la manche.',
+        a: 'Non, un seul suffit : le jeu se joue sur un téléphone que vous vous passez, et l’écran se masque à chaque tour. Si vous êtes loin l’un de l’autre, lancez l’appel vidéo : chacun joue alors sur le sien, tour à tour, en se voyant.',
       },
       {
         num: '02',
@@ -381,17 +387,25 @@ export function buildLandingDesignData(options: LandingDesignOptions = {}): Land
       {
         num: '04',
         q: 'Comment payer sans carte bancaire ?',
-        a: 'Wave, Orange Money, MTN MoMo et Moov. Le solde de points est commun aux deux comptes.',
+        // Le « solde de points commun » de la maquette n'a jamais existé : un
+        // pack est un droit d'accès, et celui d'un partenaire ouvre le jeu au
+        // couple entier (`server/game/entitlements.ts`).
+        a: 'Wave, Orange Money, MTN MoMo et Moov. Un pack pris par l’un de vous deux vaut pour le couple.',
       },
       {
         num: '05',
-        q: 'Les points expirent-ils ?',
-        a: 'Jamais. Et ils ne sont débités qu’une fois la partie terminée — une coupure ne vous coûte rien.',
+        // Remplace « Les points expirent-ils ? Jamais » : il n'y a pas de
+        // points, et un pack, lui, expire. Les durées sont lues du registre.
+        q: 'Combien de temps dure un pack ?',
+        a: `${PACKS_PAYANTS.map((p) => `${p.nom} : ${p.dureeJours} jours`).join(', ')}. Un pack ne se renouvelle pas tout seul : vous ne payez que ce que vous choisissez.`,
       },
       {
         num: '06',
-        q: 'Peut-on supprimer nos données ?',
-        a: 'Oui, depuis les réglages de l’Espace Couple. La suppression est immédiate et vaut pour les deux.',
+        // Remplace « Peut-on supprimer nos données ? Oui, depuis les
+        // réglages » : aucun écran ne le permet. On ne promet pas un bouton
+        // qui n'existe pas.
+        q: 'Et les soirs où l’on n’a pas le temps ?',
+        a: 'Le rituel du jour suffit : une question, deux réponses, une minute. Il entretient votre flamme et débloque vos badges, même sans partie complète.',
       },
     ],
     rules: [
