@@ -23,10 +23,13 @@
 // Earlier docs sometimes called this `openMs`; the actual exported option is
 // `cooldownMs`.
 import 'server-only';
+import { createBictorysProvider } from '@/lib/server/payments/bictorys';
 import {
-  createBictorysProvider,
-  type BictorysProviderHandle,
-} from '@/lib/server/payments/bictorys';
+  createPaytechProvider,
+  paytechConfigDepuisEnv,
+  paytechConfigure,
+} from '@/lib/server/payments/paytech';
+import type { PaymentProvider } from '@/lib/server/payments/provider';
 import { CircuitBreaker } from '@/lib/server/payments/circuit-breaker';
 
 /**
@@ -43,7 +46,7 @@ export class PaymentProviderUnconfiguredError extends Error {
   }
 }
 
-let _provider: BictorysProviderHandle | null = null;
+let _provider: PaymentProvider | null = null;
 
 /**
  * Lazy-init singleton accessor. First call reads `process.env`, constructs
@@ -51,8 +54,20 @@ let _provider: BictorysProviderHandle | null = null;
  * cached instance. Throws `PaymentProviderUnconfiguredError` if any required
  * env var is missing — the route translates that to 503.
  */
-export function getProvider(): BictorysProviderHandle {
+export function getProvider(): PaymentProvider {
   if (_provider) return _provider;
+
+  // Cœur Fidèle sells through PayTech since 2026-10-13: as soon as its two
+  // keys are present it wins, and Bictorys stays the fallback. The IPN URL is
+  // derived from PUBLIC_URL (the same origin the orders route redirects to).
+  if (paytechConfigure()) {
+    const origine =
+      process.env.PUBLIC_URL?.trim() ||
+      process.env.APP_URL?.trim() ||
+      'https://www.coeurfidele.net';
+    _provider = createPaytechProvider(paytechConfigDepuisEnv(origine));
+    return _provider;
+  }
 
   const url = process.env.BICTORYS_API_URL ?? '';
   const key = process.env.BICTORYS_API_KEY ?? '';

@@ -143,6 +143,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
     // Le prix d'un pack vient du registre, jamais du corps de la requête.
     let packMeta: { packId: string } | null = null;
+    let libelle: string | null = null;
     let amount: number;
     let currency: string;
     if (parsed.data.packId !== undefined) {
@@ -154,6 +155,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         );
       }
       packMeta = metadonneesDeCommande(pack);
+      libelle = `Cœur Fidèle — pack ${pack.nom}`;
       amount = pack.prix;
       currency = pack.devise;
     } else {
@@ -299,7 +301,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         userId: auth.user.sub,
         amount,
         currency,
-        provider: 'bictorys',
+        provider: provider.name,
         status: 'PENDING',
         expiresAt: new Date(Date.now() + ORDER_EXPIRY_MS),
         idempotencyKey: idemKey,
@@ -326,6 +328,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           successUrl: `${publicUrl}/paiement/${order.id}?issue=succes`,
           failureUrl: `${publicUrl}/paiement/${order.id}?issue=echec`,
           externalRef: order.id,
+          // Shown on the provider's hosted page (PayTech's item_name).
+          ...(libelle ? { metadata: { itemName: libelle } } : {}),
         }),
       );
 
