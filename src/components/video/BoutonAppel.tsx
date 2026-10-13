@@ -17,7 +17,13 @@ let disponibiliteEnCache: Promise<boolean> | null = null;
 
 function disponibilite(): Promise<boolean> {
   disponibiliteEnCache ??= api<{ disponible: boolean }>('/api/video/jeton')
-    .then((r) => r.disponible)
+    .then((r) => {
+      // Seul un « oui » se garde : « non » dépend du couple (pas encore de
+      // partenaire), et un couple qui vient de se former doit voir le bouton
+      // à l'écran suivant, pas après un rechargement.
+      if (!r.disponible) disponibiliteEnCache = null;
+      return r.disponible;
+    })
     .catch(() => {
       disponibiliteEnCache = null;
       return false;

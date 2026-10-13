@@ -17,12 +17,12 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "db:push": "prisma db push",
-    "db:migrate:dev": "prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy",
-    "db:migrate:status": "prisma migrate status",
-    "db:migrate:reset": "prisma migrate reset",
-    "db:studio": "prisma studio",
+    "db:push": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/prisma-cli.ts db push",
+    "db:migrate:dev": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/prisma-cli.ts migrate dev",
+    "db:migrate:deploy": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/prisma-cli.ts migrate deploy",
+    "db:migrate:status": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/prisma-cli.ts migrate status",
+    "db:migrate:reset": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/prisma-cli.ts migrate reset",
+    "db:studio": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/prisma-cli.ts studio",
     "db:make-superadmin": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/make-superadmin.ts",
     "seed:dev": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/seed-dev.ts",
     "seed:questions": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/seed-questions.ts",
@@ -50,7 +50,8 @@
       "fast-uri": "^3.1.7",
       "nanoid": "^3.3.18",
       "postcss": "^8.5.18",
-      "browserslist": "^4.28.7"
+      "browserslist": "^4.28.7",
+      "source-map-js": "^1.2.2"
     }
   },
   "dependencies": {

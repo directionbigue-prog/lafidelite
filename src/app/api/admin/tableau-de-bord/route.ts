@@ -73,6 +73,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       inscriptionsFenetre,
       partiesFenetre,
       dernieresConnexions,
+      emailsMortsRecents,
+      outboxMortsRecents,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { email: { endsWith: `@${DOMAINE_INVITE}` } } }),
@@ -133,6 +135,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         orderBy: { createdAt: 'desc' },
         take: 20,
       }),
+      // Les alertes ne portent que sur la semaine : les 27 événements purgés
+      // à la main le 19/09/2026 (données de développement) auraient sinon
+      // laissé une alerte rouge permanente — et une alerte qui ne s'éteint
+      // jamais finit par ne plus être lue.
+      prisma.emailJob.count({ where: { status: 'DEAD', createdAt: { gte: il7j } } }),
+      prisma.outboxEvent.count({ where: { status: 'DEAD', createdAt: { gte: il7j } } }),
     ]);
 
     const parties = compteParCle(
@@ -229,8 +237,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         dernieresConnexions: dernieresConnexions.map(ligneConnexion),
         alertes: {
           payeesSansDroit: payeesSansDroit.map((c) => c.id),
-          emailsMorts: emails.DEAD ?? 0,
-          outboxMorts: outbox.DEAD ?? 0,
+          emailsMorts: emailsMortsRecents,
+          outboxMorts: outboxMortsRecents,
           emailsEnAttente: emails.PENDING ?? 0,
         },
         series: {

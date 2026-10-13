@@ -15,7 +15,7 @@ import { BoutonAcheterPack } from '@/components/game/BoutonAcheterPack';
 import { LIBELLE_DEVISE, PACKS_VISIBLES, PACKS_PAYANTS, packDecouverte } from '@/lib/game/packs';
 
 export const metadata: Metadata = {
-  title: 'Nos packs · Cœur Fidèle',
+  title: 'Nos packs',
   // Dérivée du registre, pas écrite à la main. La version transcrite annonçait
   // encore « Découverte, Essentiel, Intégral, Annuel » après le 02/10/2026 :
   // l'extrait de recherche nommait deux paliers sous des noms qui n'existaient

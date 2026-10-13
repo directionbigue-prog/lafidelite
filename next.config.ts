@@ -60,6 +60,11 @@ export default withSentryConfig(config, {
   // that filter direct Sentry calls. Off by default — turn on if your
   // user base has heavy ad-blocker usage.
   // tunnelRoute: '/monitoring',
-  hideSourceMaps: true,
-  disableLogger: true,
+  //
+  // Sentry v10 removed `hideSourceMaps` (silently ignored — next.config.ts is
+  // outside tsconfig's `include`, so no type error said so) and deprecated
+  // `disableLogger`. Their replacements: delete the browser source maps once
+  // uploaded, and tree-shake the SDK's debug logging.
+  sourcemaps: { deleteSourcemapsAfterUpload: true },
+  webpack: { treeshake: { removeDebugLogging: true } },
 });

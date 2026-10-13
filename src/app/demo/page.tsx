@@ -12,7 +12,7 @@ import type { Metadata } from 'next';
 import { DemoGame } from '@/components/demo/DemoGame';
 
 export const metadata: Metadata = {
-  title: 'Essayer une partie — Cœur Fidèle',
+  title: 'Essayer une partie',
   description:
     'Jouez une partie de démonstration de Cœur Fidèle : trois manches, neuf questions, contre un personnage de démonstration.',
 };

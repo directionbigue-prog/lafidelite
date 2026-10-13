@@ -328,8 +328,10 @@ function Alertes({ a }: { a: Donnees['alertes'] }) {
     messages.push(
       `${a.payeesSansDroit.length} paiement(s) reçu(s) sans pack ouvert — le client a payé et ne peut pas jouer. Commandes : ${a.payeesSansDroit.slice(0, 5).join(', ')}`,
     );
-  if (a.emailsMorts > 0) messages.push(`${a.emailsMorts} e-mail(s) abandonné(s) après 5 essais.`);
-  if (a.outboxMorts > 0) messages.push(`${a.outboxMorts} événement(s) outbox abandonné(s).`);
+  if (a.emailsMorts > 0)
+    messages.push(`${a.emailsMorts} e-mail(s) abandonné(s) après 5 essais cette semaine.`);
+  if (a.outboxMorts > 0)
+    messages.push(`${a.outboxMorts} événement(s) outbox abandonné(s) cette semaine.`);
   if (a.emailsEnAttente > 20)
     messages.push(`${a.emailsEnAttente} e-mails en attente : la file ne se vide pas.`);
 
