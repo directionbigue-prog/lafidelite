@@ -282,6 +282,17 @@ export const PAGES: readonly PageReferencee[] = [
     raison: 'Console d’administration. Rien n’y a sa place dans un moteur.',
   },
   {
+    chemin: '/admin/tableau-de-bord',
+    indexable: false,
+    raison: 'Tableau de bord du super-administrateur : chiffres internes, rien de public.',
+  },
+  {
+    chemin: '/paiement/[id]',
+    indexable: false,
+    dynamique: true,
+    raison: 'Le retour de paiement d’une commande : propre à un compte, jamais public.',
+  },
+  {
     chemin: '/rituel',
     indexable: false,
     raison: 'Derrière la session : la question du jour, la série et les souvenirs d’un couple.',

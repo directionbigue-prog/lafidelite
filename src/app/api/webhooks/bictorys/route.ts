@@ -30,6 +30,7 @@ import { createWebhookHandler } from '@/lib/server/webhook/handler';
 import { bictorysWebhookProvider } from '@/lib/server/webhook/bictorys';
 import { enqueueOutbox } from '@/lib/server/outbox';
 import { prisma } from '@/lib/server/prisma';
+import { droitDeLaCommande } from '@/lib/game/achat';
 
 export const POST = createWebhookHandler({
   prisma,
@@ -46,14 +47,34 @@ export const POST = createWebhookHandler({
 
     const paymentMethod = payload.payment_method ? String(payload.payment_method) : null;
 
+    const paidAt = new Date();
     await tx.order.update({
       where: { id: order.id },
       data: {
         status: 'PAID',
-        paidAt: new Date(),
+        paidAt,
         ...(paymentMethod !== null ? { paymentMethod } : {}),
       },
     });
+
+    // Cœur Fidèle : une commande de pack payée au prix du registre ouvre le
+    // droit, dans cette même transaction (lib/game/achat.ts). Rejouée, elle
+    // n'en ouvre pas un second : on cherche d'abord par `orderId`, qui est
+    // unique — un P2002 ferait échouer toute la transaction Serializable.
+    const droit = order.userId ? droitDeLaCommande(order, paidAt) : null;
+    if (droit && order.userId) {
+      const deja = await tx.entitlement.findUnique({ where: { orderId: order.id } });
+      if (!deja) {
+        await tx.entitlement.create({
+          data: {
+            userId: order.userId,
+            packId: droit.packId,
+            expiresAt: droit.expiresAt,
+            orderId: order.id,
+          },
+        });
+      }
+    }
 
     // Outbox emits stay inside the factory's Serializable tx so the rows
     // commit atomically with the status change. The drain cron picks them up
@@ -93,6 +114,11 @@ export const POST = createWebhookHandler({
     if (!order) return {};
     await tx.order.update({
       where: { id: order.id },
+      data: { status: 'REFUNDED' },
+    });
+    // Remboursé ⇒ le droit qu'elle avait ouvert se ferme.
+    await tx.entitlement.updateMany({
+      where: { orderId: order.id, status: 'ACTIVE' },
       data: { status: 'REFUNDED' },
     });
     // No outbox emit in v1 — `notification.refund_received` kind is not

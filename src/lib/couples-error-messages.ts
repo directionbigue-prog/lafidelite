@@ -59,6 +59,19 @@ export const COUPLES_ERROR_MESSAGES: Record<string, string> = {
   // /api/invites/[code]/accept refuses a cross-site Origin. A real visitor
   // only meets it if the link was opened through some odd proxy.
   CSRF_ORIGIN_MISMATCH: 'Ouvrez le lien d’invitation directement dans votre navigateur.',
+  // Achat d'un pack (/api/orders) — lus par le bouton « Choisir ce pack ».
+  PACK_NOT_FOR_SALE: 'Ce pack n’est pas proposé à l’achat.',
+  PAYMENT_PROVIDER_UNCONFIGURED:
+    'Le paiement en ligne n’est pas encore ouvert. Revenez très bientôt.',
+  PAYMENT_PROVIDER_UNAVAILABLE:
+    'Le service de paiement ne répond pas pour le moment. Réessayez dans quelques minutes.',
+  PAYMENT_IN_FLIGHT: 'Un paiement est déjà en cours de préparation. Patientez quelques secondes.',
+  PAYMENT_FAILED: 'Le paiement n’a pas pu être lancé. Réessayez dans un instant.',
+  IDEMPOTENCY_KEY_REQUIRED: 'Le paiement n’a pas pu être lancé. Rechargez la page et réessayez.',
+  IDEMPOTENCY_KEY_INVALID: 'Le paiement n’a pas pu être lancé. Rechargez la page et réessayez.',
+  IDEMPOTENCY_KEY_BODY_MISMATCH:
+    'Le paiement n’a pas pu être lancé. Rechargez la page et réessayez.',
+  ORDER_NOT_FOUND: 'Cette commande est introuvable.',
   // Jeu (/jeu) — moteur de partie pass-and-play
   NO_ACTIVE_COUPLE: "Vous n'avez pas encore d'Espace Couple.",
   DISCLAIMER_REQUIRED: 'Vous devez tous les deux accepter les règles du jeu avant de commencer.',

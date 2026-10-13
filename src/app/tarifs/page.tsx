@@ -6,14 +6,12 @@
 // consulte pour refuser un thème, donc cette page ne peut pas annoncer un
 // palier que le moteur n'appliquerait pas.
 //
-// CE QU'IL N'Y A PAS ICI, ET POURQUOI : aucun bouton « Acheter ». Les
-// moyens de paiement ne sont pas encore intégrés, et un bouton qui ne
-// débite rien est un mensonge d'interface — l'écran « votre partie offerte
-// est déjà jouée » (/jeu/nouvelle) refuse déjà exactement cela. Quand le
-// tunnel existera, c'est ici qu'un ButtonLink par pack viendra, et nulle
-// part ailleurs.
+// L'achat (depuis le 13/10/2026) : un `BoutonAcheterPack` par pack payant.
+// Il n'envoie que l'identifiant ; le prix est relu du registre côté serveur,
+// et le webhook Bictorys ouvre le droit quand le paiement est confirmé.
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/app/AppShell';
+import { BoutonAcheterPack } from '@/components/game/BoutonAcheterPack';
 import { LIBELLE_DEVISE, PACKS_VISIBLES, PACKS_PAYANTS, packDecouverte } from '@/lib/game/packs';
 
 export const metadata: Metadata = {
@@ -113,6 +111,8 @@ export default function TarifsPage() {
                     <li key={nom}>{nom}</li>
                   ))}
                 </ul>
+
+                {!gratuit && <BoutonAcheterPack packId={pack.id} libelle={`Choisir ${pack.nom}`} />}
               </section>
             );
           })}
@@ -121,10 +121,9 @@ export default function TarifsPage() {
         <section className="rounded-2xl border border-cream/12 bg-plum-card2 p-5">
           <p className="text-[10px] uppercase tracking-[0.14em] text-cream/50">Le paiement</p>
           <p className="mt-2 text-sm leading-relaxed text-cream/65">
-            Wave, Orange Money et carte arrivent. Rien n’est débitable aujourd’hui, et nous
-            préférons le dire plutôt que d’afficher un bouton qui ne prélèverait rien. Les{' '}
-            {PACKS_PAYANTS.length} packs ci-dessus sont fixés : {decouverte.nom} reste gratuit, à un
-            seul thème.
+            Le paiement se fait sur la page sécurisée de notre prestataire, Bictorys. Le pack
+            s’ouvre dès que le paiement est confirmé, pour vous deux. Les {PACKS_PAYANTS.length}{' '}
+            packs ci-dessus sont sans engagement : {decouverte.nom} reste gratuit, à un seul thème.
           </p>
         </section>
       </div>

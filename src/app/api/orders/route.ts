@@ -50,6 +50,8 @@ import {
   getProvider,
   PaymentProviderUnconfiguredError,
 } from '@/lib/server/payments/provider-singleton';
+import { packEnVente, metadonneesDeCommande } from '@/lib/game/achat';
+import { estAdresseInvite } from '@/lib/couples/compte-invite';
 
 // CR-02 helpers ────────────────────────────────────────────────────────
 // Idempotency-Key length cap. 200 chars matches Stripe's documented limit
@@ -70,14 +72,24 @@ function fingerprintBody(input: { amount: number; currency: string }): string {
 // currency unit (CF-10). currency defaults to XOF (FCFA, Senegal). All
 // customer/metadata fields optional; customerEmail defaults to the auth
 // session's email if absent.
-const Body = z.object({
-  amount: z.number().int().positive(),
-  currency: z.string().length(3).default('XOF'),
-  customerEmail: z.string().email().optional(),
-  customerPhone: z.string().optional(),
-  customerName: z.string().optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
-});
+//
+// `packId` (Cœur Fidèle): when present, amount and currency come from the
+// pack registry and any client-sent amount is ignored — see lib/game/achat.ts.
+// Only such an order can open an Entitlement when the webhook marks it PAID.
+const Body = z
+  .object({
+    packId: z.string().min(1).max(40).optional(),
+    amount: z.number().int().positive().optional(),
+    currency: z.string().length(3).default('XOF'),
+    customerEmail: z.string().email().optional(),
+    customerPhone: z.string().optional(),
+    customerName: z.string().optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
+  })
+  .refine((b) => b.packId !== undefined || b.amount !== undefined, {
+    message: 'packId or amount required',
+    path: ['amount'],
+  });
 
 const ORDER_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24h PENDING window
 
@@ -129,10 +141,31 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         { status: 400, headers: { 'x-request-id': ctx.requestId } },
       );
     }
-    const bodyHash = fingerprintBody({
-      amount: parsed.data.amount,
-      currency: parsed.data.currency,
-    });
+    // Le prix d'un pack vient du registre, jamais du corps de la requête.
+    let packMeta: { packId: string } | null = null;
+    let amount: number;
+    let currency: string;
+    if (parsed.data.packId !== undefined) {
+      const pack = packEnVente(parsed.data.packId);
+      if (!pack) {
+        return NextResponse.json(
+          { error: 'PACK_NOT_FOR_SALE', message: 'This pack cannot be bought.' },
+          { status: 400, headers: { 'x-request-id': ctx.requestId } },
+        );
+      }
+      packMeta = metadonneesDeCommande(pack);
+      amount = pack.prix;
+      currency = pack.devise;
+    } else {
+      amount = parsed.data.amount!;
+      currency = parsed.data.currency;
+    }
+    // A guest partner's placeholder address is not an address: never hand it
+    // to the payment provider.
+    const sessionEmail = estAdresseInvite(auth.user.email) ? undefined : auth.user.email;
+    const customerEmail = parsed.data.customerEmail ?? sessionEmail;
+
+    const bodyHash = fingerprintBody({ amount, currency });
 
     // 5. Replay (Pitfall 3 — echo the outcome, not the row)
     const existing = await prisma.order.findUnique({
@@ -154,7 +187,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       const matchesBody =
         storedHash !== null
           ? storedHash === bodyHash
-          : existing.amount === parsed.data.amount && existing.currency === parsed.data.currency;
+          : existing.amount === amount && existing.currency === currency;
       if (!matchesBody) {
         return NextResponse.json(
           {
@@ -256,18 +289,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // promote this to a dedicated typed column on Order.
     const mergedMetadata: Prisma.InputJsonValue = {
       ...(parsed.data.metadata ?? {}),
+      // `packId` is the server's to write: a client-supplied one is dropped,
+      // and only a registry-priced order carries one.
+      packId: packMeta?.packId ?? null,
       idempotencyBodyHash: bodyHash,
     };
     const order = await prisma.order.create({
       data: {
         userId: auth.user.sub,
-        amount: parsed.data.amount,
-        currency: parsed.data.currency,
+        amount,
+        currency,
         provider: 'bictorys',
         status: 'PENDING',
         expiresAt: new Date(Date.now() + ORDER_EXPIRY_MS),
         idempotencyKey: idemKey,
-        customerEmail: parsed.data.customerEmail ?? auth.user.email,
+        ...(customerEmail ? { customerEmail } : {}),
         ...(parsed.data.customerPhone ? { customerPhone: parsed.data.customerPhone } : {}),
         ...(parsed.data.customerName ? { customerName: parsed.data.customerName } : {}),
         metadata: mergedMetadata,
@@ -278,15 +314,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
       const result = await breaker.execute(() =>
         provider.charge({
-          amount: parsed.data.amount,
-          currency: parsed.data.currency,
+          amount,
+          currency,
           customer: {
-            email: parsed.data.customerEmail ?? auth.user.email,
+            ...(customerEmail ? { email: customerEmail } : {}),
             ...(parsed.data.customerPhone ? { phone: parsed.data.customerPhone } : {}),
             ...(parsed.data.customerName ? { name: parsed.data.customerName } : {}),
           },
-          successUrl: `${publicUrl}/orders/${order.id}/success`,
-          failureUrl: `${publicUrl}/orders/${order.id}/failed`,
+          // The one return screen (app/paiement/[id]) reads the real status
+          // from GET /api/orders/[id]; `issue` only picks the waiting copy.
+          successUrl: `${publicUrl}/paiement/${order.id}?issue=succes`,
+          failureUrl: `${publicUrl}/paiement/${order.id}?issue=echec`,
           externalRef: order.id,
         }),
       );

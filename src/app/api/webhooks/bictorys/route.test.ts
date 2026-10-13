@@ -7,12 +7,15 @@ const update = vi.fn();
 const orderFindFirst = vi.fn();
 const orderUpdate = vi.fn();
 const outboxCreate = vi.fn();
+const entFindUnique = vi.fn();
+const entCreate = vi.fn();
 
 const $transaction = vi.fn(async (fn: (tx: unknown) => Promise<unknown>, _opts?: unknown) =>
   fn({
     webhookLog: { findUnique, create, update },
     order: { findFirst: orderFindFirst, update: orderUpdate },
     outboxEvent: { create: outboxCreate },
+    entitlement: { findUnique: entFindUnique, create: entCreate },
   }),
 );
 
@@ -31,6 +34,8 @@ beforeEach(() => {
   orderFindFirst.mockReset();
   orderUpdate.mockReset();
   outboxCreate.mockReset();
+  entFindUnique.mockReset();
+  entCreate.mockReset();
 });
 
 afterEach(() => {
@@ -109,6 +114,58 @@ describe('POST /api/webhooks/bictorys', () => {
         (k) => k === 'notification.payment_received' || k === 'email.payment_confirmation',
       ),
     ).toBe(true);
+  });
+
+  it('ouvre le pack d’une commande payée au prix du registre, une seule fois', async () => {
+    const { PACKS_PAYANTS } = await import('@/lib/game/packs');
+    const pack = PACKS_PAYANTS[0]!;
+    findUnique.mockResolvedValueOnce(null);
+    orderFindFirst.mockResolvedValueOnce({
+      id: 'o2',
+      userId: 'u1',
+      customerEmail: null,
+      amount: pack.prix,
+      currency: pack.devise,
+      metadata: { packId: pack.id },
+    });
+    entFindUnique.mockResolvedValueOnce(null);
+    const { POST } = await import('./route');
+    const { req } = bictorysFixtureRequest({ status: 'succeeded' });
+    await POST(req);
+    expect(entCreate).toHaveBeenCalledTimes(1);
+    const data = (entCreate.mock.calls[0]![0] as { data: Record<string, unknown> }).data;
+    expect(data).toMatchObject({ userId: 'u1', packId: pack.id, orderId: 'o2' });
+    expect(data.expiresAt).toBeInstanceOf(Date);
+  });
+
+  it('n’ouvre rien pour une commande sans pack, ni deux fois la même', async () => {
+    findUnique.mockResolvedValueOnce(null);
+    orderFindFirst.mockResolvedValueOnce({
+      id: 'o3',
+      userId: 'u1',
+      customerEmail: null,
+      amount: 1000,
+      currency: 'XOF',
+      metadata: null,
+    });
+    const { POST } = await import('./route');
+    await POST(bictorysFixtureRequest({ status: 'succeeded' }).req);
+    expect(entCreate).not.toHaveBeenCalled();
+
+    const { PACKS_PAYANTS } = await import('@/lib/game/packs');
+    const pack = PACKS_PAYANTS[0]!;
+    findUnique.mockResolvedValueOnce(null);
+    orderFindFirst.mockResolvedValueOnce({
+      id: 'o4',
+      userId: 'u1',
+      customerEmail: null,
+      amount: pack.prix,
+      currency: pack.devise,
+      metadata: { packId: pack.id },
+    });
+    entFindUnique.mockResolvedValueOnce({ id: 'deja' });
+    await POST(bictorysFixtureRequest({ status: 'succeeded' }).req);
+    expect(entCreate).not.toHaveBeenCalled();
   });
 
   it('exports runtime=nodejs and dynamic=force-dynamic (WH-01)', async () => {

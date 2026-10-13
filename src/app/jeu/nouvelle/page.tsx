@@ -40,6 +40,7 @@ import { palierDuTheme, THEME_DECOUVERTE, PACKS_PAYANTS, LIBELLE_DEVISE } from '
 import { AppShell } from '@/components/app/AppShell';
 import { Alert } from '@/components/ui/Alert';
 import { Button, ButtonLink } from '@/components/ui/Button';
+import { BoutonAcheterPack } from '@/components/game/BoutonAcheterPack';
 
 interface GameSessionResponse {
   id: string;
@@ -149,26 +150,31 @@ export default function NouvellePartiePage() {
             {PACKS_PAYANTS.map((pack) => (
               <li
                 key={pack.id}
-                className="flex items-baseline justify-between gap-4 rounded-2xl border border-cream/12 bg-plum-card2 p-4"
+                className="flex flex-col gap-3 rounded-2xl border border-cream/12 bg-plum-card2 p-4"
               >
-                <div>
-                  <p className="font-serif text-lg">{pack.nom}</p>
-                  <p className="text-sm text-cream/60">{pack.resume}</p>
+                <div className="flex items-baseline justify-between gap-4">
+                  <div>
+                    <p className="font-serif text-lg">{pack.nom}</p>
+                    <p className="text-sm text-cream/60">{pack.resume}</p>
+                  </div>
+                  <p className="shrink-0 font-serif text-xl text-gold">
+                    {String(pack.prix).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} {LIBELLE_DEVISE}
+                    {pack.periode && (
+                      <span className="ml-1.5 font-grotesk text-xs text-cream/55">
+                        {pack.periode}
+                      </span>
+                    )}
+                  </p>
                 </div>
-                <p className="shrink-0 font-serif text-xl text-gold">
-                  {String(pack.prix).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} {LIBELLE_DEVISE}
-                  {pack.periode && (
-                    <span className="ml-1.5 font-grotesk text-xs text-cream/55">
-                      {pack.periode}
-                    </span>
-                  )}
-                </p>
+                <BoutonAcheterPack packId={pack.id} libelle={`Choisir ${pack.nom}`} />
               </li>
             ))}
           </ul>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <ButtonLink href="/tarifs">Choisir un pack</ButtonLink>
+            <ButtonLink href="/tarifs" variant="ghost">
+              Comparer les packs
+            </ButtonLink>
             <Button variant="ghost" onClick={() => router.push('/jeu')}>
               Retour à l’accueil
             </Button>

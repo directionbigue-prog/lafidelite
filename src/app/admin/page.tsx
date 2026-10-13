@@ -449,12 +449,19 @@ export default function AdminPage() {
   return (
     <AppShell active="administration" coupleLabel={null}>
       <div className="space-y-6">
-        <header className="space-y-1">
-          <h1 className="font-serif text-3xl text-cream">Administration</h1>
-          <p className="text-sm text-cream/60">
-            Comptes, connexions, commandes et journal. Chaque modification est enregistrée dans le
-            journal d’audit.
-          </p>
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="font-serif text-3xl text-cream">Administration</h1>
+            <p className="text-sm text-cream/60">
+              Comptes, connexions, commandes et journal. Chaque modification est enregistrée dans le
+              journal d’audit.
+            </p>
+          </div>
+          {/* Le tableau de bord est réservé au SUPERADMIN ; sa route le
+              re-vérifie, ce lien n'est qu'une politesse. */}
+          {moi?.admin.role === 'SUPERADMIN' && (
+            <ButtonLink href="/admin/tableau-de-bord">Tableau de bord</ButtonLink>
+          )}
         </header>
 
         {/* Les onglets n'apparaissent qu'une fois les droits connus : avant,
