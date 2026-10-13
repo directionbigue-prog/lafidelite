@@ -3,6 +3,8 @@ import { Inter, Instrument_Serif, Familjen_Grotesk } from 'next/font/google';
 import './globals.css';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { VideoProvider } from '@/contexts/VideoContext';
+import { FenetreVideo } from '@/components/video/FenetreVideo';
 import { ORIGINE_CANONIQUE } from '@/lib/seo/pages';
 
 const inter = Inter({
@@ -84,7 +86,13 @@ export default function RootLayout({
     >
       <body className={inter.className}>
         <ToastProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            {/* Au-dessus des pages : l'appel survit aux changements d'écran. */}
+            <VideoProvider>
+              {children}
+              <FenetreVideo />
+            </VideoProvider>
+          </AuthProvider>
         </ToastProvider>
       </body>
     </html>

@@ -18,8 +18,13 @@ const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   {
+    // Caméra et micro ouverts à NOTRE origine seulement (`self`), pour l'appel
+    // vidéo du couple (/components/video). Daily est utilisé en « call object »
+    // — l'interface est la nôtre, pas une iframe tierce — donc aucune autre
+    // origine n'a besoin de ces droits. Les remettre à `()` coupe l'appel en
+    // silence : le navigateur refuse l'accès sans même demander.
     key: 'Permissions-Policy',
-    value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+    value: 'camera=(self), microphone=(self), geolocation=(), interest-cohort=()',
   },
   { key: 'X-DNS-Prefetch-Control', value: 'off' },
 ];

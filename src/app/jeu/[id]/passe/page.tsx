@@ -11,7 +11,12 @@
 // Who to name is decided by `passDeviceTarget`, a pure function: the
 // comparison it makes is trivial to invert by accident and impossible to
 // notice while testing alone on a single device.
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useVideo } from '@/contexts/VideoContext';
+import { useSuiviPartie } from '@/lib/video/useSuiviPartie';
+import { relirePartie } from '@/lib/video/relire';
+import { decisionAttente } from '@/lib/video/distance';
+import { BoutonAppel } from '@/components/video/BoutonAppel';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useUser } from '@/contexts/AuthContext';
@@ -54,6 +59,8 @@ type ScreenState =
       // deep-link would otherwise carry a finished game's id forward.
       sessionId: string;
       target: Exclude<PassDeviceTarget, { kind: 'unknown' }>;
+      /** CREATOR | PARTNER — pour savoir, à distance, si le tour est le mien. */
+      viewerRole: string;
       /** The letter in the tile — null when no name is on file. */
       initial: string | null;
       roundNumber: number;
@@ -78,6 +85,10 @@ export default function PassePage() {
   // authority on which one it is. Navigating on the fetched id keeps a
   // stale tab from carrying a finished game's id into the next screen.
   const [state, setState] = useState<ScreenState>({ kind: 'loading' });
+  const video = useVideo();
+  // Incrémenté pour relire la partie quand elle a avancé à distance.
+  const [jeton, setJeton] = useState(0);
+  const [surCeTelephone, setSurCeTelephone] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -119,6 +130,7 @@ export default function PassePage() {
           kind: 'ready',
           sessionId: session.id,
           target,
+          viewerRole: me.couple?.viewerRole ?? '',
           initial: passDeviceInitial(target, user.name ?? null),
           roundNumber: session.currentRoundNumber,
           questionNumber: session.currentQuestionNumber,
@@ -132,7 +144,30 @@ export default function PassePage() {
     return () => {
       cancelled = true;
     };
-  }, [user, router]);
+  }, [user, router, jeton]);
+
+  // ── Mode à distance ─────────────────────────────────────────────────
+  // Le tour est à l'autre, qui joue sur SON téléphone : on n'a rien à lui
+  // passer. Cet écran attend et suit la partie (voir lib/video/distance.ts).
+  // « Nous jouons sur ce téléphone » ramène au pass-and-play pour cet écran,
+  // pour le couple qui garde la vidéo allumée en étant côte à côte.
+  const enAttente =
+    video.modeDistance &&
+    !surCeTelephone &&
+    state.kind === 'ready' &&
+    state.target.kind === 'partner';
+  const viewerRole = state.kind === 'ready' ? state.viewerRole : '';
+  const relecture = useCallback(() => {
+    relirePartie()
+      .then((lu) => {
+        const d = decisionAttente(lu, viewerRole);
+        if (d.kind === 'a-toi') setJeton((n) => n + 1);
+        else if (d.kind === 'aller') router.replace(d.path);
+      })
+      // Une relecture ratée n'est pas grave : la suivante arrive dans 4 s.
+      .catch(() => undefined);
+  }, [viewerRole, router]);
+  useSuiviPartie(enAttente, relecture);
 
   if (!user) return null;
 
@@ -163,7 +198,38 @@ export default function PassePage() {
         </p>
       )}
 
-      {state.kind === 'ready' && (
+      {state.kind === 'ready' && enAttente && (
+        <>
+          {state.initial !== null && (
+            <span
+              aria-hidden
+              className="flex h-[74px] w-[74px] animate-pulse items-center justify-center rounded-[26px] border border-cream/28 bg-cream/16 font-serif text-[32px] leading-none"
+            >
+              {state.initial}
+            </span>
+          )}
+          <h1 className="mt-1 max-w-xs font-serif text-[36px] leading-[1.06]">
+            {state.target.kind === 'partner' && state.target.partnerName
+              ? `${state.target.partnerName} répond…`
+              : 'Votre partenaire répond…'}
+          </h1>
+          <p role="status" className="max-w-xs text-[16px] leading-relaxed text-cream/85">
+            Sur son téléphone. Cet écran avance tout seul dès que c’est à vous — et personne ne voit
+            la réponse de l’autre avant la fin de la manche.
+          </p>
+          <BoutonAppel libelle="Se voir pendant la partie" />
+          <button
+            type="button"
+            onClick={() => setSurCeTelephone(true)}
+            className={buttonClass('ghost')}
+          >
+            Nous jouons sur ce téléphone
+          </button>
+          {progress && <p className="text-sm text-cream/65">{progress.label}</p>}
+        </>
+      )}
+
+      {state.kind === 'ready' && !enAttente && (
         <>
           {state.initial !== null && (
             /*

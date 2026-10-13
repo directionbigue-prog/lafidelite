@@ -81,6 +81,9 @@ export const COUPLES_ERROR_MESSAGES: Record<string, string> = {
   // n'aiderait personne.
   THEME_LOCKED: 'Ce thème n’est pas inclus dans votre pack. Voir les packs pour l’ouvrir.',
   SALON_LOCKED: 'Le Salon est inclus dans les packs Essentiel, Intégral et Annuel.',
+  // Appel vidéo du couple
+  VIDEO_NOT_CONFIGURED: 'L’appel vidéo n’est pas encore disponible.',
+  VIDEO_UNAVAILABLE: 'L’appel vidéo ne répond pas pour le moment. Réessayez dans un instant.',
   // Rituel (/rituel) — la question du jour
   DEJA_REPONDU: 'Cette personne a déjà répondu aujourd’hui. Passez le téléphone à l’autre !',
   NO_DAILY_QUESTION: 'La question du jour n’est pas encore prête. Revenez un peu plus tard.',

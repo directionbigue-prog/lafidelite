@@ -36,6 +36,7 @@ import { useUser } from '@/contexts/AuthContext';
 import { AmbientBackdrop } from '@/components/ui/AmbientBackdrop';
 import { Marque } from '@/components/ui/Marque';
 import { peutVoirLaConsole } from '@/lib/admin/console';
+import { BoutonAppel } from '@/components/video/BoutonAppel';
 
 interface CoupleMeResponse {
   couple: { status?: string; partnerName?: string | null } | null;
@@ -172,6 +173,13 @@ export function AppShell({
             })}
           </ul>
         </nav>
+
+        {/* Seulement pour un couple formé : sans partenaire, personne à voir. */}
+        {coupleLabel && (
+          <div className="mt-4 lg:mt-auto">
+            <BoutonAppel fullWidth />
+          </div>
+        )}
       </aside>
 
       <main className="relative min-w-0 flex-1 px-5 py-8 sm:px-8 lg:px-12 lg:py-12">

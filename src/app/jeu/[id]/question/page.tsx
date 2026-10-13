@@ -57,6 +57,8 @@ import {
 import { buttonClass } from '@/components/ui/Button';
 import { FocusLayout } from '@/components/ui/FocusLayout';
 import { chromeForRound } from '@/lib/game/round-ground';
+import { useVideo } from '@/contexts/VideoContext';
+import { questionSurLeMauvaisTelephone } from '@/lib/video/distance';
 
 interface ClientOption {
   id: string;
@@ -78,6 +80,7 @@ interface CurrentGameSessionResponse {
   jokersRemainingPartner: number;
   /** This session's round lengths — 2, 5 or 10, depending on the format. */
   questionsPerRound: number[];
+  activePlayerRole: string;
 }
 
 interface AnswerSubmitResponse {
@@ -116,6 +119,7 @@ export default function QuestionPage() {
   // which session is in progress.
 
   const [state, setState] = useState<ScreenState>({ kind: 'loading' });
+  const { modeDistance, signalerPartie } = useVideo();
   const [selection, setSelection] = useState<AnswerSelection>(EMPTY_SELECTION);
   const [jokersRemaining, setJokersRemaining] = useState<number | null>(null);
   const [jokersExhausted, setJokersExhausted] = useState(false);
@@ -155,6 +159,25 @@ export default function QuestionPage() {
           return;
         }
 
+        // À distance, cet écran n'a sa place que sur le téléphone du joueur
+        // actif : sur l'autre, `start-turn` lancerait le chronomètre pour
+        // quelqu'un qui ne tient pas le téléphone. Lu seulement en mode à
+        // distance — en pass-and-play, un seul téléphone sert aux deux.
+        if (modeDistance) {
+          const me = await api<{ couple: { viewerRole?: string } | null }>('/api/couples/me');
+          if (cancelled) return;
+          if (
+            questionSurLeMauvaisTelephone(
+              true,
+              session.activePlayerRole,
+              me.couple?.viewerRole ?? '',
+            )
+          ) {
+            router.replace(`/jeu/${session.id}/passe`);
+            return;
+          }
+        }
+
         const turn = await api<StartTurnResponse>(
           `/api/games/${encodeURIComponent(session.id)}/start-turn`,
           { method: 'POST' },
@@ -190,6 +213,9 @@ export default function QuestionPage() {
     return () => {
       cancelled = true;
     };
+    // `modeDistance` est lu au chargement seulement, volontairement absent des
+    // dépendances : changer de mode en pleine question ne doit pas relancer
+    // `start-turn`.
   }, [user, router]);
 
   if (!user) return null;
@@ -240,6 +266,8 @@ export default function QuestionPage() {
         `/api/games/${encodeURIComponent(state.sessionId)}/answers`,
         { method: 'POST', body },
       );
+      // La partie a avancé : l'autre téléphone, s'il attend, relit tout de suite.
+      signalerPartie();
       const outcome = nextPathAfterSubmit(state.sessionId, res.phase);
       if (outcome.kind === 'error') {
         setActionError(outcome.message);
@@ -264,6 +292,7 @@ export default function QuestionPage() {
       // The skip response carries the UPDATED count for the role that just
       // skipped — take it from here rather than re-fetching `/current`.
       setJokersRemaining(res.jokersRemaining);
+      signalerPartie();
       const outcome = nextPathAfterSubmit(state.sessionId, res.phase);
       if (outcome.kind === 'error') {
         setActionError(outcome.message);

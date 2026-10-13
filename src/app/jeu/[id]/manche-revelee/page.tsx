@@ -22,9 +22,13 @@
 // All decision logic (the diagonal MIROIR match wiring, phase routing,
 // column labelling) lives in that pure module per this lot's no-jsdom
 // testing decision; this component stays a thin fetch + render wrapper.
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
+import { useVideo } from '@/contexts/VideoContext';
+import { useSuiviPartie } from '@/lib/video/useSuiviPartie';
+import { relirePartie } from '@/lib/video/relire';
+import { decisionRevelation } from '@/lib/video/distance';
 import { useUser } from '@/contexts/AuthContext';
 import { gameErrorMessage } from '@/lib/game/api-result';
 import { roundLabel, TOTAL_ROUNDS } from '@/lib/game/round-labels';
@@ -96,6 +100,7 @@ export default function MancheReveleePage() {
   // in progress.
 
   const [state, setState] = useState<ScreenState>({ kind: 'loading' });
+  const { modeDistance, signalerPartie } = useVideo();
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -172,6 +177,21 @@ export default function MancheReveleePage() {
     };
   }, [user, router]);
 
+  // ── Mode à distance ─────────────────────────────────────────────────
+  // Les deux téléphones lisent cette révélation ensemble ; l'un des deux
+  // clique « Continuer », l'autre doit suivre tout seul — y compris vers les
+  // résultats après la dernière manche (voir `decisionRevelation`).
+  const sessionId = state.kind === 'ready' ? state.sessionId : '';
+  const suivre = useCallback(() => {
+    relirePartie()
+      .then((lu) => {
+        const d = decisionRevelation(lu, sessionId);
+        if (d.kind === 'aller') router.replace(d.path);
+      })
+      .catch(() => undefined);
+  }, [sessionId, router]);
+  useSuiviPartie(modeDistance && state.kind === 'ready', suivre);
+
   if (!user) return null;
 
   if (state.kind === 'loading') {
@@ -205,6 +225,7 @@ export default function MancheReveleePage() {
         `/api/games/${encodeURIComponent(state.sessionId)}/round/advance`,
         { method: 'POST' },
       );
+      signalerPartie();
       const outcome = nextPathAfterAdvance(state.sessionId, res.phase);
       if (outcome.kind === 'error') {
         setActionError(outcome.message);
@@ -213,6 +234,13 @@ export default function MancheReveleePage() {
       }
       router.push(outcome.path);
     } catch (err) {
+      // À distance, les deux ont pu cliquer « Continuer » à la même seconde :
+      // le second reçoit NOT_IN_ROUND_REVEAL parce que le premier a déjà fait
+      // avancer la partie. Ce n'est pas une erreur à afficher — on suit.
+      if (modeDistance && err instanceof ApiError && err.code === 'NOT_IN_ROUND_REVEAL') {
+        suivre();
+        return;
+      }
       setActionError(gameErrorMessage(err));
       setBusy(false);
     }
