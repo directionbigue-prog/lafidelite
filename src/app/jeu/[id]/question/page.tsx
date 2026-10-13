@@ -57,8 +57,8 @@ import {
 import { buttonClass } from '@/components/ui/Button';
 import { FocusLayout } from '@/components/ui/FocusLayout';
 import { chromeForRound } from '@/lib/game/round-ground';
-import { useVideo } from '@/contexts/VideoContext';
-import { questionSurLeMauvaisTelephone } from '@/lib/video/distance';
+import { useDistance } from '@/contexts/DistanceContext';
+import { questionSurLeMauvaisTelephone } from '@/lib/distance/distance';
 
 interface ClientOption {
   id: string;
@@ -119,7 +119,7 @@ export default function QuestionPage() {
   // which session is in progress.
 
   const [state, setState] = useState<ScreenState>({ kind: 'loading' });
-  const { modeDistance, signalerPartie } = useVideo();
+  const { modeDistance } = useDistance();
   const [selection, setSelection] = useState<AnswerSelection>(EMPTY_SELECTION);
   const [jokersRemaining, setJokersRemaining] = useState<number | null>(null);
   const [jokersExhausted, setJokersExhausted] = useState(false);
@@ -266,8 +266,6 @@ export default function QuestionPage() {
         `/api/games/${encodeURIComponent(state.sessionId)}/answers`,
         { method: 'POST', body },
       );
-      // La partie a avancé : l'autre téléphone, s'il attend, relit tout de suite.
-      signalerPartie();
       const outcome = nextPathAfterSubmit(state.sessionId, res.phase);
       if (outcome.kind === 'error') {
         setActionError(outcome.message);
@@ -292,7 +290,6 @@ export default function QuestionPage() {
       // The skip response carries the UPDATED count for the role that just
       // skipped — take it from here rather than re-fetching `/current`.
       setJokersRemaining(res.jokersRemaining);
-      signalerPartie();
       const outcome = nextPathAfterSubmit(state.sessionId, res.phase);
       if (outcome.kind === 'error') {
         setActionError(outcome.message);

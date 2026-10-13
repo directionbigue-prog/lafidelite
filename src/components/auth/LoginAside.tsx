@@ -33,7 +33,8 @@ export function LoginAside() {
         </p>
         <p className="mt-2 text-sm leading-relaxed text-cream/70">
           Ensemble, une seule personne se connecte et vous vous passez l’appareil. Loin l’un de
-          l’autre, connectez-vous chacun sur votre téléphone et lancez l’appel vidéo.
+          l’autre, connectez-vous chacun sur votre téléphone et activez « Chacun sur son téléphone
+          ».
         </p>
       </div>
     </AsideShell>

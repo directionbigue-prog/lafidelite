@@ -40,14 +40,16 @@
 //   · LE MODE « DEUX TÉLÉPHONES » a été retiré puis REMIS, et l'ordre
 //     compte. La page promettait « Chacun son téléphone, en même temps »
 //     quand le moteur ne savait jouer que sur un appareil : promesse retirée.
-//     Le 13/10/2026 le mode à distance est livré (`lib/video/distance.ts`,
-//     appel vidéo Daily) : chacun joue sur son téléphone, TOUR À TOUR, et
+//     Le 13/10/2026 le mode à distance est livré (`lib/distance/distance.ts`)
+//     : chacun joue sur son téléphone, TOUR À TOUR, et
 //     l'écran de celui qui attend suit la partie. La page le dit à nouveau —
 //     mais jamais « en même temps » : le moteur garde une seule
 //     `activePlayerRole` à la fois. `categories.test.ts` tient les deux bouts.
-//   · LE RITUEL DU JOUR (question du jour, flamme, badges, rappels) et
-//     l'APPEL VIDÉO ont chacun leur section, écrite d'après ce que font
-//     `lib/rituel/` et `lib/video/` — pas d'après une maquette.
+//   · LE RITUEL DU JOUR (question du jour, flamme, badges, rappels) et le
+//     JEU À DISTANCE ont chacun leur section, écrite d'après ce que font
+//     `lib/rituel/` et `lib/distance/` — pas d'après une maquette. L'appel
+//     vidéo, livré le même jour, a été retiré du produit le soir même : la
+//     page n'en parle plus.
 //   · Les liens du footer (Confidentialité, CGU, Support, English) et
 //     plusieurs CTA pointent sur « # », comme dans la maquette.
 //
@@ -265,8 +267,8 @@ export default function Home() {
               }}
             >
               Cœur Fidèle est un jeu de couple en 15 questions. Trois manches, un score commun — sur
-              un téléphone qu’on se passe, ou chacun sur le sien en se voyant en vidéo, même à des
-              milliers de kilomètres. On rit, on se découvre, et on finit la partie du même côté.
+              un téléphone qu’on se passe, ou chacun sur le sien, même à des milliers de kilomètres.
+              On rit, on se découvre, et on finit la partie du même côté.
             </p>
             <SignupCard ctaLabel={ctaLabel} />
             <div
@@ -1254,10 +1256,10 @@ export default function Home() {
           </div>
         </section>
         {/*
-          À distance — l'appel vidéo et le jeu sur deux téléphones. Chaque
-          phrase correspond à du code : salle Daily privée à deux places sans
-          enregistrement (`server/video/daily.ts`), écran d'attente qui suit la
-          partie (`lib/video/distance.ts`), secret des réponses inchangé
+          À distance — le jeu sur deux téléphones. Chaque phrase correspond à
+          du code : interrupteur par appareil (`contexts/DistanceContext.tsx`),
+          écran d'attente qui suit la partie (`lib/distance/distance.ts`),
+          secret des réponses inchangé
           (`game/response-shaping.ts`). Le jeu se joue tour à tour, et cette
           section ne promet rien d'autre (voir categories.test.ts).
         */}
@@ -1289,7 +1291,7 @@ export default function Home() {
                   marginBottom: '18px',
                 }}
               >
-                Nouveau · Appel vidéo
+                Nouveau · À distance
               </div>
               <h2
                 style={{
@@ -1312,8 +1314,8 @@ export default function Home() {
                   margin: '0',
                 }}
               >
-                Lancez l’appel vidéo depuis votre Espace Couple : vous vous voyez, vous vous
-                entendez, et chacun joue sur son téléphone, tour à tour. Quand c’est à l’autre de
+                Activez « Chacun sur son téléphone » dans votre Espace Couple, sur vos deux
+                téléphones : chacun joue sur le sien, tour à tour. Quand c’est à l’autre de
                 répondre, votre écran affiche « Awa répond… » et avance tout seul dès qu’elle a
                 joué.
               </p>
@@ -1321,14 +1323,14 @@ export default function Home() {
             <div style={{ display: 'grid', gap: '16px' }}>
               {[
                 {
-                  titre: 'Une salle rien qu’à vous deux',
+                  titre: 'La même partie, deux téléphones',
                   texte:
-                    'Personne d’autre ne peut y entrer : l’accès est donné par Cœur Fidèle, à vous deux seulement. L’appel n’est jamais enregistré.',
+                    'Chacun se connecte sur son téléphone à votre Espace Couple : une seule partie, un seul score, le tour passe de l’un à l’autre.',
                 },
                 {
                   titre: 'Rien à installer',
                   texte:
-                    'L’appel s’ouvre dans le navigateur, sur téléphone comme sur ordinateur, et reste à l’écran pendant toute la partie.',
+                    'Tout se passe dans le navigateur, sur téléphone comme sur ordinateur. Appelez-vous comme d’habitude, et jouez.',
                 },
                 {
                   titre: 'Le secret tient, même à distance',

@@ -372,7 +372,7 @@ export function buildLandingDesignData(options: LandingDesignOptions = {}): Land
       {
         num: '01',
         q: 'Faut-il que l’autre ait un smartphone ?',
-        a: 'Non, un seul suffit : le jeu se joue sur un téléphone que vous vous passez, et l’écran se masque à chaque tour. Si vous êtes loin l’un de l’autre, lancez l’appel vidéo : chacun joue alors sur le sien, tour à tour, en se voyant.',
+        a: 'Non, un seul suffit : le jeu se joue sur un téléphone que vous vous passez, et l’écran se masque à chaque tour. Si vous êtes loin l’un de l’autre, activez « Chacun sur son téléphone » : chacun joue alors sur le sien, tour à tour.',
       },
       {
         num: '02',

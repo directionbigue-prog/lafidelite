@@ -12,11 +12,10 @@
 // comparison it makes is trivial to invert by accident and impossible to
 // notice while testing alone on a single device.
 import { useCallback, useEffect, useState } from 'react';
-import { useVideo } from '@/contexts/VideoContext';
-import { useSuiviPartie } from '@/lib/video/useSuiviPartie';
-import { relirePartie } from '@/lib/video/relire';
-import { decisionAttente } from '@/lib/video/distance';
-import { BoutonAppel } from '@/components/video/BoutonAppel';
+import { useDistance } from '@/contexts/DistanceContext';
+import { useSuiviPartie } from '@/lib/distance/useSuiviPartie';
+import { relirePartie } from '@/lib/distance/relire';
+import { decisionAttente } from '@/lib/distance/distance';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useUser } from '@/contexts/AuthContext';
@@ -85,7 +84,7 @@ export default function PassePage() {
   // authority on which one it is. Navigating on the fetched id keeps a
   // stale tab from carrying a finished game's id into the next screen.
   const [state, setState] = useState<ScreenState>({ kind: 'loading' });
-  const video = useVideo();
+  const distance = useDistance();
   // Incrémenté pour relire la partie quand elle a avancé à distance.
   const [jeton, setJeton] = useState(0);
   const [surCeTelephone, setSurCeTelephone] = useState(false);
@@ -148,11 +147,11 @@ export default function PassePage() {
 
   // ── Mode à distance ─────────────────────────────────────────────────
   // Le tour est à l'autre, qui joue sur SON téléphone : on n'a rien à lui
-  // passer. Cet écran attend et suit la partie (voir lib/video/distance.ts).
+  // passer. Cet écran attend et suit la partie (voir lib/distance/distance.ts).
   // « Nous jouons sur ce téléphone » ramène au pass-and-play pour cet écran,
-  // pour le couple qui garde la vidéo allumée en étant côte à côte.
+  // pour le couple qui a laissé le mode à distance activé en étant côte à côte.
   const enAttente =
-    video.modeDistance &&
+    distance.modeDistance &&
     !surCeTelephone &&
     state.kind === 'ready' &&
     state.target.kind === 'partner';
@@ -217,7 +216,6 @@ export default function PassePage() {
             Sur son téléphone. Cet écran avance tout seul dès que c’est à vous — et personne ne voit
             la réponse de l’autre avant la fin de la manche.
           </p>
-          <BoutonAppel libelle="Se voir pendant la partie" />
           <button
             type="button"
             onClick={() => setSurCeTelephone(true)}

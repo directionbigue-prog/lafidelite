@@ -242,7 +242,7 @@ describe('the landing page tells the truth about the question bank', () => {
   //
   // Jusqu'au 13/10/2026 la page promettait « chacun son téléphone » alors que
   // le moteur ne savait jouer que sur UN appareil. Ce test interdisait donc la
-  // formule. Depuis, le mode à distance existe (`lib/video/distance.ts`) : le
+  // formule. Depuis, le mode à distance existe (`lib/distance/distance.ts`) : le
   // téléphone qui attend affiche « X répond… » et suit la partie. Deux
   // téléphones sont donc une promesse TENABLE — mais seulement tant que ce
   // mode est câblé. Le premier test l'exige : la page peut promettre deux

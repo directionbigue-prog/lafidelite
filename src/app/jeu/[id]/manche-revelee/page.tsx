@@ -25,10 +25,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
-import { useVideo } from '@/contexts/VideoContext';
-import { useSuiviPartie } from '@/lib/video/useSuiviPartie';
-import { relirePartie } from '@/lib/video/relire';
-import { decisionRevelation } from '@/lib/video/distance';
+import { useDistance } from '@/contexts/DistanceContext';
+import { useSuiviPartie } from '@/lib/distance/useSuiviPartie';
+import { relirePartie } from '@/lib/distance/relire';
+import { decisionRevelation } from '@/lib/distance/distance';
 import { useUser } from '@/contexts/AuthContext';
 import { gameErrorMessage } from '@/lib/game/api-result';
 import { roundLabel, TOTAL_ROUNDS } from '@/lib/game/round-labels';
@@ -100,7 +100,7 @@ export default function MancheReveleePage() {
   // in progress.
 
   const [state, setState] = useState<ScreenState>({ kind: 'loading' });
-  const { modeDistance, signalerPartie } = useVideo();
+  const { modeDistance } = useDistance();
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -225,7 +225,6 @@ export default function MancheReveleePage() {
         `/api/games/${encodeURIComponent(state.sessionId)}/round/advance`,
         { method: 'POST' },
       );
-      signalerPartie();
       const outcome = nextPathAfterAdvance(state.sessionId, res.phase);
       if (outcome.kind === 'error') {
         setActionError(outcome.message);

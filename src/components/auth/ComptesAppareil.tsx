@@ -10,7 +10,7 @@
 //
 // Le serveur décide de tout (api/auth/comptes) : chaque bascule y revérifie
 // le jeton. Après une bascule, la page est rechargée en entier plutôt que
-// mise à jour : le contexte d'authentification, l'appel vidéo et la partie en
+// mise à jour : le contexte d'authentification, le mode à distance et la partie en
 // cours appartiennent au compte précédent, et rien ne doit en survivre.
 import { useCallback, useEffect, useState } from 'react';
 import { api, ApiError } from '@/lib/api';

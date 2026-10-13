@@ -1,4 +1,4 @@
-// Le jeu à distance — deux téléphones au lieu d'un, pendant l'appel vidéo.
+// Le jeu à distance — deux téléphones au lieu d'un, chacun chez soi.
 //
 // LE MOTEUR NE CHANGE PAS. La partie reste celle du pass-and-play : un seul
 // `GameSession`, un `activePlayerRole` qui dit à qui est le tour, et des
@@ -10,10 +10,11 @@
 //     téléphone à Awa » — il n'y a pas de téléphone à passer ;
 //   · dès que la partie avance, le téléphone qui attendait suit tout seul.
 //
-// L'attente se résout par une relecture de `GET /api/games/current`,
-// déclenchée par un signal envoyé dans l'appel vidéo (instantané) ET par un
-// sondage lent (le filet, si le signal se perd). Ce module décide quoi faire
-// d'une relecture ; il ne lit rien lui-même, pour rester testable.
+// L'attente se résout par une relecture de `GET /api/games/current` toutes
+// les quelques secondes (`useSuiviPartie`). Jusqu'au 13/10/2026 un signal
+// passait aussi par l'appel vidéo ; l'appel a été retiré du produit, la
+// relecture suffit. Ce module décide quoi faire d'une relecture ; il ne lit
+// rien lui-même, pour rester testable.
 //
 // Le secret des réponses tient comme avant : le serveur ne montre la réponse
 // de l'autre qu'une fois la manche COMPLETED (`response-shaping.ts`), quel
@@ -103,13 +104,4 @@ export function questionSurLeMauvaisTelephone(
   viewerRole: string,
 ): boolean {
   return modeDistance && viewerRole !== '' && activePlayerRole !== viewerRole;
-}
-
-/** Le message qu'un téléphone envoie à l'autre quand la partie avance. */
-export const SIGNAL_PARTIE = 'cf:partie';
-
-export function estSignalPartie(data: unknown): boolean {
-  return (
-    typeof data === 'object' && data !== null && (data as { type?: unknown }).type === SIGNAL_PARTIE
-  );
 }

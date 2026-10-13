@@ -45,7 +45,6 @@ const WATCHED = [
   path.join(APP_DIR, 'api', 'auth'),
   path.join(APP_DIR, 'api', 'invites'),
   path.join(APP_DIR, 'api', 'rituel'),
-  path.join(APP_DIR, 'api', 'video'),
   // Since 2026-10-13 the pack purchase button reads these on /tarifs.
   path.join(APP_DIR, 'api', 'orders'),
 ];

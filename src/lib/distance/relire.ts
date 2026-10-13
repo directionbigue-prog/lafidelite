@@ -5,7 +5,7 @@
 // `GET /api/games/current` répond 404 quand la partie est terminée ou
 // abandonnée. Pour l'écran qui attend l'autre téléphone, ce 404 n'est pas une
 // panne : c'est une information (« la partie vient de finir »), que
-// `lib/video/distance.ts` sait router. Toute autre erreur est relancée.
+// `lib/distance/distance.ts` sait router. Toute autre erreur est relancée.
 import { api, ApiError } from '@/lib/api';
 import { PLUS_DE_PARTIE, type SessionLue } from './distance';
 

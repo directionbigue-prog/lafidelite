@@ -2,13 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   decisionAttente,
   decisionRevelation,
-  estSignalPartie,
   PLUS_DE_PARTIE,
   questionSurLeMauvaisTelephone,
-  SIGNAL_PARTIE,
   type SessionLue,
 } from './distance';
-import { pistesDepuis } from './pistes';
 
 function session(p: Partial<SessionLue>): SessionLue {
   return {
@@ -89,43 +86,5 @@ describe('questionSurLeMauvaisTelephone', () => {
 
   it('un rôle inconnu ne bloque pas la question', () => {
     expect(questionSurLeMauvaisTelephone(true, 'PARTNER', '')).toBe(false);
-  });
-});
-
-describe('signal', () => {
-  it('ne reconnaît que le signal de partie', () => {
-    expect(estSignalPartie({ type: SIGNAL_PARTIE })).toBe(true);
-    expect(estSignalPartie({ type: 'autre' })).toBe(false);
-    expect(estSignalPartie('cf:partie')).toBe(false);
-    expect(estSignalPartie(null)).toBe(false);
-  });
-});
-
-describe('pistesDepuis', () => {
-  it('sépare ma caméra de celle du partenaire, et ne garde que les pistes jouables', () => {
-    const p = pistesDepuis<string>({
-      local: { local: true, tracks: { video: { state: 'playable', persistentTrack: 'moi-v' } } },
-      abc: {
-        local: false,
-        user_name: ' Awa ',
-        tracks: {
-          video: { state: 'loading', persistentTrack: 'awa-v' },
-          audio: { state: 'playable', persistentTrack: 'awa-a' },
-        },
-      },
-    });
-    expect(p).toEqual({
-      maVideo: 'moi-v',
-      saVideo: null,
-      sonAudio: 'awa-a',
-      partenairePresent: true,
-      nomPartenaire: 'Awa',
-    });
-  });
-
-  it('seul dans la salle : pas de partenaire', () => {
-    const p = pistesDepuis<string>({ local: { local: true } });
-    expect(p.partenairePresent).toBe(false);
-    expect(p.saVideo).toBeNull();
   });
 });

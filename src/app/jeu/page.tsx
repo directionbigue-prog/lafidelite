@@ -58,11 +58,10 @@ import { complicityProgress } from '@/lib/game/complicity-progress';
 import { dashboardGreeting } from '@/lib/game/greeting';
 import type { EtatSerie } from '@/lib/rituel/serie';
 import { joursLibelle, legendeSerie } from '@/lib/rituel/ecran';
-import { useVideo } from '@/contexts/VideoContext';
-import { useSuiviPartie } from '@/lib/video/useSuiviPartie';
-import { relirePartie } from '@/lib/video/relire';
-import { PLUS_DE_PARTIE } from '@/lib/video/distance';
-import { BoutonAppel } from '@/components/video/BoutonAppel';
+import { useDistance } from '@/contexts/DistanceContext';
+import { useSuiviPartie } from '@/lib/distance/useSuiviPartie';
+import { relirePartie } from '@/lib/distance/relire';
+import { PLUS_DE_PARTIE } from '@/lib/distance/distance';
 
 interface CoupleMeResponse {
   couple: CoupleMeCouple;
@@ -109,7 +108,7 @@ export default function JeuStartPage() {
   // The streak card. Fetched on its own and never awaited by the rest of the
   // screen: a failed lookup hides the card, it never costs the dashboard.
   const [serie, setSerie] = useState<EtatSerie | null>(null);
-  const video = useVideo();
+  const distance = useDistance();
   // Bumping this re-runs the load effect. It is what the error state's
   // "Réessayer" and the waiting state's "Vérifier à nouveau" buttons do —
   // without it, a single failed fetch would strand the user on a screen
@@ -212,7 +211,7 @@ export default function JeuStartPage() {
       })
       .catch(() => undefined);
   }, []);
-  useSuiviPartie(video.modeDistance && state.kind === 'no-game', guetter);
+  useSuiviPartie(distance.modeDistance && state.kind === 'no-game', guetter);
 
   async function acceptDisclaimer() {
     setAccepting(true);
@@ -406,32 +405,27 @@ export default function JeuStartPage() {
           </div>
 
           {/*
-            Jouer à distance : chacun sur son téléphone. Automatique pendant un
-            appel vidéo ; l'interrupteur sert sans vidéo (ou pour couper le
-            mode quand on est côte à côte). Mémorisé sur CET appareil.
+            Jouer à distance : chacun sur son téléphone. Un interrupteur
+            mémorisé sur CET appareil ; à activer sur les deux téléphones.
           */}
           <section className="flex flex-col gap-4 rounded-2xl border border-cream/12 bg-plum-card p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[15px] font-semibold">Vous êtes loin l’un de l’autre ?</p>
               <p className="mt-1 text-sm leading-relaxed text-cream/60">
-                {video.statut === 'en-appel'
-                  ? 'Pendant l’appel, chacun joue sur son téléphone : l’écran de l’autre attend son tour.'
-                  : 'Lancez l’appel vidéo et jouez chacun sur votre téléphone, en vous voyant.'}
+                Activez le jeu à distance sur vos deux téléphones : chacun répond sur le sien, et
+                l’écran de l’autre attend son tour.
               </p>
             </div>
             <div className="flex shrink-0 flex-col items-start gap-3 sm:items-end">
-              <BoutonAppel variant="primary" />
-              {video.statut !== 'en-appel' && (
-                <label className="flex cursor-pointer items-center gap-2 text-sm text-cream/70">
-                  <input
-                    type="checkbox"
-                    checked={video.distanceManuelle}
-                    onChange={(e) => video.setDistanceManuelle(e.target.checked)}
-                    className="h-4 w-4 accent-gold"
-                  />
-                  Chacun sur son téléphone, sans vidéo
-                </label>
-              )}
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-cream/70">
+                <input
+                  type="checkbox"
+                  checked={distance.modeDistance}
+                  onChange={(e) => distance.setModeDistance(e.target.checked)}
+                  className="h-4 w-4 accent-gold"
+                />
+                Chacun sur son téléphone
+              </label>
             </div>
           </section>
 
