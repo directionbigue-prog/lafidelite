@@ -27,6 +27,8 @@ import {
   nomPays,
   drapeau,
   POINTS_PAR_GRANULARITE,
+  DERNIERES_CONNEXIONS,
+  ligneConnexion,
   type Granularite,
 } from '@/lib/admin/connexions';
 import { libelleMethode } from '@/lib/server/admin/connexions';
@@ -61,6 +63,16 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       // drapeau `tronque` le dit à l'écran au lieu de le cacher.
       take: 50_000,
       orderBy: { createdAt: 'desc' },
+    });
+
+    // La liste détaillée : les dernières connexions, quelle que soit l'échelle
+    // choisie (à l'échelle « heure », la fenêtre peut être vide alors qu'on
+    // veut voir les dernières visites). Appareil, date, pays — et rien qui
+    // identifie la personne : la liste reste anonyme comme les agrégats.
+    const dernieres = await prisma.connexionEvent.findMany({
+      select: { appareil: true, pays: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+      take: DERNIERES_CONNEXIONS,
     });
 
     const compter = (cles: readonly (string | null)[]): { cle: string; nombre: number }[] => {
@@ -99,6 +111,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         pays,
         methodes,
         serie,
+        dernieres: (dernieres ?? []).map(ligneConnexion),
       },
       { headers: { 'x-request-id': ctx.requestId } },
     );

@@ -17,6 +17,7 @@ import { enforceAdminRateLimit } from '@/lib/server/middleware/rate-limit-by-use
 import { prisma } from '@/lib/server/prisma';
 import { makeRequestContext, withRequestContext } from '@/lib/server/observability/request-context';
 import { DOMAINE_INVITE } from '@/lib/couples/compte-invite';
+import { drapeau, libelleAppareil, ligneConnexion, nomPays } from '@/lib/admin/connexions';
 import {
   compteParCle,
   jourUtc,
@@ -71,6 +72,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       connexions7j,
       inscriptionsFenetre,
       partiesFenetre,
+      dernieresConnexions,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { email: { endsWith: `@${DOMAINE_INVITE}` } } }),
@@ -126,6 +128,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         where: { status: 'COMPLETED', completedAt: { gte: debutFenetre } },
         select: { completedAt: true },
       }),
+      prisma.connexionEvent.findMany({
+        select: { appareil: true, pays: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      }),
     ]);
 
     const parties = compteParCle(
@@ -170,8 +177,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const parAppareil: Record<string, number> = {};
     const parPays: Record<string, number> = {};
     for (const c of connexions7j) {
-      parAppareil[c.appareil] = (parAppareil[c.appareil] ?? 0) + 1;
-      const pays = c.pays ?? 'Inconnu';
+      const appareil = libelleAppareil(c.appareil);
+      parAppareil[appareil] = (parAppareil[appareil] ?? 0) + 1;
+      const pays = `${drapeau(c.pays)} ${nomPays(c.pays)}`;
       parPays[pays] = (parPays[pays] ?? 0) + 1;
     }
 
@@ -218,6 +226,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         },
         files: { emails, outbox },
         connexions7j: { total: connexions7j.length, parAppareil, parPays },
+        dernieresConnexions: dernieresConnexions.map(ligneConnexion),
         alertes: {
           payeesSansDroit: payeesSansDroit.map((c) => c.id),
           emailsMorts: emails.DEAD ?? 0,

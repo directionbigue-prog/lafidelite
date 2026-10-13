@@ -13,7 +13,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ApiError } from '@/lib/api';
 import { apiAdmin } from '@/lib/admin/api-admin';
-import { GRANULARITES, type Granularite } from '@/lib/admin/connexions';
+import { GRANULARITES, type Granularite, type LigneConnexion } from '@/lib/admin/connexions';
 import { messageErreurAdmin } from '@/lib/admin/console';
 
 interface Repartition {
@@ -43,6 +43,68 @@ interface Reponse {
   pays: RepartitionPays[];
   methodes: Repartition[];
   serie: PointSerie[];
+  dernieres?: LigneConnexion[];
+}
+
+const ICONE_APPAREIL: Record<string, string> = {
+  TELEPHONE: '📱',
+  TABLETTE: '📲',
+  ORDINATEUR: '💻',
+  AUTRE: '❔',
+};
+
+/**
+ * Chaque connexion, une par ligne : appareil, heure, jour, mois, année, pays
+ * et son drapeau. Tout vient déjà formaté de `ligneConnexion` côté serveur.
+ */
+export function DernieresConnexions({ lignes }: { lignes: LigneConnexion[] }) {
+  return (
+    <div className="rounded-xl border border-cream/10 bg-plum-card2/60 p-4">
+      <p className="text-[10px] uppercase tracking-[0.14em] text-cream/50">
+        Dernières connexions (heure de Dakar)
+      </p>
+      {lignes.length === 0 ? (
+        <p className="mt-2 text-sm text-cream/45">Aucune connexion encore.</p>
+      ) : (
+        <div className="mt-2.5 max-h-[420px] overflow-auto">
+          <table className="w-full text-sm">
+            <thead className="sticky top-0 bg-plum-card2">
+              <tr className="text-left text-[11px] uppercase tracking-[0.1em] text-cream/45">
+                <th className="pb-1.5 pr-3 font-normal">Appareil</th>
+                <th className="pb-1.5 pr-3 font-normal">Heure</th>
+                <th className="pb-1.5 pr-3 font-normal">Jour</th>
+                <th className="pb-1.5 pr-3 font-normal">Mois</th>
+                <th className="pb-1.5 pr-3 font-normal">Année</th>
+                <th className="pb-1.5 font-normal">Pays</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lignes.map((l, i) => (
+                <tr key={`${l.quand}-${i}`} className="border-t border-cream/8 text-cream/80">
+                  <td className="whitespace-nowrap py-1.5 pr-3">
+                    <span className="mr-1.5" aria-hidden>
+                      {ICONE_APPAREIL[l.typeAppareil] ?? '❔'}
+                    </span>
+                    {l.appareil}
+                  </td>
+                  <td className="py-1.5 pr-3 tabular-nums">{l.heure}</td>
+                  <td className="py-1.5 pr-3 tabular-nums">{l.jour}</td>
+                  <td className="py-1.5 pr-3">{l.mois}</td>
+                  <td className="py-1.5 pr-3 tabular-nums">{l.annee}</td>
+                  <td className="whitespace-nowrap py-1.5">
+                    <span className="mr-1.5 text-base" aria-hidden>
+                      {l.drapeau}
+                    </span>
+                    {l.pays}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
 }
 
 const LIBELLES_GRANULARITE: Record<Granularite, string> = {
@@ -148,6 +210,8 @@ export function Connexions() {
             lignes={donnees.methodes}
             vide="Aucune connexion encore."
           />
+
+          <DernieresConnexions lignes={donnees.dernieres ?? []} />
 
           {donnees.tronque && (
             <p className="text-[12px] text-cream/45">

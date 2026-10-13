@@ -15,6 +15,8 @@ import {
   debutDeFenetre,
   POINTS_PAR_GRANULARITE,
   classer,
+  horodatage,
+  ligneConnexion,
 } from './connexions';
 
 // Les vrais « user-agent », copiés depuis des appareils existants. Des chaînes
@@ -305,5 +307,40 @@ describe('le classement d’une répartition', () => {
       (c) => c,
     );
     expect(r.map((x) => x.cle)).toEqual(['AA', 'ZZ']);
+  });
+});
+
+describe('horodatage et ligneConnexion', () => {
+  it('donne heure, jour, mois et année en heure de Dakar (UTC)', () => {
+    expect(horodatage(new Date('2026-10-13T07:05:00Z'))).toEqual({
+      heure: '07:05',
+      jour: '13',
+      mois: 'octobre',
+      annee: '2026',
+    });
+    // Minuit pile reste le jour même, pas la veille.
+    expect(horodatage(new Date('2027-01-01T00:00:00Z')).jour).toBe('1');
+  });
+
+  it('rend une ligne avec appareil, pays et drapeau', () => {
+    const l = ligneConnexion({
+      createdAt: new Date('2026-10-13T20:30:00Z'),
+      appareil: 'TELEPHONE',
+      pays: 'sn',
+    });
+    expect(l).toMatchObject({
+      heure: '20:30',
+      appareil: 'Téléphone',
+      paysCode: 'SN',
+      pays: 'Sénégal',
+      drapeau: '🇸🇳',
+    });
+  });
+
+  it('un pays absent reste lisible', () => {
+    const l = ligneConnexion({ createdAt: new Date(), appareil: 'ORDINATEUR', pays: null });
+    expect(l.pays).toBe('Pays inconnu');
+    expect(l.paysCode).toBeNull();
+    expect(l.appareil).toBe('Ordinateur');
   });
 });

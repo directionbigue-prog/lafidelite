@@ -19,6 +19,8 @@ import {
 } from '@/lib/admin/tableau-de-bord';
 import { packParId } from '@/lib/game/packs';
 import { Alert } from '@/components/ui/Alert';
+import { DernieresConnexions } from '@/components/admin/Connexions';
+import type { LigneConnexion } from '@/lib/admin/connexions';
 import { Button, ButtonLink } from '@/components/ui/Button';
 
 interface Donnees {
@@ -60,6 +62,7 @@ interface Donnees {
     parAppareil: Record<string, number>;
     parPays: Record<string, number>;
   };
+  dernieresConnexions: LigneConnexion[];
   alertes: {
     payeesSansDroit: string[];
     emailsMorts: number;
@@ -311,6 +314,8 @@ export function TableauDeBord() {
               <Statuts valeurs={d.files.outbox} />
             </Carte>
           </div>
+
+          <DernieresConnexions lignes={d.dernieresConnexions ?? []} />
         </>
       )}
     </div>

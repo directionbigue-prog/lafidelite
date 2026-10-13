@@ -160,6 +160,78 @@ export function nomPays(code: string | null | undefined): string {
   return NOMS_PAYS[pays] ?? pays;
 }
 
+const MOIS = [
+  'janvier',
+  'février',
+  'mars',
+  'avril',
+  'mai',
+  'juin',
+  'juillet',
+  'août',
+  'septembre',
+  'octobre',
+  'novembre',
+  'décembre',
+] as const;
+
+/**
+ * L'heure, le jour, le mois et l'année d'une connexion, en heure de Dakar
+ * (= UTC, sans heure d'été), comme le reste du produit.
+ *
+ * Écrit à la main plutôt qu'avec `toLocaleString` : le serveur et chaque
+ * navigateur formateraient selon leur propre fuseau, et la même connexion
+ * s'afficherait à 14 h à Dakar et à 16 h à Paris dans la même console.
+ */
+export function horodatage(date: Date): {
+  heure: string;
+  jour: string;
+  mois: string;
+  annee: string;
+} {
+  const hh = String(date.getUTCHours()).padStart(2, '0');
+  const mm = String(date.getUTCMinutes()).padStart(2, '0');
+  return {
+    heure: `${hh}:${mm}`,
+    jour: String(date.getUTCDate()),
+    mois: MOIS[date.getUTCMonth()]!,
+    annee: String(date.getUTCFullYear()),
+  };
+}
+
+export interface LigneConnexion {
+  quand: string;
+  heure: string;
+  jour: string;
+  mois: string;
+  annee: string;
+  appareil: string;
+  typeAppareil: string;
+  paysCode: string | null;
+  pays: string;
+  drapeau: string;
+}
+
+/** Une connexion telle que la console l'affiche, ligne par ligne. */
+export function ligneConnexion(l: {
+  createdAt: Date;
+  appareil: string;
+  pays: string | null;
+}): LigneConnexion {
+  return {
+    quand: l.createdAt.toISOString(),
+    ...horodatage(l.createdAt),
+    appareil: libelleAppareil(l.appareil),
+    typeAppareil: l.appareil,
+    paysCode: paysValide(l.pays),
+    pays: nomPays(l.pays),
+    drapeau: drapeau(l.pays),
+  };
+}
+
+/** Combien de connexions la liste détaillée montre. */
+export const DERNIERES_CONNEXIONS = 100;
+
 /** Les cinq échelles de temps que la console propose. */
 export const GRANULARITES = ['heure', 'jour', 'semaine', 'mois', 'annee'] as const;
 
