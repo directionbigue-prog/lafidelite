@@ -15,6 +15,7 @@ import type { Redis } from '@upstash/redis';
 import type { PrismaClient } from '@prisma/client';
 import { JobQueue, type QueueJob } from './job-queue';
 import type { Mailer, SendEmailInput } from '../email';
+import { estAdresseInvite } from '@/lib/couples/compte-invite';
 
 export interface EmailJobPayload {
   emailJobId: string;
@@ -93,8 +94,14 @@ export class EmailQueue extends JobQueue<EmailJobPayload> {
   /**
    * Persist the email payload + push the work pointer in one call.
    * Returns the EmailJob row id for callers that want to track status.
+   *
+   * A guest partner's placeholder address (see lib/couples/compte-invite.ts)
+   * is never queued: it resolves nowhere, so every send would bounce. Returns
+   * '' in that case — no row, no pointer.
    */
   async enqueue(input: SendEmailInput): Promise<string> {
+    if (estAdresseInvite(input.to)) return '';
+
     const data: {
       to: string;
       subject: string;

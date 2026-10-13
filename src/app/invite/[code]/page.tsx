@@ -3,9 +3,10 @@
 // /invite/[code] — the screen a partner lands on from a shared link.
 //
 // Two audiences, one URL. Someone already signed in can join in a click;
-// someone new is sent to signup carrying the code, so the pairing happens
-// during signup rather than as a step they have to remember afterwards.
+// someone new gives a first name and is signed in on the spot — only the
+// partner who sends the invitation has to create an account.
 import { use, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api, ApiError } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +15,7 @@ import { AuthSplitLayout } from '@/components/auth/AuthSplitLayout';
 import { OnboardingAside } from '@/components/auth/OnboardingAside';
 import { Alert } from '@/components/ui/Alert';
 import { Button, ButtonLink } from '@/components/ui/Button';
+import { Field } from '@/components/ui/Field';
 
 interface InviteInfo {
   valid: boolean;
@@ -24,8 +26,9 @@ interface InviteInfo {
 export default function InvitePage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params);
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refresh } = useAuth();
   const [invite, setInvite] = useState<InviteInfo | null>(null);
+  const [prenom, setPrenom] = useState('');
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,6 +37,26 @@ export default function InvitePage({ params }: { params: Promise<{ code: string 
       .then(setInvite)
       .catch(() => setInvite({ valid: false, expired: false }));
   }, [code]);
+
+  async function onAccept() {
+    setJoining(true);
+    setError(null);
+    try {
+      await api(`/api/invites/${encodeURIComponent(code)}/accept`, {
+        method: 'POST',
+        body: { name: prenom.trim() },
+      });
+      await refresh();
+      router.push('/couple/apparies');
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? coupleErrorMessage(err.code, err.message)
+          : 'Une erreur est survenue.',
+      );
+      setJoining(false);
+    }
+  }
 
   async function onJoin() {
     setJoining(true);
@@ -82,11 +105,35 @@ export default function InvitePage({ params }: { params: Promise<{ code: string 
               {joining ? 'Appairage…' : `Rejoindre ${creator}`}
             </Button>
           ) : (
-            // Carries the code into signup so the couple is formed during
-            // registration — see SignupForm's `inviteCode` handling.
-            <ButtonLink href={`/inscription?invite=${encodeURIComponent(code)}`}>
-              Créer mon compte et rejoindre
-            </ButtonLink>
+            // Only the partner who invites signs up. The invitee gives a
+            // first name and is signed in on the spot — the code they hold
+            // is the credential (see POST /api/invites/[code]/accept).
+            <form
+              className="flex flex-col gap-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void onAccept();
+              }}
+            >
+              <Field
+                label="Votre prénom"
+                name="prenom"
+                autoComplete="given-name"
+                required
+                maxLength={100}
+                value={prenom}
+                onChange={(e) => setPrenom(e.target.value)}
+              />
+              <Button type="submit" disabled={joining || prenom.trim() === ''}>
+                {joining ? 'Connexion…' : `Rejoindre ${creator} et jouer`}
+              </Button>
+              <p className="text-sm text-cream/60">
+                Pas d’inscription ni de mot de passe : vous êtes connecté directement.{' '}
+                <Link href="/connexion" className="underline underline-offset-2 hover:text-cream">
+                  J’ai déjà un compte
+                </Link>
+              </p>
+            </form>
           )}
         </div>
       ) : (

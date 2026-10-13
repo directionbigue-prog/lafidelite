@@ -50,7 +50,7 @@ export interface PricingCard {
   nom: string;
   /** « Gratuit », ou « 4 900 FCFA ». */
   prix: string;
-  /** Sous le prix : « par semaine », « Une partie offerte par compte »… */
+  /** Sous le prix : « par semaine », « Une partie offerte par couple »… */
   mention: string;
   /** Les lignes de la carte, dans l'ordre. */
   details: readonly string[];
@@ -130,7 +130,7 @@ const PRICING_CARDS: readonly PricingCard[] = PACKS_VISIBLES.map((pack) => {
     id: pack.id,
     nom: pack.nom,
     prix: gratuit ? 'Gratuit' : enFrancs(pack.prix),
-    mention: gratuit ? 'Une partie offerte par compte' : (pack.periode ?? ''),
+    mention: gratuit ? 'Une partie offerte par couple' : (pack.periode ?? ''),
     details: detailsDuPack(pack),
     // Le même palier est recommandé ici et sur /tarifs. Deux surfaces qui
     // mettent en avant deux packs différents se contredisent devant le client.

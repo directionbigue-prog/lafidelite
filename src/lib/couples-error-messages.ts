@@ -56,14 +56,16 @@ export const COUPLES_ERROR_MESSAGES: Record<string, string> = {
   // keep it off the screen without touching the protected module. In
   // practice it means a stale or missing cookie, which a reload fixes.
   'Invalid CSRF token': 'Votre session a expiré. Rechargez la page et réessayez.',
+  // /api/invites/[code]/accept refuses a cross-site Origin. A real visitor
+  // only meets it if the link was opened through some odd proxy.
+  CSRF_ORIGIN_MISMATCH: 'Ouvrez le lien d’invitation directement dans votre navigateur.',
   // Jeu (/jeu) — moteur de partie pass-and-play
   NO_ACTIVE_COUPLE: "Vous n'avez pas encore d'Espace Couple.",
   DISCLAIMER_REQUIRED: 'Vous devez tous les deux accepter les règles du jeu avant de commencer.',
-  // The one free game is per account: this partner has used theirs. The
+  // The one free game is per couple: one of the two partners has used it. The
   // wording says whose it was and what comes next, because 'refusé' with
   // no reason is how a player concludes the app is broken.
-  FREE_GAME_USED:
-    'Votre partie offerte a déjà été jouée. Les parties suivantes seront payantes — la recharge arrive bientôt.',
+  FREE_GAME_USED: 'Votre partie offerte a déjà été jouée. Pour continuer, choisissez un pack.',
   // Volontairement neutre et unique : le backend renvoie NO_ACTIVE_GAME
   // aussi bien pour une partie inexistante que pour celle d'un autre
   // couple (Design Decision 5 — ne jamais révéler l'existence d'une

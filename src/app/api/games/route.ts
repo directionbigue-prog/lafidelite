@@ -31,7 +31,11 @@ import {
   type GameFormatId,
 } from '@/lib/game/formats';
 import { firstPlayerRoleForRound } from '@/lib/server/game/state-machine';
-import { isFreeGameExempt, FREE_GAME_EXEMPT_ENV } from '@/lib/server/game/free-game';
+import {
+  isFreeGameExempt,
+  FREE_GAME_EXEMPT_ENV,
+  partieOfferteDejaJouee,
+} from '@/lib/server/game/free-game';
 import { packDuCouple } from '@/lib/server/game/entitlements';
 import { verifierThemes } from '@/lib/game/packs';
 import { makeRequestContext, withRequestContext } from '@/lib/server/observability/request-context';
@@ -274,6 +278,28 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // giving back its OWN claim and not somebody else's.
     let claimedAt: Date | null = null;
     if (!exempt) {
+      // Une partie offerte par COUPLE : si l'autre l'a déjà jouée depuis son
+      // compte, celui-ci n'en a plus. Deux partenaires qui lancent en même
+      // temps depuis deux téléphones passent tous deux ce contrôle, mais
+      // l'index partiel « une partie en cours par couple » ne laisse naître
+      // qu'une session, et le perdant rend sa réclamation plus bas.
+      const partenaireId = couple.creatorId === userId ? couple.partnerId : couple.creatorId;
+      const partenaire = partenaireId
+        ? await prisma.user.findUnique({
+            where: { id: partenaireId },
+            select: { freeGameUsedAt: true },
+          })
+        : null;
+      if (partieOfferteDejaJouee(partenaire?.freeGameUsedAt)) {
+        return NextResponse.json(
+          {
+            error: 'FREE_GAME_USED',
+            message: 'This couple has already used its free game.',
+          },
+          { status: 402, headers: { 'x-request-id': ctx.requestId } },
+        );
+      }
+
       const claimedNowAt = new Date();
       const claim = await prisma.user.updateMany({
         where: { id: userId, freeGameUsedAt: null },

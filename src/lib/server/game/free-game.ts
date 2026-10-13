@@ -1,10 +1,12 @@
 // Who still has a free game, and who is exempt from the rule entirely.
 //
-// The product rule: an account gets ONE free game, claimed the first time
-// it creates a session. Per account rather than per couple, by explicit
-// decision — each partner gets one at their first sign-in, so a couple
-// starts with two. Beyond that a game costs points, and the points economy
-// arrives with the payment provider.
+// The product rule (revised 2026-10-13): a COUPLE gets ONE free game. The
+// claim is still written on the account that launches it
+// (`User.freeGameUsedAt`), but a partner whose other half has already spent
+// theirs is refused too — see `partieOfferteDejaJouee`. Before, each partner
+// had one, so a couple started with two; with the invitee now joining from
+// the link with a fresh account in one click, that second game came for free
+// to every couple. Beyond the free game, the couple needs a paid pack.
 //
 // The exemption exists so the seeded demo accounts stay playable while
 // there is no way to pay. It is deliberately env-driven and empty by
@@ -24,6 +26,14 @@
  * they turn out to be.
  */
 export const FREE_GAME_EXEMPT_ENV = 'FREE_GAME_EXEMPT_EMAILS';
+
+/**
+ * Has the couple already played its one free game? True as soon as EITHER
+ * partner's account carries a claim — whoever held the phone that time.
+ */
+export function partieOfferteDejaJouee(...usages: readonly (Date | null | undefined)[]): boolean {
+  return usages.some((u) => u instanceof Date);
+}
 
 /**
  * Is this address exempt from the free-game limit?

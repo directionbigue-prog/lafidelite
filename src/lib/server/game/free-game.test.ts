@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isFreeGameExempt, FREE_GAME_EXEMPT_ENV } from './free-game';
+import { isFreeGameExempt, FREE_GAME_EXEMPT_ENV, partieOfferteDejaJouee } from './free-game';
 
 const LIST = 'couple-a@example.com, couple-b@example.com';
 
@@ -53,5 +53,17 @@ describe('isFreeGameExempt', () => {
 
   it('names the variable it reads, so the route and the docs cannot drift', () => {
     expect(FREE_GAME_EXEMPT_ENV).toBe('FREE_GAME_EXEMPT_EMAILS');
+  });
+});
+
+describe('partieOfferteDejaJouee', () => {
+  it('est vraie dÃ¨s que lâ€™un des deux comptes porte une rÃ©clamation', () => {
+    expect(partieOfferteDejaJouee(null, new Date())).toBe(true);
+    expect(partieOfferteDejaJouee(new Date())).toBe(true);
+  });
+
+  it('est fausse tant quâ€™aucun des deux ne lâ€™a jouÃ©e', () => {
+    expect(partieOfferteDejaJouee(null, undefined)).toBe(false);
+    expect(partieOfferteDejaJouee()).toBe(false);
   });
 });

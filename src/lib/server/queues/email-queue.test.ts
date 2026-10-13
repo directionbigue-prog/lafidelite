@@ -3,6 +3,7 @@ import type { Redis } from '@upstash/redis';
 import type { PrismaClient } from '@prisma/client';
 import { EmailQueue, type DrainOutcome } from './email-queue';
 import type { Mailer } from '../email';
+import { adresseInvite } from '@/lib/couples/compte-invite';
 
 // ---------------------------------------------------------------------------
 // A fake Upstash client, list- and zset-shaped, covering exactly the commands
@@ -111,6 +112,28 @@ function build(rows: Row[], mailer?: Mailer) {
   });
   return { queue, redis: r, prisma: p, send };
 }
+
+describe('EmailQueue.enqueue', () => {
+  it('queues a real address: one row, one pointer', async () => {
+    const { queue, prisma, redis } = build([]);
+    const id = await queue.enqueue({ to: 'awa@example.com', subject: 's', html: '<p>x</p>' });
+    expect(id).not.toBe('');
+    expect(prisma.rows.size).toBe(1);
+    expect([...redis.lists.values()].flat()).toHaveLength(1);
+  });
+
+  it("never queues a guest partner's placeholder address", async () => {
+    const { queue, prisma, redis } = build([]);
+    const id = await queue.enqueue({
+      to: adresseInvite('abc'),
+      subject: 'Flamme en danger',
+      html: '<p>x</p>',
+    });
+    expect(id).toBe('');
+    expect(prisma.rows.size).toBe(0);
+    expect([...redis.lists.values()].flat()).toHaveLength(0);
+  });
+});
 
 describe('EmailQueue.drainOne', () => {
   it("reports 'empty' on an empty queue", async () => {

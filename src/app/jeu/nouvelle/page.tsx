@@ -12,7 +12,7 @@
 //   - the points price under each format (20 / 50 / 90 pts). There is no
 //     points economy in this build, and a price nothing charges is a
 //     promise the product cannot keep. The FIRST half of that economy does
-//     exist though: one free game per account, spent on creation. When it
+//     exist though: one free game per couple, spent on creation. When it
 //     is gone this screen stops being a picker and says so — see the
 //     `spent` branch below.
 // Le sélecteur de thèmes, lui, EST là depuis que la banque le porte. Il
@@ -36,10 +36,10 @@ import { toGameApiSuccess, toGameApiFailure } from '@/lib/game/api-result';
 import { interpretCreateGame } from '@/lib/game/start-screen';
 import { GAME_FORMATS, DEFAULT_FORMAT_ID, type GameFormatId } from '@/lib/game/formats';
 import { THEMES, basculerTheme, corpsDeCreation } from '@/lib/game/themes';
-import { palierDuTheme, THEME_DECOUVERTE } from '@/lib/game/packs';
+import { palierDuTheme, THEME_DECOUVERTE, PACKS_PAYANTS, LIBELLE_DEVISE } from '@/lib/game/packs';
 import { AppShell } from '@/components/app/AppShell';
 import { Alert } from '@/components/ui/Alert';
-import { Button } from '@/components/ui/Button';
+import { Button, ButtonLink } from '@/components/ui/Button';
 
 interface GameSessionResponse {
   id: string;
@@ -138,20 +138,40 @@ export default function NouvellePartiePage() {
           </header>
 
           <p className="text-[15px] leading-relaxed text-cream/70">
-            Chacun de vous a droit à une partie offerte. La vôtre a servi — celle de votre
-            partenaire est peut-être encore là : c’est le compte qui lance la partie qui la dépense.
+            Votre couple a droit à une partie offerte, et elle a été jouée. Pour continuer, il
+            suffit que l’un de vous prenne un pack : il ouvre les parties pour vous deux, pendant
+            toute sa durée.
           </p>
 
-          <section className="rounded-2xl border border-cream/12 bg-plum-card2 p-5">
-            <p className="text-[10px] uppercase tracking-[0.14em] text-cream/50">La suite</p>
-            <p className="mt-2 text-sm leading-relaxed text-cream/65">
-              Les parties suivantes seront payantes, par recharge de points. Wave, Orange Money et
-              carte arrivent — rien n’est encore débitable aujourd’hui.
-            </p>
-          </section>
+          {/* Dérivé du registre comme /tarifs : nom, prix, durée. Choisir selon
+              le temps qu'on a devant soi — les paliers diffèrent par la durée. */}
+          <ul className="flex flex-col gap-3">
+            {PACKS_PAYANTS.map((pack) => (
+              <li
+                key={pack.id}
+                className="flex items-baseline justify-between gap-4 rounded-2xl border border-cream/12 bg-plum-card2 p-4"
+              >
+                <div>
+                  <p className="font-serif text-lg">{pack.nom}</p>
+                  <p className="text-sm text-cream/60">{pack.resume}</p>
+                </div>
+                <p className="shrink-0 font-serif text-xl text-gold">
+                  {String(pack.prix).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} {LIBELLE_DEVISE}
+                  {pack.periode && (
+                    <span className="ml-1.5 font-grotesk text-xs text-cream/55">
+                      {pack.periode}
+                    </span>
+                  )}
+                </p>
+              </li>
+            ))}
+          </ul>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Button onClick={() => router.push('/jeu')}>Retour à l’accueil</Button>
+            <ButtonLink href="/tarifs">Choisir un pack</ButtonLink>
+            <Button variant="ghost" onClick={() => router.push('/jeu')}>
+              Retour à l’accueil
+            </Button>
           </div>
         </div>
       </AppShell>

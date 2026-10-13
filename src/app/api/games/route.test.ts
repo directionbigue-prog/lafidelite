@@ -531,8 +531,8 @@ describe('POST /api/games — format', () => {
 
 // ── The one free game ───────────────────────────────────────────────
 //
-// Product rule: one free game per ACCOUNT, claimed when a session is
-// created. Everything worth getting wrong here is a way to hand out a
+// Product rule: one free game per COUPLE, claimed on the launching account
+// when a session is created. Everything worth getting wrong here is a way to hand out a
 // second free game — or to charge for one that never started.
 describe('POST /api/games — the free game', () => {
   beforeEach(() => {
@@ -566,6 +566,27 @@ describe('POST /api/games — the free game', () => {
     expect((await res.json()).error).toBe('FREE_GAME_USED');
     expect(prismaMock.$transaction).not.toHaveBeenCalled();
     expect(selectQuestionsForRound).not.toHaveBeenCalled();
+  });
+
+  it("refuses when the PARTNER's account already spent the couple's free game", async () => {
+    prismaMock.user.findUnique.mockResolvedValue({ freeGameUsedAt: new Date() } as never);
+
+    const res = await POST(makeReq());
+    expect(res.status).toBe(402);
+    expect((await res.json()).error).toBe('FREE_GAME_USED');
+    // Refused before claiming: this account's own free game is not burnt.
+    expect(prismaMock.user.updateMany).not.toHaveBeenCalled();
+    expect(selectQuestionsForRound).not.toHaveBeenCalled();
+  });
+
+  it('lets a paid pack play even after the free game was spent', async () => {
+    prismaMock.user.findUnique.mockResolvedValue({ freeGameUsedAt: new Date() } as never);
+    prismaMock.entitlement.findMany.mockResolvedValue([
+      { packId: 'INTEGRAL', expiresAt: new Date(Date.now() + 86_400_000) },
+    ] as never);
+
+    const res = await POST(makeReq());
+    expect(res.status).toBe(201);
   });
 
   it('never charges for resuming a game already in progress', async () => {
