@@ -8,10 +8,16 @@
 // This component never decides whether Google is available — the page does,
 // from `tryCreateGoogleProvider()` server-side. Rendering it when the
 // provider is unconfigured would point users at a 404.
+//
+// The href goes through `lienConnexionGoogle`, which makes Google's callback
+// land on the counting relay before `next` — so Google sign-ins show in the
+// admin console without touching the protected callback.
+import { lienConnexionGoogle } from '@/lib/auth/lien-google';
+
 export function GoogleButton({ next }: { next: string }) {
   return (
     <a
-      href={`/api/auth/oauth/google/start?next=${encodeURIComponent(next)}`}
+      href={lienConnexionGoogle(next)}
       className="flex w-full items-center justify-center gap-3 rounded-full border border-cream/26 bg-cream px-6 py-3.5 text-[15px] font-semibold text-ink transition-colors hover:bg-rose"
     >
       <GoogleMark />

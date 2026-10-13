@@ -34,6 +34,7 @@ import { Button } from '@/components/ui/Button';
 import { FocusLayout } from '@/components/ui/FocusLayout';
 import { AppShell } from '@/components/app/AppShell';
 import { ComptesAppareil } from '@/components/auth/ComptesAppareil';
+import { lienConnexionGoogle } from '@/lib/auth/lien-google';
 
 /**
  * Codes whose wording depends on being HERE rather than on a sign-in
@@ -278,8 +279,9 @@ export default function SettingsPage() {
               // A top-level navigation, not a fetch: the OAuth start route
               // 302s to Google and the browser must follow it so the state
               // and PKCE cookies it sets are stored.
+              // Through the counting relay, like every Google button.
               <a
-                href="/api/auth/oauth/google/start?next=/settings"
+                href={lienConnexionGoogle('/settings')}
                 className="shrink-0 rounded-full border border-cream/26 px-4 py-2 text-sm font-semibold text-cream transition-colors hover:border-gold"
               >
                 Lier Google

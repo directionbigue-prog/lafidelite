@@ -65,32 +65,34 @@ describe('la collecte est branchée là où une session naît', () => {
   });
 });
 
-describe('le chemin Google n’est PAS encore compté, et c’est consigné', () => {
-  // CE TEST DOCUMENTE UN TROU PLUTÔT QUE DE LE CACHER.
-  //
-  // `src/app/api/auth/oauth/google/callback/route.ts` est dans la liste des
-  // fichiers protégés de CLAUDE.md : « state/PKCE cookie scoping,
-  // account-linking, ID-token decode are all interdependent ». Y ajouter une
-  // ligne demande un accord explicite, qui n'a pas été demandé pour une
-  // statistique. Les connexions Google manquent donc à la console.
-  //
-  // L'assertion est inversée exprès : le jour où la ligne sera ajoutée, ce
-  // test rougira, et celui qui l'ajoutera viendra le supprimer en même temps
-  // que cette explication. Un trou qu'un test surveille se referme ; un trou
-  // écrit dans un commentaire se perd.
+describe('le chemin Google est compté par le relais, sans toucher au callback', () => {
+  // Depuis le 13/10/2026. Le callback Google est un fichier PROTÉGÉ (CLAUDE.md :
+  // « state/PKCE cookie scoping, account-linking, ID-token decode are all
+  // interdependent ») : on ne l'ouvre pas pour une statistique. Chaque bouton
+  // Google demande donc comme `next` le relais `api/auth/connexion-google`,
+  // qui compte puis redirige (lib/auth/lien-google.ts).
   const callback = 'auth/oauth/google/callback/route.ts';
+  const relais = 'auth/connexion-google/route.ts';
 
-  it('la route existe toujours là où on la croit', () => {
-    expect(() => source(callback)).not.toThrow();
-  });
-
-  it('n’appelle pas encore enregistrerConnexion — à retirer quand ce sera fait', () => {
+  it('le callback protégé reste inchangé : il n’enregistre rien lui-même', () => {
     expect(sansCommentaires(source(callback))).not.toContain('enregistrerConnexion');
   });
 
-  it('la méthode GOOGLE est néanmoins déclarée, prête à être utilisée', async () => {
-    const { METHODES } = await import('./connexions');
-    expect(METHODES).toContain('GOOGLE');
+  it('le relais enregistre la connexion GOOGLE, avec le compte et les en-têtes', () => {
+    const src = sansCommentaires(source(relais));
+    expect(src).toContain('enregistrerConnexion');
+    expect(src).toContain("methode: 'GOOGLE'");
+    expect(src).toContain('headers: req.headers');
+    expect(src).toMatch(/userId:\s*payload\.sub/);
+  });
+
+  it('chaque lien Google de l’interface passe par le relais', () => {
+    const SRC = resolve(here, '../../..');
+    for (const f of ['components/auth/GoogleButton.tsx', 'app/settings/page.tsx']) {
+      const src = sansCommentaires(readFileSync(resolve(SRC, f), 'utf8'));
+      expect(src, f).toContain('lienConnexionGoogle(');
+      expect(src, f).not.toMatch(/href=["{`]+\/api\/auth\/oauth\/google\/start/);
+    }
   });
 });
 
