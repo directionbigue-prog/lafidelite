@@ -36,6 +36,18 @@ describe('coupleGateRedirect', () => {
   it('does not redirect for an ACTIVE couple even with a null partner name', () => {
     expect(coupleGateRedirect(activeCouple({ partnerName: null }))).toBeNull();
   });
+
+  it('sends an admin with no couple to /admin, never to the pairing flow', () => {
+    expect(coupleGateRedirect(null, 'SUPERADMIN')).toBe('/admin');
+    expect(coupleGateRedirect(null, 'ADMIN')).toBe('/admin');
+  });
+
+  it('keeps the normal flow for a plain user, an unknown role, or an admin mid-pairing', () => {
+    expect(coupleGateRedirect(null, 'USER')).toBe('/couple/creer');
+    expect(coupleGateRedirect(null, undefined)).toBe('/couple/creer');
+    expect(coupleGateRedirect({ status: 'PENDING' }, 'SUPERADMIN')).toBe('/couple/creer');
+    expect(coupleGateRedirect(activeCouple({ partnerName: 'Awa' }), 'SUPERADMIN')).toBeNull();
+  });
 });
 
 describe('interpretGamesCurrent', () => {

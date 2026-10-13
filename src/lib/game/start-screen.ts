@@ -45,9 +45,16 @@ export type CoupleMeCouple =
  *
  * Returns the path to redirect to, or `null` when the couple is ACTIVE and
  * the page should proceed to the game-session check.
+ *
+ * Un compte d'administration sans aucun couple va à /admin plutôt qu'au
+ * parcours d'appariement (décision du 13/10/2026) : il vient superviser, pas
+ * jouer, et l'obliger à inviter un partenaire n'a aucun sens. Ce n'est qu'un
+ * aiguillage — chaque route /api/admin/* revérifie le rôle. Un admin qui a
+ * lui-même commencé un couple (PENDING) garde le parcours normal.
  */
-export function coupleGateRedirect(couple: CoupleMeCouple): string | null {
+export function coupleGateRedirect(couple: CoupleMeCouple, role?: string): string | null {
   if (couple !== null && couple.status === 'ACTIVE') return null;
+  if (couple === null && (role === 'ADMIN' || role === 'SUPERADMIN')) return '/admin';
   return '/couple/creer';
 }
 

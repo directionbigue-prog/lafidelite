@@ -140,7 +140,7 @@ export default function JeuStartPage() {
       }
       if (cancelled) return;
 
-      const redirect = coupleGateRedirect(couple);
+      const redirect = coupleGateRedirect(couple, user.role);
       if (redirect) {
         setState({ kind: 'redirecting' });
         router.replace(redirect);
