@@ -160,4 +160,54 @@ html:has(.cf-landing) {
   .cf-landing .cf-badge-right {
     right: 0 !important;
   }
+
+  /* Tarifs compacts (14/10/2026). Empilées telles quelles, les quatre
+   * cartes faisaient 2 040 px — le plus haut bloc de la page sur téléphone.
+   * Un carrousel les aurait ramenées à une seule hauteur, mais en cachant
+   * trois offres derrière un balayage que beaucoup ne font pas. Ici elles
+   * restent toutes visibles : nom et prix sur la même ligne, détails serrés,
+   * bouton moins haut. */
+  .cf-landing .cf-tarifs {
+    gap: 14px !important;
+  }
+
+  .cf-landing .cf-tarif {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 12px;
+    align-items: center;
+    padding: 22px 18px 18px !important;
+  }
+
+  .cf-landing .cf-tarif-nom {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .cf-landing .cf-tarif-mention {
+    grid-column: 1;
+    grid-row: 2;
+    margin-bottom: 0 !important;
+    font-size: 14px !important;
+  }
+
+  .cf-landing .cf-tarif-prix {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin: 0 !important;
+    font-size: 34px !important;
+    text-align: right;
+  }
+
+  .cf-landing .cf-tarif-details {
+    grid-column: 1 / -1;
+    gap: 4px !important;
+    margin: 14px 0 16px !important;
+    font-size: 14px !important;
+  }
+
+  .cf-landing .cf-tarif-cta {
+    grid-column: 1 / -1;
+    padding: 12px !important;
+  }
 }

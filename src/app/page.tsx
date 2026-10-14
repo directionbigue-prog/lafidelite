@@ -679,6 +679,7 @@ export default function Home() {
               gap: '20px',
               alignItems: 'stretch',
             }}
+            className="cf-tarifs"
           >
             {' '}
             {/* Une seule carte, répétée. Les trois étaient écrites à la main,
@@ -701,6 +702,7 @@ export default function Home() {
                   flexDirection: 'column',
                   position: 'relative',
                 }}
+                className="cf-tarif"
               >
                 {card.misEnAvant && (
                   <div
@@ -728,6 +730,7 @@ export default function Home() {
                     textTransform: 'uppercase',
                     color: card.misEnAvant ? '#E8B860' : 'rgba(246,238,230,.64)',
                   }}
+                  className="cf-tarif-nom"
                 >
                   {card.nom}
                 </div>
@@ -738,6 +741,7 @@ export default function Home() {
                     lineHeight: '1.1',
                     margin: '18px 0 6px',
                   }}
+                  className="cf-tarif-prix"
                 >
                   {card.prix}
                 </div>
@@ -747,6 +751,7 @@ export default function Home() {
                     color: 'rgba(246,238,230,.66)',
                     marginBottom: '24px',
                   }}
+                  className="cf-tarif-mention"
                 >
                   {card.mention}
                 </div>
@@ -759,6 +764,7 @@ export default function Home() {
                     color: 'rgba(246,238,230,.78)',
                     marginBottom: '28px',
                   }}
+                  className="cf-tarif-details"
                 >
                   {card.details.map((ligne) => (
                     <div key={ligne}>{ligne}</div>
@@ -779,7 +785,7 @@ export default function Home() {
                           fontWeight: '600',
                         }),
                   }}
-                  className={card.misEnAvant ? 'cf-h2' : 'cf-h5'}
+                  className={`${card.misEnAvant ? 'cf-h2' : 'cf-h5'} cf-tarif-cta`}
                 >
                   {card.ctaLabel}
                 </a>
