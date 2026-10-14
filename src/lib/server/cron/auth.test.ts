@@ -52,4 +52,17 @@ describe('verifyCronSecret (CRON-06)', () => {
     const res = verifyCronSecret(makeReq({ authorization: 'Bearer short' }));
     expect(res!.status).toBe(401);
   });
+
+  it('accepts a CRON_SECRET set with a BOM or a trailing newline (PowerShell paste)', () => {
+    // PUBLIC_URL carried exactly such a BOM in production on 2026-10-13.
+    vi.stubEnv('CRON_SECRET', String.fromCharCode(0xfeff) + 'secret-value-12345\n');
+    const res = verifyCronSecret(makeReq({ authorization: 'Bearer secret-value-12345' }));
+    expect(res).toBeNull();
+  });
+
+  it('still refuses a wrong token once both sides are trimmed', () => {
+    vi.stubEnv('CRON_SECRET', ' secret-value-12345 ');
+    const res = verifyCronSecret(makeReq({ authorization: 'Bearer secret-value-1234X' }));
+    expect(res!.status).toBe(401);
+  });
 });

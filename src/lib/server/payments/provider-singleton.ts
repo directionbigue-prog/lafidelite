@@ -30,6 +30,7 @@ import {
   paytechConfigure,
 } from '@/lib/server/payments/paytech';
 import type { PaymentProvider } from '@/lib/server/payments/provider';
+import { urlPubliqueNettoyee } from '@/lib/server/payments/etat';
 import { CircuitBreaker } from '@/lib/server/payments/circuit-breaker';
 
 /**
@@ -61,9 +62,11 @@ export function getProvider(): PaymentProvider {
   // keys are present it wins, and Bictorys stays the fallback. The IPN URL is
   // derived from PUBLIC_URL (the same origin the orders route redirects to).
   if (paytechConfigure()) {
+    // Same cleaning as the orders route (one reader: `urlPubliqueNettoyee`),
+    // so the IPN URL and the return URLs cannot disagree about PUBLIC_URL.
     const origine =
-      process.env.PUBLIC_URL?.trim() ||
-      process.env.APP_URL?.trim() ||
+      urlPubliqueNettoyee(process.env.PUBLIC_URL) ||
+      urlPubliqueNettoyee(process.env.APP_URL) ||
       'https://www.coeurfidele.net';
     _provider = createPaytechProvider(paytechConfigDepuisEnv(origine));
     return _provider;

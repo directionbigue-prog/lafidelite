@@ -68,6 +68,9 @@ interface Donnees {
     emailsMorts: number;
     outboxMorts: number;
     emailsEnAttente: number;
+    commandesEchouees24h: number;
+    configuration: string[];
+    paiement: string[];
   };
   series: { inscriptions: PointDeSerie[]; parties: PointDeSerie[]; ventes: PointDeSerie[] };
 }
@@ -334,6 +337,15 @@ function Alertes({ a }: { a: Donnees['alertes'] }) {
     messages.push(`${a.outboxMorts} événement(s) outbox abandonné(s) cette semaine.`);
   if (a.emailsEnAttente > 20)
     messages.push(`${a.emailsEnAttente} e-mails en attente : la file ne se vide pas.`);
+  if (a.commandesEchouees24h > 0)
+    messages.push(
+      `${a.commandesEchouees24h} commande(s) en échec ces dernières 24 h : la page de paiement ne s’est pas ouverte. Motif dans les logs Vercel (« order charge failed »).`,
+    );
+  messages.push(...a.paiement);
+  if (a.configuration.length > 0)
+    messages.push(
+      `Variable(s) d’environnement mal formée(s) : ${a.configuration.join(', ')}. À reposer dans Vercel sans caractère caché, puis redéployer.`,
+    );
 
   if (messages.length === 0) return <Alert tone="success">Aucune alerte. Tout tourne.</Alert>;
   return (

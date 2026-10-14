@@ -7,6 +7,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/server/prisma';
 import { redis } from '@/lib/server/redis';
 import { getEmailQueue } from '@/lib/server/queues/email-queue-singleton';
+import { diagnostiquerEnvironnement } from '@/lib/config/environnement';
+import { alertesPaiement, etatPaiement } from '@/lib/server/payments/etat';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -84,6 +86,16 @@ export async function GET() {
     .filter(([, value]) => !value)
     .map(([name]) => name);
 
+  // Configuration and payment: reported, NOT gated, for the same reason as
+  // mail. On 2026-10-13 every pack purchase failed because PUBLIC_URL began
+  // with an invisible BOM — and Vercel will not show a "Secret" variable's
+  // value to anyone, so only the running server can see such a defect. It is
+  // named here (variable NAME and defect kind — never a value, prefix or
+  // length), together with the payment provider and its mode, so a glance at
+  // this endpoint after any env change says whether payments can work.
+  const suspectes = diagnostiquerEnvironnement(process.env);
+  const paiement = etatPaiement(process.env, process.env.NODE_ENV === 'production');
+
   return NextResponse.json(
     {
       ok: allOk,
@@ -94,6 +106,12 @@ export async function GET() {
         missing,
         note: 'informational — a missing email provider does not fail this probe',
       },
+      configuration: {
+        ok: suspectes.length === 0,
+        suspectes,
+        note: 'informational — variables carrying a BOM, invisible characters, surrounding spaces or quotes',
+      },
+      paiement: { ...paiement, alertes: alertesPaiement(paiement) },
     },
     { status: allOk ? 200 : 503 },
   );

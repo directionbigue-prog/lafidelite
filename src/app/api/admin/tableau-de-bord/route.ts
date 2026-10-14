@@ -17,6 +17,8 @@ import { enforceAdminRateLimit } from '@/lib/server/middleware/rate-limit-by-use
 import { prisma } from '@/lib/server/prisma';
 import { makeRequestContext, withRequestContext } from '@/lib/server/observability/request-context';
 import { DOMAINE_INVITE } from '@/lib/couples/compte-invite';
+import { diagnostiquerEnvironnement, libelleSuspecte } from '@/lib/config/environnement';
+import { alertesPaiement, etatPaiement } from '@/lib/server/payments/etat';
 import { drapeau, libelleAppareil, ligneConnexion, nomPays } from '@/lib/admin/connexions';
 import {
   compteParCle,
@@ -75,6 +77,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       dernieresConnexions,
       emailsMortsRecents,
       outboxMortsRecents,
+      commandesEchouees24h,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { email: { endsWith: `@${DOMAINE_INVITE}` } } }),
@@ -141,6 +144,15 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       // jamais finit par ne plus être lue.
       prisma.emailJob.count({ where: { status: 'DEAD', createdAt: { gte: il7j } } }),
       prisma.outboxEvent.count({ where: { status: 'DEAD', createdAt: { gte: il7j } } }),
+      // Une commande qui n'a même pas obtenu sa page de paiement. Le 13/10/2026,
+      // quatre achats de suite ont fini ainsi (PUBLIC_URL portait un BOM) sans
+      // qu'aucun écran ne le montre : le client voyait « réessayez ».
+      prisma.order.count({
+        where: {
+          status: 'FAILED',
+          createdAt: { gte: new Date(maintenant.getTime() - 86_400_000) },
+        },
+      }),
     ]);
 
     const parties = compteParCle(
@@ -240,6 +252,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           emailsMorts: emailsMortsRecents,
           outboxMorts: outboxMortsRecents,
           emailsEnAttente: emails.PENDING ?? 0,
+          commandesEchouees24h,
+          // Lu sur le serveur en marche : seul endroit où la valeur réelle d'une
+          // variable « Secret » de Vercel est visible. Noms et défauts seulement.
+          configuration: diagnostiquerEnvironnement(process.env).map(libelleSuspecte),
+          paiement: alertesPaiement(
+            etatPaiement(process.env, process.env.NODE_ENV === 'production'),
+          ),
         },
         series: {
           inscriptions: serieQuotidienne(

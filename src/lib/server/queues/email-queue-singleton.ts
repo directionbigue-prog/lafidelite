@@ -37,8 +37,11 @@ export function getEmailQueue(): EmailQueue | null {
 
   const url = process.env.UPSTASH_REDIS_REST_URL ?? '';
   const token = process.env.UPSTASH_REDIS_REST_TOKEN ?? '';
-  const resendKey = process.env.RESEND_API_KEY ?? '';
-  const emailFrom = process.env.EMAIL_FROM ?? '';
+  // Trimmed: a key or sender pasted with a BOM or a trailing newline (how
+  // PUBLIC_URL broke every payment on 2026-10-13) would make Resend refuse
+  // every send while this module reported itself configured.
+  const resendKey = process.env.RESEND_API_KEY?.trim() ?? '';
+  const emailFrom = process.env.EMAIL_FROM?.trim() ?? '';
 
   if (!url || !token || !resendKey || !emailFrom || !redis) {
     log.warn(

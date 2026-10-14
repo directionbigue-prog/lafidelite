@@ -100,4 +100,54 @@ describe('GET /api/readyz', () => {
     expect(brut).not.toContain('bonjour@exemple.test');
     expect(brut).not.toContain('exemple.upstash.io');
   });
+
+  it('nomme une variable porteuse d’un BOM, sans jamais sa valeur, et reste à 200', async () => {
+    // L'incident du 13/10/2026 : PUBLIC_URL commençait par U+FEFF, et Vercel
+    // ne montre la valeur d'aucune variable « Secret ». Seul le serveur la voit.
+    mockQueue.mockReturnValue({} as never);
+    process.env.RESEND_API_KEY = String.fromCharCode(0xfeff) + 're_test';
+    const res = await GET();
+    expect(res.status).toBe(200);
+    const corps = await res.json();
+    expect(corps.configuration.ok).toBe(false);
+    expect(corps.configuration.suspectes).toEqual([
+      { variable: 'RESEND_API_KEY', defauts: ['BOM'] },
+    ]);
+    expect(JSON.stringify(corps)).not.toContain('re_test');
+  });
+
+  it('rapporte le prestataire de paiement et son mode', async () => {
+    mockQueue.mockReturnValue({} as never);
+    const avant = {
+      k: process.env.PAYTECH_API_KEY,
+      s: process.env.PAYTECH_API_SECRET,
+      e: process.env.PAYTECH_ENV,
+      u: process.env.PUBLIC_URL,
+    };
+    process.env.PAYTECH_API_KEY = 'cle-paytech';
+    process.env.PAYTECH_API_SECRET = 'secret-paytech';
+    process.env.PAYTECH_ENV = 'test';
+    process.env.PUBLIC_URL = 'https://www.coeurfidele.net';
+    try {
+      const corps = await (await GET()).json();
+      expect(corps.paiement).toMatchObject({
+        fournisseur: 'paytech',
+        mode: 'test',
+        urlPublique: 'ok',
+      });
+      expect(corps.paiement.alertes).toHaveLength(1);
+      expect(JSON.stringify(corps)).not.toContain('cle-paytech');
+      expect(JSON.stringify(corps)).not.toContain('secret-paytech');
+    } finally {
+      for (const [nom, valeur] of [
+        ['PAYTECH_API_KEY', avant.k],
+        ['PAYTECH_API_SECRET', avant.s],
+        ['PAYTECH_ENV', avant.e],
+        ['PUBLIC_URL', avant.u],
+      ] as const) {
+        if (valeur === undefined) delete process.env[nom];
+        else process.env[nom] = valeur;
+      }
+    }
+  });
 });

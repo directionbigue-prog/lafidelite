@@ -44,6 +44,7 @@ import { verifyCsrf } from '@/lib/server/auth';
 import { requireAuth } from '@/lib/server/middleware';
 import { makeRequestContext, withRequestContext } from '@/lib/server/observability/request-context';
 import { log } from '@/lib/server/observability/log';
+import { urlPubliqueNettoyee } from '@/lib/server/payments/etat';
 import { prisma } from '@/lib/server/prisma';
 import { CircuitOpenError } from '@/lib/server/payments/circuit-breaker';
 import {
@@ -277,7 +278,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // success/cancel URL handed to PayTech was invalid — 422 from PayTech,
     // 502 PAYMENT_FAILED here, every pack purchase dead. `trim()` removes the
     // BOM as well as stray spaces; the trailing slash would double the `/`.
-    const envPublicUrl = process.env.PUBLIC_URL?.trim().replace(/\/+$/, '') || undefined;
+    const envPublicUrl = urlPubliqueNettoyee(process.env.PUBLIC_URL);
     if (!envPublicUrl && process.env.NODE_ENV === 'production') {
       return NextResponse.json(
         {

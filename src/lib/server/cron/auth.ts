@@ -11,7 +11,12 @@ import crypto from 'node:crypto';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export function verifyCronSecret(req: NextRequest): NextResponse | null {
-  const secret = process.env.CRON_SECRET ?? '';
+  // Trimmed (and the presented token below too): `trim()` also removes a BOM.
+  // On 2026-10-13 PUBLIC_URL turned out to start with one, written by
+  // PowerShell when the variable was set; a CRON_SECRET set the same way
+  // would 401 every scheduled run, silently — a cron that is never let in
+  // looks exactly like a quiet one.
+  const secret = process.env.CRON_SECRET?.trim() ?? '';
   if (!secret) {
     // Boot-time misconfiguration — fail closed loudly. Production deploys
     // without CRON_SECRET set are a security regression (any anonymous POST
@@ -27,7 +32,7 @@ export function verifyCronSecret(req: NextRequest): NextResponse | null {
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
   }
 
-  const presented = header.slice('Bearer '.length);
+  const presented = header.slice('Bearer '.length).trim();
   if (presented.length === 0) {
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
   }
