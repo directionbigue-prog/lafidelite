@@ -18,6 +18,20 @@ export type { BictorysWebhookPayload };
 
 let _provider: WebhookProvider<BictorysWebhookPayload> | null = null;
 
+/**
+ * True when the three variables the provider needs are all set. Read on every
+ * call, never cached, so the route can refuse cleanly (503) when Bictorys is
+ * absent — production runs on PayTech since 2026-10-13 and carries none of
+ * them, and the lazy init below throws, which surfaced as a bare 500.
+ */
+export function isBictorysWebhookConfigured(): boolean {
+  return Boolean(
+    process.env.BICTORYS_API_URL &&
+    process.env.BICTORYS_API_KEY &&
+    process.env.BICTORYS_WEBHOOK_SECRET,
+  );
+}
+
 /** Lazy-init — env reads happen at first call so `vi.stubEnv` works in tests. */
 export function getBictorysWebhookProvider(): WebhookProvider<BictorysWebhookPayload> {
   if (_provider) return _provider;

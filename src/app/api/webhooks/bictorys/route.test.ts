@@ -44,6 +44,19 @@ afterEach(() => {
 });
 
 describe('POST /api/webhooks/bictorys', () => {
+  // Production runs on PayTech and carries no BICTORYS_* variable. Every
+  // anonymous POST here used to throw inside the provider's lazy init and
+  // come back as a bare 500 — found by probing production on 2026-10-14.
+  it('answers 503 WEBHOOK_NOT_CONFIGURED, without a transaction, when Bictorys is not configured', async () => {
+    const { req } = bictorysFixtureRequest({ status: 'succeeded' });
+    vi.stubEnv('BICTORYS_WEBHOOK_SECRET', '');
+    const { POST } = await import('./route');
+    const res = await POST(req);
+    expect(res.status).toBe(503);
+    expect((await res.json()).code).toBe('WEBHOOK_NOT_CONFIGURED');
+    expect($transaction).not.toHaveBeenCalled();
+  });
+
   it('valid HMAC + first delivery returns 200 deduped:false (WH-01)', async () => {
     findUnique.mockResolvedValueOnce(null); // no existing WebhookLog row
     orderFindFirst.mockResolvedValueOnce(null); // unknown charge — onPaid drops

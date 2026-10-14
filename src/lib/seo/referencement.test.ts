@@ -37,6 +37,34 @@ function cheminsDesPages(): string[] {
   return out.sort();
 }
 
+describe('une page indexable se lit sans session', () => {
+  // Une page dans le sitemap qui renvoie l'anonyme vers /connexion n'est pas
+  // une page publique : le moteur n'indexe que la redirection, et le visiteur
+  // arrivé par le résultat se voit demander un compte. C'est arrivé deux fois,
+  // trouvé en sondant la production le 14/10/2026 : `/tarifs` (rendue dans
+  // l'`AppShell`, dont le `useUser()` nu redirige) et `/demo` (fermée aux
+  // anonymes par la règle de la partie offerte, mais toujours indexée sous
+  // « Essayer sans compte »).
+  //
+  // Ce test lit le `page.tsx` lui-même : une porte posée plus bas, dans un
+  // composant importé, lui échappe — c'était le cas de `/demo`, et c'est pour
+  // cela que sa fiche du registre dit maintenant pourquoi elle est privée.
+  for (const page of PAGES_INDEXABLES) {
+    it(`${page.chemin} ne redirige pas un visiteur anonyme`, () => {
+      const fichier = resolve(APP, `.${page.chemin}`, 'page.tsx');
+      const src = readFileSync(fichier, 'utf8').replace(/^\s*(\/\/|\*|\/\*).*$/gm, '');
+      if (src.includes('<AppShell')) {
+        expect(src, `${page.chemin} rend l'AppShell sans acces="public"`).toContain(
+          'acces="public"',
+        );
+      }
+      expect(src, `${page.chemin} appelle useUser(), qui redirige`).not.toMatch(
+        /\buseUser\(\s*(?!null\b)/,
+      );
+    });
+  }
+});
+
 describe('le registre couvre toutes les pages du dépôt', () => {
   // L'ASSERTION QUI FAIT TOUT LE TRAVAIL. Un sitemap écrit à la main se
   // désynchronise au premier écran ajouté, et rien ne le signale : un sitemap

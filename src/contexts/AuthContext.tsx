@@ -146,12 +146,17 @@ export function useAuth(): AuthContextValue {
 // any caller that omitted the argument redirected unauthenticated visitors
 // to a route that does not exist. `/settings` was doing exactly that: its
 // sign-in redirect landed on a 404.
-export function useUser(redirectTo: string = '/connexion'): User | null {
+//
+// `null` means "read the user, never redirect": for a public screen inside a
+// shell that would otherwise send every visitor to /connexion. `/tarifs` was
+// that screen — indexable, in the sitemap, with a signed-out purchase button —
+// and `AppShell`'s bare `useUser()` bounced every anonymous visitor off it.
+export function useUser(redirectTo: string | null = '/connexion'): User | null {
   const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (redirectTo !== null && !loading && !user) {
       router.replace(redirectTo);
     }
   }, [loading, user, redirectTo, router]);

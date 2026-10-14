@@ -26,8 +26,12 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import 'server-only';
+import { NextResponse, type NextRequest } from 'next/server';
 import { createWebhookHandler } from '@/lib/server/webhook/handler';
-import { bictorysWebhookProvider } from '@/lib/server/webhook/bictorys';
+import {
+  bictorysWebhookProvider,
+  isBictorysWebhookConfigured,
+} from '@/lib/server/webhook/bictorys';
 import { prisma } from '@/lib/server/prisma';
 import {
   echouerCommande,
@@ -35,7 +39,23 @@ import {
   rembourserCommande,
 } from '@/lib/server/payments/encaissement';
 
-export const POST = createWebhookHandler({
+/**
+ * Provider absent → 503, as CLAUDE.md promises for every optional provider.
+ * The check runs BEFORE the factory and never touches the body, so the
+ * raw-body HMAC invariant is untouched. Without it, the provider's lazy init
+ * threw inside the protected factory and every anonymous POST became a 500.
+ */
+export async function POST(req: NextRequest): Promise<NextResponse> {
+  if (!isBictorysWebhookConfigured()) {
+    return NextResponse.json(
+      { code: 'WEBHOOK_NOT_CONFIGURED', message: 'Bictorys webhook not configured' },
+      { status: 503 },
+    );
+  }
+  return traiterWebhook(req);
+}
+
+const traiterWebhook = createWebhookHandler({
   prisma,
   provider: bictorysWebhookProvider,
 

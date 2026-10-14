@@ -69,9 +69,17 @@ export function AppShell({
   coupleLabel: providedLabel,
   surface = 'sombre',
   large = false,
+  acces = 'connecte',
   children,
 }: {
   active: AppSection;
+  /**
+   * `public` : la page se lit sans session, et la coquille ne renvoie
+   * personne vers /connexion. Seul `/tarifs` l'utilise — une page indexée,
+   * dans le sitemap, dont le bouton d'achat sait déjà traiter un visiteur
+   * non connecté. Par défaut, la coquille garde la session comme avant.
+   */
+  acces?: 'connecte' | 'public';
   /**
    * `clair` : le fond gris clair de la console d'administration (demande du
    * 14/10/2026). Le produit reste sombre partout ailleurs — le Salon en a
@@ -94,7 +102,7 @@ export function AppShell({
   coupleLabel?: string | null;
   children: ReactNode;
 }) {
-  const user = useUser();
+  const user = useUser(acces === 'public' ? null : '/connexion');
   const [fetchedLabel, setFetchedLabel] = useState<string | null>(null);
   const shouldFetch = providedLabel === undefined;
   const coupleLabel = shouldFetch ? fetchedLabel : providedLabel;

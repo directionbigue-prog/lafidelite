@@ -39,7 +39,7 @@ export default function TarifsPage() {
   const decouverte = packDecouverte();
 
   return (
-    <AppShell active="accueil">
+    <AppShell active="accueil" acces="public">
       <div className="flex max-w-4xl flex-col gap-8">
         <header>
           <p className="text-[11px] uppercase tracking-[0.16em] text-cream/50">Nos packs</p>

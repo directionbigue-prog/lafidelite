@@ -130,13 +130,14 @@ export const PAGES: readonly PageReferencee[] = [
       'Week-end, Semaine ou Mois : les trois paliers ouvrent le même catalogue, seule la durée change. Une partie est offerte, sans carte.',
   },
   {
+    // Indexable jusqu'au 14/10/2026, sous « Essayer sans compte… sans
+    // inscription ». C'était faux depuis la règle de la partie offerte : la
+    // démo exige un compte (`DemoGame` → `useUser`), et un moteur, comme un
+    // visiteur arrivé par le résultat, ne voyait qu'une redirection.
     chemin: '/demo',
-    indexable: true,
-    priorite: 0.9,
-    frequence: 'monthly',
-    titre: 'Essayer sans compte',
-    description:
-      'Une manche contre le vrai moteur du jeu, sans inscription et sans carte. De quoi savoir si c’est pour vous.',
+    indexable: false,
+    raison:
+      'Réservée aux comptes depuis la règle de la partie offerte : un moteur n’y verrait qu’une redirection vers /connexion.',
   },
   {
     chemin: '/connexion',
