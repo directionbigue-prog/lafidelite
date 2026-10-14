@@ -245,6 +245,17 @@ html:has(.cf-landing) {
   border-color: #e8b860;
 }
 
+/* Bouton lecture/pause du film (`components/landing/FilmPub.tsx`). */
+
+.cf-landing .cf-film-bouton:hover {
+  border-color: #e8b860;
+}
+
+.cf-landing .cf-film-bouton:focus-visible {
+  outline: 2px solid #e8b860;
+  outline-offset: 3px;
+}
+
 /* ── Adaptation mobile ───────────────────────────────────────────────────
  *
  * Le canevas Claude Design a été dessiné pour le bureau. Son contenu est

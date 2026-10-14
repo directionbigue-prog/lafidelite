@@ -50,6 +50,10 @@
 //     `lib/rituel/` et `lib/distance/` — pas d'après une maquette. L'appel
 //     vidéo, livré le même jour, a été retiré du produit le soir même : la
 //     page n'en parle plus.
+//   · LE FILM PUBLICITAIRE (section `#film`, 14/10/2026) n'existe pas dans le
+//     canevas. Il vit dans `components/landing/FilmPub.tsx`, seul îlot client
+//     de la page, et ne démarre que selon `lib/landing/film.ts` : 7 Mo payés
+//     en données mobiles ne se dépensent pas à l'ouverture de la page.
 //   · Les liens du footer (Confidentialité, CGU, Support, English) et
 //     plusieurs CTA pointent sur « # », comme dans la maquette.
 //
@@ -68,6 +72,7 @@ import './landing.css';
 import { buildLandingDesignData, TOTAL_QUESTIONS } from '@/lib/landing/design-data';
 import { cheminAchat } from '@/lib/game/pack-choisi';
 import { SignupCard } from '@/components/landing/SignupCard';
+import { FilmPub } from '@/components/landing/FilmPub';
 import { Marque } from '@/components/ui/Marque';
 
 export const runtime = 'nodejs';
@@ -473,6 +478,44 @@ export default function Home() {
             </div>
           </div>
         </div>
+        <section
+          id="film"
+          style={{
+            position: 'relative',
+            zIndex: '3',
+            maxWidth: '1440px',
+            margin: '0 auto',
+            padding: 'clamp(56px,7vw,100px) clamp(20px,5vw,72px) 0',
+          }}
+        >
+          {' '}
+          <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+            {' '}
+            <div
+              style={{
+                fontSize: '12px',
+                letterSpacing: '.16em',
+                textTransform: 'uppercase',
+                color: '#E8B860',
+                marginBottom: '16px',
+              }}
+            >
+              Le film · 20 secondes
+            </div>
+            <h2
+              style={{
+                fontFamily: "'Instrument Serif',serif",
+                fontWeight: '400',
+                fontSize: 'clamp(32px,4.2vw,56px)',
+                lineHeight: '1.05',
+                margin: '0 0 clamp(24px,3vw,36px)',
+              }}
+            >
+              Cœur Fidèle, en vingt secondes
+            </h2>
+            <FilmPub />
+          </div>
+        </section>
         <section
           id="apercu-anime"
           style={{
