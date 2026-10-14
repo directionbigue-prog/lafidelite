@@ -125,9 +125,11 @@ describe('the landing page tells the truth about the question bank', () => {
   // Le chiffre de maquette a disparu : la page compte la banque. Ce cas
   // garde la porte fermée — un « 440 » réécrit à la main redeviendrait faux
   // dès la question suivante ajoutée au seed.
+  // Depuis la page courte (14/10/2026), la section des catégories n'existe
+  // plus : le compteur vit dans le bandeau des chiffres, juste sous le héros.
   it('counts the real bank instead of the canvas figure', () => {
     expect(landing).not.toContain('440 questions');
-    expect(landing).toContain('{TOTAL_QUESTIONS} questions, huit territoires');
+    expect(landing).toMatch(/\{TOTAL_QUESTIONS\}\s*<\/span>\s*<span>questions écrites à la main/);
     expect(TOTAL_QUESTIONS).toBe(QUESTIONS_SEED.length);
   });
 
