@@ -15,6 +15,7 @@ import { ApiError } from '@/lib/api';
 import { apiAdmin } from '@/lib/admin/api-admin';
 import { GRANULARITES, type Granularite, type LigneConnexion } from '@/lib/admin/connexions';
 import { messageErreurAdmin } from '@/lib/admin/console';
+import { CARTE_CONSOLE, ErreurConsole } from './ListeAdmin';
 
 interface Repartition {
   cle: string;
@@ -59,17 +60,17 @@ const ICONE_APPAREIL: Record<string, string> = {
  */
 export function DernieresConnexions({ lignes }: { lignes: LigneConnexion[] }) {
   return (
-    <div className="rounded-xl border border-cream/10 bg-plum-card2/60 p-4">
-      <p className="text-[10px] uppercase tracking-[0.14em] text-cream/50">
+    <div className="rounded-2xl border border-console-ligne bg-white p-4 sm:p-5">
+      <p className="text-[10px] uppercase tracking-[0.14em] text-ink/50">
         Dernières connexions (heure de Dakar)
       </p>
       {lignes.length === 0 ? (
-        <p className="mt-2 text-sm text-cream/45">Aucune connexion encore.</p>
+        <p className="mt-2 text-sm text-ink/50">Aucune connexion encore.</p>
       ) : (
         <div className="mt-2.5 max-h-[420px] overflow-auto">
           <table className="w-full text-sm">
-            <thead className="sticky top-0 bg-plum-card2">
-              <tr className="text-left text-[11px] uppercase tracking-[0.1em] text-cream/45">
+            <thead className="sticky top-0 bg-white">
+              <tr className="text-left text-[11px] uppercase tracking-[0.1em] text-ink/50">
                 <th className="pb-1.5 pr-3 font-normal">Appareil</th>
                 <th className="pb-1.5 pr-3 font-normal">Heure</th>
                 <th className="pb-1.5 pr-3 font-normal">Jour</th>
@@ -80,7 +81,7 @@ export function DernieresConnexions({ lignes }: { lignes: LigneConnexion[] }) {
             </thead>
             <tbody>
               {lignes.map((l, i) => (
-                <tr key={`${l.quand}-${i}`} className="border-t border-cream/8 text-cream/80">
+                <tr key={`${l.quand}-${i}`} className="border-t border-console-ligne text-ink/85">
                   <td className="whitespace-nowrap py-1.5 pr-3">
                     <span className="mr-1.5" aria-hidden>
                       {ICONE_APPAREIL[l.typeAppareil] ?? '❔'}
@@ -92,7 +93,7 @@ export function DernieresConnexions({ lignes }: { lignes: LigneConnexion[] }) {
                   <td className="py-1.5 pr-3">{l.mois}</td>
                   <td className="py-1.5 pr-3 tabular-nums">{l.annee}</td>
                   <td className="whitespace-nowrap py-1.5">
-                    <span className="mr-1.5 text-base" aria-hidden>
+                    <span className="drapeau mr-1.5 text-base" aria-hidden>
                       {l.drapeau}
                     </span>
                     {l.pays}
@@ -143,27 +144,27 @@ export function Connexions() {
   }, [granularite, charger]);
 
   return (
-    <section className="space-y-4 rounded-2xl border border-cream/12 bg-plum-card/50 p-5">
+    <section className={CARTE_CONSOLE}>
       <header className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <h2 className="font-serif text-xl text-cream">Connexions</h2>
-          <p className="mt-1 text-[13px] leading-relaxed text-cream/55">
+          <h2 className="font-serif text-xl text-ink">Connexions</h2>
+          <p className="mt-1 max-w-prose text-[13px] leading-relaxed text-ink/60">
             Type d’appareil et pays, déduits à la connexion. Ni l’adresse IP ni le navigateur ne
             sont conservés.
           </p>
         </div>
         {donnees && (
-          <p className="text-[13px] text-cream/60">
-            <span className="font-semibold text-gold">{donnees.total}</span> connexion
+          <p className="text-[13px] text-ink/60">
+            <span className="font-semibold text-wine">{donnees.total}</span> connexion
             {donnees.total === 1 ? '' : 's'} ·{' '}
-            <span className="font-semibold text-gold">{donnees.comptesDistincts}</span> compte
+            <span className="font-semibold text-wine">{donnees.comptesDistincts}</span> compte
             {donnees.comptesDistincts === 1 ? '' : 's'}
           </p>
         )}
       </header>
 
-      {/* Sélecteur d'échelle. `rounded-xl` et un fond teinté, pas une pastille
-          pleine : une pastille `rounded-full bg-gold` serait un bouton d'action
+      {/* Sélecteur d'échelle. `rounded-xl` (l'onglet actif en encre depuis le
+          thème clair), pas une pastille : une pastille `rounded-full bg-gold` serait un bouton d'action
           au sens de la charte, et `one-button-design.test.ts` le signalerait —
           à raison, puisque ce sont des onglets, pas des actions. */}
       <div role="tablist" aria-label="Échelle de temps" className="flex flex-wrap gap-1.5">
@@ -178,8 +179,8 @@ export function Connexions() {
               onClick={() => setGranularite(g)}
               className={`rounded-xl px-3 py-1.5 text-[13px] transition-colors ${
                 actif
-                  ? 'bg-gold/15 font-semibold text-gold'
-                  : 'text-cream/60 hover:bg-plum-card hover:text-cream'
+                  ? 'bg-ink font-semibold text-cream'
+                  : 'text-ink/60 hover:bg-console-fond hover:text-ink'
               }`}
             >
               {LIBELLES_GRANULARITE[g]}
@@ -188,13 +189,9 @@ export function Connexions() {
         })}
       </div>
 
-      {erreur && (
-        <p className="rounded-xl border border-wine/40 bg-wine/10 px-3 py-2 text-sm text-cream">
-          {erreur}
-        </p>
-      )}
+      {erreur && <ErreurConsole>{erreur}</ErreurConsole>}
 
-      {chargement && !donnees && <p className="text-sm text-cream/50">Chargement…</p>}
+      {chargement && !donnees && <p className="text-sm text-ink/55">Chargement…</p>}
 
       {donnees && (
         <div className="space-y-5">
@@ -214,7 +211,7 @@ export function Connexions() {
           <DernieresConnexions lignes={donnees.dernieres ?? []} />
 
           {donnees.tronque && (
-            <p className="text-[12px] text-cream/45">
+            <p className="text-[12px] text-ink/50">
               Volume plafonné à 50 000 connexions : les chiffres ci-dessus sont partiels.
             </p>
           )}
@@ -238,7 +235,9 @@ function Histogramme({ serie }: { serie: PointSerie[] }) {
     <div>
       <div className="flex h-32 items-end gap-[3px]">
         {serie.map((p) => (
-          <div key={p.debut} className="group relative flex flex-1 flex-col justify-end">
+          // `h-full` : sans lui, la colonne d'un conteneur `items-end` prend la
+          // hauteur de son contenu (zéro), et la barre en % avec elle.
+          <div key={p.debut} className="group relative flex h-full flex-1 flex-col justify-end">
             <div
               // `title` plutôt qu'une infobulle maison : la série peut compter
               // 30 points sur un téléphone, donc les étiquettes sous l'axe sont
@@ -246,7 +245,7 @@ function Histogramme({ serie }: { serie: PointSerie[] }) {
               title={`${p.libelle} · ${p.nombre}`}
               style={{ height: `${Math.round((p.nombre / max) * 100)}%` }}
               className={`w-full rounded-t-[3px] ${
-                p.nombre === 0 ? 'min-h-[2px] bg-cream/10' : 'bg-gold/70'
+                p.nombre === 0 ? 'min-h-[2px] bg-ink/10' : 'bg-gold-deep/75'
               }`}
             />
           </div>
@@ -255,7 +254,7 @@ function Histogramme({ serie }: { serie: PointSerie[] }) {
       {/* Une étiquette sur quatre au plus : trente libellés côte à côte se
           chevauchent et deviennent illisibles. Les extrêmes sont toujours
           affichés, sinon on ne sait pas où commence ni où finit la fenêtre. */}
-      <div className="mt-1.5 flex gap-[3px] text-[10px] text-cream/40">
+      <div className="mt-1.5 flex gap-[3px] text-[10px] text-ink/45">
         {serie.map((p, i) => {
           const pas = Math.max(1, Math.ceil(serie.length / 6));
           const montrer = i === 0 || i === serie.length - 1 || i % pas === 0;
@@ -280,27 +279,31 @@ function Liste({
   vide: string;
 }) {
   return (
-    <div className="rounded-xl border border-cream/10 bg-plum-card2/60 p-4">
-      <p className="text-[10px] uppercase tracking-[0.14em] text-cream/50">{titre}</p>
+    <div className="rounded-xl border border-console-ligne bg-console-fond/50 p-4">
+      <p className="text-[10px] uppercase tracking-[0.14em] text-ink/50">{titre}</p>
       {lignes.length === 0 ? (
-        <p className="mt-2 text-sm text-cream/45">{vide}</p>
+        <p className="mt-2 text-sm text-ink/50">{vide}</p>
       ) : (
         <ul className="mt-2.5 space-y-2">
           {lignes.map((l) => (
             <li key={l.cle || '(vide)'} className="space-y-1">
               <div className="flex items-baseline justify-between gap-2 text-sm">
-                <span className="min-w-0 truncate text-cream/80">
-                  {'drapeau' in l && <span className="mr-1.5">{l.drapeau}</span>}
+                <span className="min-w-0 truncate text-ink/85">
+                  {'drapeau' in l && (
+                    <span className="drapeau mr-1.5" aria-hidden>
+                      {l.drapeau}
+                    </span>
+                  )}
                   {l.libelle}
                 </span>
-                <span className="shrink-0 tabular-nums text-cream/60">
+                <span className="shrink-0 tabular-nums text-ink/60">
                   {l.nombre}
-                  <span className="ml-1.5 text-cream/40">{l.pourcentage}%</span>
+                  <span className="ml-1.5 text-ink/40">{l.pourcentage}%</span>
                 </span>
               </div>
-              <div className="h-1 overflow-hidden rounded-full bg-cream/8">
+              <div className="h-1 overflow-hidden rounded-full bg-ink/8">
                 <div
-                  className="h-full rounded-full bg-gold/60"
+                  className="h-full rounded-full bg-gold-deep/70"
                   style={{ width: `${l.pourcentage}%` }}
                 />
               </div>

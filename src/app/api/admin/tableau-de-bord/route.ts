@@ -19,7 +19,7 @@ import { makeRequestContext, withRequestContext } from '@/lib/server/observabili
 import { DOMAINE_INVITE } from '@/lib/couples/compte-invite';
 import { diagnostiquerEnvironnement, libelleSuspecte } from '@/lib/config/environnement';
 import { alertesPaiement, etatPaiement } from '@/lib/server/payments/etat';
-import { drapeau, libelleAppareil, ligneConnexion, nomPays } from '@/lib/admin/connexions';
+import { classer, drapeau, libelleAppareil, ligneConnexion, nomPays } from '@/lib/admin/connexions';
 import {
   compteParCle,
   jourUtc,
@@ -78,6 +78,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       emailsMortsRecents,
       outboxMortsRecents,
       commandesEchouees24h,
+      paysParGroupe,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { email: { endsWith: `@${DOMAINE_INVITE}` } } }),
@@ -153,6 +154,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           createdAt: { gte: new Date(maintenant.getTime() - 86_400_000) },
         },
       }),
+      // TOUS les pays d'où l'on s'est connecté, sur toute la durée conservée
+      // (CONNEXION_RETENTION_DAYS, purgée par le cron) — et non les six
+      // premiers de la semaine, le reste fondu dans « Autres ». Un groupBy :
+      // une ligne par pays, quel que soit le nombre de connexions.
+      prisma.connexionEvent.groupBy({ by: ['pays'], _count: { _all: true } }),
     ]);
 
     const parties = compteParCle(
@@ -203,6 +209,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       parPays[pays] = (parPays[pays] ?? 0) + 1;
     }
 
+    // Un pays inconnu (pas d'en-tête de géolocalisation) a la clé '' : il
+    // reste dans la liste, sous « Pays inconnu », pour que le total tombe juste.
+    const paysConnectes = classer(
+      groupes(paysParGroupe, (r) => r.pays).map((g) => ({ cle: g.cle ?? '', nombre: g.n })),
+      nomPays,
+    ).map((p) => ({ ...p, drapeau: drapeau(p.cle) }));
+
     return NextResponse.json(
       {
         genereLe: maintenant.toISOString(),
@@ -246,6 +259,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         },
         files: { emails, outbox },
         connexions7j: { total: connexions7j.length, parAppareil, parPays },
+        paysConnectes,
         dernieresConnexions: dernieresConnexions.map(ligneConnexion),
         alertes: {
           payeesSansDroit: payeesSansDroit.map((c) => c.id),

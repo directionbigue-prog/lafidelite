@@ -49,7 +49,12 @@ import {
   tonDuStatut,
   RAISON_MAX,
 } from '@/lib/admin/console';
-import { Pastille } from '@/components/admin/ListeAdmin';
+import {
+  Pastille,
+  CARTE_CONSOLE,
+  SELECT_CONSOLE,
+  BOUTON_CONSOLE,
+} from '@/components/admin/ListeAdmin';
 
 interface Moi {
   admin: { id: string; email: string; role: string };
@@ -285,12 +290,12 @@ export default function AdminPage() {
 
   const corps = (() => {
     if (chargement) {
-      return <p className="text-sm text-cream/60">Vérification de vos droits…</p>;
+      return <p className="text-sm text-ink/60">Vérification de vos droits…</p>;
     }
 
     if (refuse) {
       return (
-        <Alert tone="error">
+        <Alert tone="error" surface="clair">
           Cette console est réservée aux administrateurs. Si vous pensez que c’est une erreur,
           demandez une promotion à un super-administrateur.
         </Alert>
@@ -300,12 +305,14 @@ export default function AdminPage() {
     if (!moi) {
       return (
         <div className="space-y-3">
-          <Alert tone="error">{erreur ?? 'Impossible de vérifier vos droits.'}</Alert>
+          <Alert tone="error" surface="clair">
+            {erreur ?? 'Impossible de vérifier vos droits.'}
+          </Alert>
           {reconnexion ? (
             // L'action qui répare, pas celle qui échouera encore.
             <ButtonLink href="/connexion?next=/admin">Se reconnecter</ButtonLink>
           ) : (
-            <Button variant="secondary" onClick={() => window.location.reload()}>
+            <Button variant="secondary-inverse" onClick={() => window.location.reload()}>
               Réessayer
             </Button>
           )}
@@ -317,34 +324,37 @@ export default function AdminPage() {
 
     return (
       <div className="space-y-6">
-        <div className="rounded-2xl border border-cream/10 bg-plum-card/40 px-4 py-3 text-sm">
-          <p className="text-cream/80">
-            Connecté comme <strong className="text-cream">{moi.admin.email}</strong> —{' '}
+        <div className="rounded-2xl border border-console-ligne bg-white px-4 py-3 text-sm shadow-sm">
+          <p className="break-words text-ink/75">
+            Connecté comme <strong className="text-ink">{moi.admin.email}</strong> —{' '}
             {libelleRole(moi.admin.role)}
           </p>
           {!modifiable && (
-            <p className="mt-1 text-cream/60">
+            <p className="mt-1 text-ink/60">
               Vous pouvez consulter les comptes. Seul un super-administrateur change les rôles.
             </p>
           )}
         </div>
 
-        <form onSubmit={soumettreRecherche} className="space-y-3">
-          <Field
-            label="Rechercher"
-            name="q"
-            value={recherche}
-            onChange={(e) => setRecherche(e.target.value)}
-            placeholder="Adresse e-mail ou nom"
-            helper="Laissez vide pour voir les comptes les plus récents."
-          />
-          <div className="flex flex-wrap items-end gap-3">
-            <label className="flex flex-col gap-1 text-sm text-cream/80">
+        {/* Sur ordinateur, recherche, rôle et bouton tiennent sur une ligne ;
+            sur téléphone, ils s'empilent. L'aide passe dans le texte indicatif :
+            sous le champ, elle décalait le bouton de la ligne. */}
+        <form onSubmit={soumettreRecherche} className={CARTE_CONSOLE}>
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem_auto] md:items-end">
+            <Field
+              surface="clair"
+              label="Rechercher"
+              name="q"
+              value={recherche}
+              onChange={(e) => setRecherche(e.target.value)}
+              placeholder="E-mail ou nom — vide : les plus récents"
+            />
+            <label className="flex flex-col gap-1.5 text-sm text-ink/75">
               Rôle
               <select
                 value={filtreRole}
                 onChange={(e) => setFiltreRole(e.target.value)}
-                className="rounded-xl border border-cream/15 bg-plum-deep px-3 py-2 text-cream"
+                className={`${SELECT_CONSOLE} py-3.5`}
               >
                 <option value="">Tous</option>
                 {ROLES.map((r) => (
@@ -354,21 +364,29 @@ export default function AdminPage() {
                 ))}
               </select>
             </label>
-            <Button type="submit" variant="secondary">
+            <Button type="submit" variant="secondary-inverse">
               Filtrer
             </Button>
           </div>
         </form>
 
-        {erreur && <Alert tone="error">{erreur}</Alert>}
-        {succes && <Alert tone="success">{succes}</Alert>}
+        {erreur && (
+          <Alert tone="error" surface="clair">
+            {erreur}
+          </Alert>
+        )}
+        {succes && (
+          <Alert tone="success" surface="clair">
+            {succes}
+          </Alert>
+        )}
 
         {page === null ? (
-          <p className="text-sm text-cream/60">Chargement des comptes…</p>
+          <p className="text-sm text-ink/60">Chargement des comptes…</p>
         ) : page.items.length === 0 ? (
-          <p className="text-sm text-cream/60">Aucun compte ne correspond à cette recherche.</p>
+          <p className="text-sm text-ink/60">Aucun compte ne correspond à cette recherche.</p>
         ) : (
-          <ul className="space-y-3">
+          <ul className="grid gap-3 xl:grid-cols-2">
             {page.items.map((u) => {
               // L'action de statut, ou la raison pour laquelle il n'y en a pas.
               const statut = actionStatut({
@@ -379,28 +397,28 @@ export default function AdminPage() {
               return (
                 <li
                   key={u.id}
-                  className="rounded-2xl border border-cream/10 bg-plum-card/30 px-4 py-3"
+                  className="min-w-0 rounded-2xl border border-console-ligne bg-white px-4 py-3 shadow-sm"
                 >
                   {/* Le statut était lu dans la réponse et jamais affiché : un
                     compte suspendu était indiscernable d'un compte actif dans
                     la console qui l'avait suspendu. */}
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium text-cream">{u.email}</p>
+                    <p className="min-w-0 break-all font-medium text-ink">{u.email}</p>
                     <Pastille ton={tonDuStatut(u.status)}>{libelleStatut(u.status)}</Pastille>
                   </div>
-                  <p className="text-sm text-cream/60">
+                  <p className="mt-0.5 text-sm text-ink/60">
                     {u.name ?? 'Sans nom'} · inscrit le {formaterDate(u.createdAt)} ·{' '}
                     {libelleVerification(u.emailVerifiedAt)}
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-3">
                     {modifiable ? (
-                      <label className="flex items-center gap-2 text-sm text-cream/80">
+                      <label className="flex items-center gap-2 text-sm text-ink/70">
                         Rôle
                         <select
                           value={u.role}
                           disabled={enCours === u.id}
                           onChange={(e) => void changerRole(u, e.target.value)}
-                          className="rounded-xl border border-cream/15 bg-plum-deep px-3 py-1.5 text-cream disabled:opacity-50"
+                          className={`${SELECT_CONSOLE} disabled:opacity-50`}
                         >
                           {ROLES.map((r: RoleAdmin) => (
                             <option key={r} value={r}>
@@ -410,22 +428,23 @@ export default function AdminPage() {
                         </select>
                       </label>
                     ) : (
-                      <span className="text-sm text-cream/70">{libelleRole(u.role)}</span>
+                      <span className="text-sm text-ink/70">{libelleRole(u.role)}</span>
                     )}
                     {statut.offerte ? (
-                      <Button
-                        variant="secondary"
+                      <button
+                        type="button"
                         disabled={enCours === u.id}
                         onClick={() => void changerStatut(u)}
+                        className={BOUTON_CONSOLE}
                       >
                         {statut.label}
-                      </Button>
+                      </button>
                     ) : (
                       // Dire pourquoi, plutôt que de ne rien afficher : un bouton
                       // absent se lit comme une panne.
-                      <span className="text-[13px] text-cream/45">{statut.empeche}</span>
+                      <span className="text-[13px] text-ink/50">{statut.empeche}</span>
                     )}
-                    {enCours === u.id && <span className="text-sm text-cream/60">Envoi…</span>}
+                    {enCours === u.id && <span className="text-sm text-ink/60">Envoi…</span>}
                   </div>
                 </li>
               );
@@ -434,9 +453,13 @@ export default function AdminPage() {
         )}
 
         {page?.nextCursor && (
-          <Button variant="secondary" onClick={() => void charger(page.nextCursor)}>
+          <button
+            type="button"
+            onClick={() => void charger(page.nextCursor)}
+            className={BOUTON_CONSOLE}
+          >
             Charger la suite
-          </Button>
+          </button>
         )}
       </div>
     );
@@ -448,12 +471,12 @@ export default function AdminPage() {
   const onglets = ongletsVisibles(moi?.can);
 
   return (
-    <AppShell active="administration" coupleLabel={null}>
+    <AppShell active="administration" coupleLabel={null} surface="clair" large>
       <div className="space-y-6">
-        <header className="flex flex-wrap items-end justify-between gap-4">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-1">
-            <h1 className="font-serif text-3xl text-cream">Administration</h1>
-            <p className="text-sm text-cream/60">
+            <h1 className="font-serif text-3xl text-ink sm:text-4xl">Administration</h1>
+            <p className="max-w-prose text-sm text-ink/60">
               Comptes, connexions, commandes et journal. Chaque modification est enregistrée dans le
               journal d’audit.
             </p>
@@ -469,7 +492,11 @@ export default function AdminPage() {
             on ne sait pas lesquels afficher, et après un refus la page montre
             déjà son message. */}
         {moi && onglets.length > 1 && (
-          <div role="tablist" aria-label="Sections" className="flex flex-wrap gap-1.5">
+          <div
+            role="tablist"
+            aria-label="Sections"
+            className="flex gap-1 overflow-x-auto rounded-2xl border border-console-ligne bg-white p-1.5 shadow-sm"
+          >
             {onglets.map((o) => {
               const actif = o.id === onglet;
               return (
@@ -479,10 +506,10 @@ export default function AdminPage() {
                   role="tab"
                   aria-selected={actif}
                   onClick={() => setOnglet(o.id)}
-                  className={`rounded-xl px-3 py-1.5 text-[13px] transition-colors ${
+                  className={`shrink-0 whitespace-nowrap rounded-xl px-3.5 py-2 text-[13px] transition-colors ${
                     actif
-                      ? 'bg-gold/15 font-semibold text-gold'
-                      : 'text-cream/60 hover:bg-plum-card hover:text-cream'
+                      ? 'bg-ink font-semibold text-cream'
+                      : 'text-ink/60 hover:bg-console-fond hover:text-ink'
                   }`}
                 >
                   {o.label}

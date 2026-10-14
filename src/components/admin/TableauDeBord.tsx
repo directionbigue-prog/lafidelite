@@ -20,8 +20,8 @@ import {
 import { packParId } from '@/lib/game/packs';
 import { Alert } from '@/components/ui/Alert';
 import { DernieresConnexions } from '@/components/admin/Connexions';
+import { BOUTON_CONSOLE } from '@/components/admin/ListeAdmin';
 import type { LigneConnexion } from '@/lib/admin/connexions';
-import { Button, ButtonLink } from '@/components/ui/Button';
 
 interface Donnees {
   genereLe: string;
@@ -63,6 +63,8 @@ interface Donnees {
     parPays: Record<string, number>;
   };
   dernieresConnexions: LigneConnexion[];
+  /** Absent d'une réponse antérieure au 14/10/2026 : lu avec `?? []`. */
+  paysConnectes?: PaysConnecte[];
   alertes: {
     payeesSansDroit: string[];
     emailsMorts: number;
@@ -73,6 +75,14 @@ interface Donnees {
     paiement: string[];
   };
   series: { inscriptions: PointDeSerie[]; parties: PointDeSerie[]; ventes: PointDeSerie[] };
+}
+
+interface PaysConnecte {
+  cle: string;
+  libelle: string;
+  drapeau: string;
+  nombre: number;
+  pourcentage: number;
 }
 
 const RAFRAICHISSEMENT_MS = 60_000;
@@ -139,7 +149,7 @@ export function TableauDeBord() {
 
   if (refuse) {
     return (
-      <Alert tone="info">
+      <Alert tone="info" surface="clair">
         Ce tableau de bord est réservé au super-administrateur.{' '}
         <Link href="/admin" className="underline">
           Retour à la console
@@ -150,24 +160,33 @@ export function TableauDeBord() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-1">
-          <h1 className="font-serif text-3xl text-cream">Tableau de bord</h1>
-          <p className="text-sm text-cream/60">
+          <h1 className="font-serif text-3xl text-ink sm:text-4xl">Tableau de bord</h1>
+          <p className="text-sm text-ink/60">
             {d ? `Mis à jour ${dateCourte(d.genereLe)} · rafraîchi chaque minute` : 'Chargement…'}
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="ghost" onClick={() => void charger()} disabled={chargement}>
+          <button
+            type="button"
+            onClick={() => void charger()}
+            disabled={chargement}
+            className={BOUTON_CONSOLE}
+          >
             {chargement ? 'Actualisation…' : 'Actualiser'}
-          </Button>
-          <ButtonLink href="/admin" variant="ghost">
+          </button>
+          <Link href="/admin" className={BOUTON_CONSOLE}>
             Console
-          </ButtonLink>
+          </Link>
         </div>
       </header>
 
-      {erreur && <Alert tone="error">{erreur}</Alert>}
+      {erreur && (
+        <Alert tone="error" surface="clair">
+          {erreur}
+        </Alert>
+      )}
 
       {d && (
         <>
@@ -209,7 +228,7 @@ export function TableauDeBord() {
             </Carte>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-4 xl:grid-cols-2">
             <Carte titre="Ventes par pack">
               {d.ventes.parPack.length === 0 ? (
                 <Vide>Aucune vente encore.</Vide>
@@ -259,7 +278,7 @@ export function TableauDeBord() {
             </Carte>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <Carte titre="Comptes">
               <Ligne libelle="Total" valeur={nombreLisible(d.comptes.total)} />
               <Ligne
@@ -304,11 +323,10 @@ export function TableauDeBord() {
             </Carte>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <Carte titre="Connexions — 7 jours">
               <Ligne libelle="Total" valeur={nombreLisible(d.connexions7j.total)} />
               <Repartition titre="Appareils" valeurs={d.connexions7j.parAppareil} />
-              <Repartition titre="Pays" valeurs={d.connexions7j.parPays} max={6} />
             </Carte>
             <Carte titre="File d’e-mails">
               <Statuts valeurs={d.files.emails} />
@@ -317,6 +335,8 @@ export function TableauDeBord() {
               <Statuts valeurs={d.files.outbox} />
             </Carte>
           </div>
+
+          <PaysConnectes pays={d.paysConnectes ?? []} />
 
           <DernieresConnexions lignes={d.dernieresConnexions ?? []} />
         </>
@@ -347,9 +367,14 @@ function Alertes({ a }: { a: Donnees['alertes'] }) {
       `Variable(s) d’environnement mal formée(s) : ${a.configuration.join(', ')}. À reposer dans Vercel sans caractère caché, puis redéployer.`,
     );
 
-  if (messages.length === 0) return <Alert tone="success">Aucune alerte. Tout tourne.</Alert>;
+  if (messages.length === 0)
+    return (
+      <Alert tone="success" surface="clair">
+        Aucune alerte. Tout tourne.
+      </Alert>
+    );
   return (
-    <Alert tone="error">
+    <Alert tone="error" surface="clair">
       <ul className="list-disc space-y-1 pl-4">
         {messages.map((m) => (
           <li key={m}>{m}</li>
@@ -371,36 +396,48 @@ function Chiffre({
   accent?: boolean;
 }) {
   return (
+    // Le chiffre d'affaires en carte encre : sur un tableau de bord clair,
+    // c'est le seul chiffre qu'on doit trouver sans le chercher.
     <div
-      className={`rounded-2xl border p-4 ${accent ? 'border-gold/60 bg-plum-card' : 'border-cream/12 bg-plum-card/50'}`}
+      className={`min-w-0 rounded-2xl border p-4 shadow-sm ${
+        accent ? 'border-ink bg-ink text-cream' : 'border-console-ligne bg-white text-ink'
+      }`}
     >
-      <p className="text-[10px] uppercase tracking-[0.14em] text-cream/50">{titre}</p>
-      <p className="mt-1.5 font-serif text-[clamp(22px,3vw,30px)] leading-tight text-gold">
+      <p
+        className={`text-[10px] uppercase tracking-[0.14em] ${accent ? 'text-cream/60' : 'text-ink/50'}`}
+      >
+        {titre}
+      </p>
+      <p
+        className={`mt-1.5 break-words font-serif text-[clamp(22px,3vw,32px)] leading-tight ${
+          accent ? 'text-gold' : 'text-ink'
+        }`}
+      >
         {valeur}
       </p>
-      <p className="mt-1 text-[12px] text-cream/55">{detail}</p>
+      <p className={`mt-1 text-[12px] ${accent ? 'text-cream/65' : 'text-ink/55'}`}>{detail}</p>
     </div>
   );
 }
 
 function Carte({ titre, children }: { titre: string; children: ReactNode }) {
   return (
-    <section className="space-y-3 rounded-2xl border border-cream/12 bg-plum-card/50 p-5">
-      <h2 className="font-serif text-lg text-cream">{titre}</h2>
+    <section className="min-w-0 space-y-3 rounded-2xl border border-console-ligne bg-white p-4 shadow-sm sm:p-5">
+      <h2 className="font-serif text-lg text-ink">{titre}</h2>
       {children}
     </section>
   );
 }
 
 function Vide({ children }: { children: ReactNode }) {
-  return <p className="text-sm text-cream/45">{children}</p>;
+  return <p className="text-sm text-ink/50">{children}</p>;
 }
 
 function Ligne({ libelle, valeur }: { libelle: string; valeur: string }) {
   return (
     <div className="flex items-baseline justify-between gap-3 text-sm">
-      <span className="text-cream/65">{libelle}</span>
-      <span className="text-right tabular-nums text-cream">{valeur}</span>
+      <span className="text-ink/65">{libelle}</span>
+      <span className="text-right font-medium tabular-nums text-ink">{valeur}</span>
     </div>
   );
 }
@@ -410,7 +447,7 @@ function Tableau({ entetes, lignes }: { entetes: string[]; lignes: string[][] })
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left text-[11px] uppercase tracking-[0.1em] text-cream/45">
+          <tr className="text-left text-[11px] uppercase tracking-[0.1em] text-ink/50">
             {entetes.map((e) => (
               <th key={e} className="pb-1.5 pr-3 font-normal">
                 {e}
@@ -420,9 +457,9 @@ function Tableau({ entetes, lignes }: { entetes: string[]; lignes: string[][] })
         </thead>
         <tbody>
           {lignes.map((l, i) => (
-            <tr key={i} className="border-t border-cream/8">
+            <tr key={i} className="border-t border-console-ligne">
               {l.map((c, j) => (
-                <td key={j} className="py-1.5 pr-3 tabular-nums text-cream/80">
+                <td key={j} className="py-1.5 pr-3 tabular-nums text-ink/85">
                   {c}
                 </td>
               ))}
@@ -447,7 +484,7 @@ function Repartition({
   const total = lignes.reduce((s, l) => s + l.valeur, 0);
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-[0.14em] text-cream/50">{titre}</p>
+      <p className="text-[10px] uppercase tracking-[0.14em] text-ink/50">{titre}</p>
       {lignes.length === 0 ? (
         <Vide>Rien encore.</Vide>
       ) : (
@@ -457,13 +494,13 @@ function Repartition({
             return (
               <li key={l.cle} className="space-y-1">
                 <div className="flex justify-between gap-2 text-sm">
-                  <span className="truncate text-cream/80">{l.cle}</span>
-                  <span className="tabular-nums text-cream/60">
-                    {l.valeur} <span className="text-cream/40">{p}%</span>
+                  <span className="truncate text-ink/85">{l.cle}</span>
+                  <span className="tabular-nums text-ink/60">
+                    {l.valeur} <span className="text-ink/40">{p}%</span>
                   </span>
                 </div>
-                <div className="h-1 overflow-hidden rounded-full bg-cream/8">
-                  <div className="h-full rounded-full bg-gold/60" style={{ width: `${p}%` }} />
+                <div className="h-1 overflow-hidden rounded-full bg-ink/8">
+                  <div className="h-full rounded-full bg-gold-deep/70" style={{ width: `${p}%` }} />
                 </div>
               </li>
             );
@@ -471,6 +508,55 @@ function Repartition({
         </ul>
       )}
     </div>
+  );
+}
+
+/**
+ * Tous les pays d'où l'on s'est connecté, sans plafond ni « Autres » : la
+ * route compte sur toute la durée conservée. Le drapeau porte la classe
+ * `drapeau` (police dédiée, voir globals.css) : sans elle, Windows écrit
+ * « SN » au lieu de dessiner le drapeau.
+ */
+function PaysConnectes({ pays }: { pays: PaysConnecte[] }) {
+  const total = pays.reduce((s, p) => s + p.nombre, 0);
+  return (
+    <section className="min-w-0 space-y-4 rounded-2xl border border-console-ligne bg-white p-4 shadow-sm sm:p-5">
+      <header className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="font-serif text-lg text-ink">Pays connectés</h2>
+        <p className="text-[13px] text-ink/60">
+          <span className="font-semibold text-ink">{pays.length}</span> pays ·{' '}
+          {nombreLisible(total)} connexion{total === 1 ? '' : 's'} conservée
+          {total === 1 ? '' : 's'}
+        </p>
+      </header>
+      {pays.length === 0 ? (
+        <Vide>Aucune connexion encore.</Vide>
+      ) : (
+        <ul className="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {pays.map((p) => (
+            <li key={p.cle || '(inconnu)'} className="min-w-0 space-y-1">
+              <div className="flex items-baseline justify-between gap-2 text-sm">
+                <span className="flex min-w-0 items-baseline gap-2 text-ink/85">
+                  <span className="drapeau text-lg leading-none" aria-hidden>
+                    {p.drapeau}
+                  </span>
+                  <span className="truncate">{p.libelle}</span>
+                </span>
+                <span className="shrink-0 tabular-nums text-ink/60">
+                  {nombreLisible(p.nombre)} <span className="text-ink/40">{p.pourcentage}%</span>
+                </span>
+              </div>
+              <div className="h-1 overflow-hidden rounded-full bg-ink/8">
+                <div
+                  className="h-full rounded-full bg-gold-deep/70"
+                  style={{ width: `${p.pourcentage}%` }}
+                />
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 
@@ -496,21 +582,24 @@ function Barres({ serie }: { serie: PointDeSerie[] }) {
   const total = serie.reduce((s, p) => s + p.valeur, 0);
   return (
     <div>
-      <p className="text-sm text-cream/60">
-        Total : <span className="font-semibold text-gold">{nombreLisible(total)}</span>
+      <p className="text-sm text-ink/60">
+        Total : <span className="font-semibold text-ink">{nombreLisible(total)}</span>
       </p>
       <div className="mt-2 flex h-24 items-end gap-[3px]">
         {serie.map((p) => (
-          <div key={p.jour} className="flex flex-1 flex-col justify-end">
+          // `h-full` : sans lui, la colonne d'un conteneur `items-end` prend la
+          // hauteur de son contenu, soit zéro, et la barre en % aussi — les
+          // trois histogrammes s'affichaient vides.
+          <div key={p.jour} className="flex h-full flex-1 flex-col justify-end">
             <div
               title={`${p.jour} · ${p.valeur}`}
               style={{ height: `${Math.round((p.valeur / max) * 100)}%` }}
-              className={`w-full rounded-t-[3px] ${p.valeur === 0 ? 'min-h-[2px] bg-cream/10' : 'bg-gold/70'}`}
+              className={`w-full rounded-t-[3px] ${p.valeur === 0 ? 'min-h-[2px] bg-ink/10' : 'bg-gold-deep/75'}`}
             />
           </div>
         ))}
       </div>
-      <div className="mt-1 flex justify-between text-[10px] text-cream/40">
+      <div className="mt-1 flex justify-between text-[10px] text-ink/45">
         <span>{serie[0]?.jour.slice(5)}</span>
         <span>{serie[serie.length - 1]?.jour.slice(5)}</span>
       </div>

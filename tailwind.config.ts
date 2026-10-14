@@ -26,6 +26,13 @@ const config: Config = {
           clair: '#EFE3D6',
           fonce: '#3D2036',
         },
+        // La console d'administration, en clair (demande du 14/10/2026). Un
+        // gris à peine teinté de prune, pour rester de la famille. Ces jetons
+        // ne servent qu'à `/admin` : le produit reste sombre partout ailleurs.
+        console: {
+          fond: '#F3F1F5',
+          ligne: '#E3DFE7',
+        },
       },
       fontFamily: {
         serif: ['var(--font-serif)', 'serif'],

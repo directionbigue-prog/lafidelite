@@ -15,7 +15,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ApiError } from '@/lib/api';
 import { apiAdmin } from '@/lib/admin/api-admin';
-import { ListeAdmin, Pastille, type Colonne } from './ListeAdmin';
+import {
+  ListeAdmin,
+  Pastille,
+  CARTE_CONSOLE,
+  BOUTON_CONSOLE,
+  ErreurConsole,
+  type Colonne,
+} from './ListeAdmin';
 import {
   libelleStatut,
   tonDuStatut,
@@ -165,11 +172,7 @@ export function Retraits({ peutAnnuler }: { peutAnnuler: boolean }) {
 
   return (
     <div className="space-y-3">
-      {erreur && (
-        <p className="rounded-xl border border-wine/40 bg-wine/10 px-3 py-2 text-sm text-cream">
-          {erreur}
-        </p>
-      )}
+      {erreur && <ErreurConsole>{erreur}</ErreurConsole>}
       <ListeAdmin<Retrait>
         titre="Retraits"
         description={
@@ -189,7 +192,7 @@ export function Retraits({ peutAnnuler }: { peutAnnuler: boolean }) {
                     type="button"
                     disabled={enCours === r.id}
                     onClick={() => void annuler(r, recharger)}
-                    className="whitespace-nowrap rounded-xl border border-wine/50 px-2.5 py-1 text-[12px] text-rose transition-colors hover:bg-wine/15 disabled:opacity-50"
+                    className="whitespace-nowrap rounded-xl border border-wine/40 bg-white px-2.5 py-1 text-[12px] font-medium text-wine transition-colors hover:bg-wine/5 disabled:opacity-50"
                   >
                     {enCours === r.id ? '…' : 'Annuler'}
                   </button>
@@ -282,7 +285,7 @@ export function Systeme() {
       entete: 'Dernière erreur',
       secondaire: true,
       rendu: (e) => (
-        <span className="text-[12px] text-cream/55">{e.lastError?.slice(0, 90) ?? '—'}</span>
+        <span className="text-[12px] text-ink/55">{e.lastError?.slice(0, 90) ?? '—'}</span>
       ),
     },
   ];
@@ -302,7 +305,7 @@ export function Systeme() {
       entete: 'Dernière erreur',
       secondaire: true,
       rendu: (c) => (
-        <span className="text-[12px] text-cream/55">{c.lastError?.slice(0, 90) ?? '—'}</span>
+        <span className="text-[12px] text-ink/55">{c.lastError?.slice(0, 90) ?? '—'}</span>
       ),
     },
   ];
@@ -370,11 +373,11 @@ export function Limiteurs() {
   const etat = donnees ? etatDesLimiteurs(donnees) : null;
 
   return (
-    <section className="space-y-4 rounded-2xl border border-cream/12 bg-plum-card/50 p-5">
+    <section className={CARTE_CONSOLE}>
       <header className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <h2 className="font-serif text-xl text-cream">Limiteurs</h2>
-          <p className="mt-1 text-[13px] leading-relaxed text-cream/55">
+          <h2 className="font-serif text-xl text-ink">Limiteurs</h2>
+          <p className="mt-1 max-w-prose text-[13px] leading-relaxed text-ink/60">
             À lire quand quelqu’un dit ne plus pouvoir se connecter : cet écran distingue un verrou
             de sécurité d’une panne. Lecture seule — un verrou s’éteint à son expiration.
           </p>
@@ -383,23 +386,19 @@ export function Limiteurs() {
           type="button"
           onClick={() => void charger()}
           disabled={chargement}
-          className="rounded-xl border border-cream/20 px-3 py-1.5 text-[13px] text-cream/80 transition-colors hover:bg-plum-card disabled:opacity-50"
+          className={BOUTON_CONSOLE}
         >
           {chargement ? 'Lecture…' : 'Rafraîchir'}
         </button>
       </header>
 
-      {erreur && (
-        <p className="rounded-xl border border-wine/40 bg-wine/10 px-3 py-2 text-sm text-cream">
-          {erreur}
-        </p>
-      )}
+      {erreur && <ErreurConsole>{erreur}</ErreurConsole>}
 
-      {chargement && !donnees && <p className="text-sm text-cream/50">Chargement…</p>}
+      {chargement && !donnees && <p className="text-sm text-ink/55">Chargement…</p>}
 
       {/* Trois absences se ressemblent et ne veulent pas dire la même chose :
           Redis absent, aucun seau, aucun compteur. `etatDesLimiteurs` tranche. */}
-      {etat && !etat.utilisable && <p className="text-sm text-cream/55">{etat.message}</p>}
+      {etat && !etat.utilisable && <p className="text-sm text-ink/60">{etat.message}</p>}
 
       {etat?.utilisable &&
         (donnees?.buckets ?? [])
@@ -407,23 +406,23 @@ export function Limiteurs() {
           .map((s) => (
             <div key={s.bucket} className="space-y-2">
               <div className="flex flex-wrap items-baseline gap-2">
-                <h3 className="text-sm font-medium text-cream">{libelleSeau(s.bucket)}</h3>
+                <h3 className="text-sm font-medium text-ink">{libelleSeau(s.bucket)}</h3>
                 <Pastille ton={estSeauDeVerrou(s.bucket) ? 'echec' : 'attente'}>
                   {s.totalKeys} {estSeauDeVerrou(s.bucket) ? 'verrouillé' : 'suivi'}
                   {s.totalKeys === 1 ? '' : 's'}
                 </Pastille>
                 {s.truncated && (
-                  <span className="text-[12px] text-cream/45">liste tronquée à 1 000 clés</span>
+                  <span className="text-[12px] text-ink/50">liste tronquée à 1 000 clés</span>
                 )}
               </div>
               <ul className="space-y-1">
                 {s.top10.map((e) => (
                   <li
                     key={e.key}
-                    className="flex flex-wrap items-baseline justify-between gap-2 border-b border-cream/8 pb-1 text-[13px] last:border-0"
+                    className="flex flex-wrap items-baseline justify-between gap-2 border-b border-console-ligne pb-1 text-[13px] last:border-0"
                   >
-                    <span className="break-all font-mono text-[12px] text-cream/75">{e.key}</span>
-                    <span className="text-cream/55">
+                    <span className="break-all font-mono text-[12px] text-ink/75">{e.key}</span>
+                    <span className="text-ink/55">
                       {estSeauDeVerrou(s.bucket)
                         ? 'verrouillé'
                         : `${e.hits} tentative${e.hits === 1 ? '' : 's'}`}

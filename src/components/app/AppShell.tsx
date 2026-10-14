@@ -67,9 +67,19 @@ const NAV_ADMIN: { id: AppSection; label: string; href: string } = {
 export function AppShell({
   active,
   coupleLabel: providedLabel,
+  surface = 'sombre',
+  large = false,
   children,
 }: {
   active: AppSection;
+  /**
+   * `clair` : le fond gris clair de la console d'administration (demande du
+   * 14/10/2026). Le produit reste sombre partout ailleurs — le Salon en a
+   * fait l'expérience, voir `app/salon/charte.test.ts`.
+   */
+  surface?: 'sombre' | 'clair';
+  /** Contenu pleine largeur (tableaux de bord), au lieu de la colonne de lecture. */
+  large?: boolean;
   /**
    * Pass it when the page already has it. Omit it and the shell fetches
    * its own.
@@ -92,6 +102,7 @@ export function AppShell({
   // `peutVoirLaConsole` refuse un rôle absent, donc le lien n'apparaît pas
   // pendant que `/api/auth/me` est encore en vol.
   const entrees = peutVoirLaConsole(user?.role) ? [...NAV, NAV_ADMIN] : NAV;
+  const clair = surface === 'clair';
 
   // Only runs for pages that did not supply the label themselves.
   useEffect(() => {
@@ -114,15 +125,22 @@ export function AppShell({
   }, [user, shouldFetch]);
 
   return (
-    <div className="relative min-h-screen bg-ink font-grotesk text-cream lg:flex">
-      <AmbientBackdrop />
+    <div
+      className={`relative min-h-screen font-grotesk lg:flex ${clair ? 'bg-console-fond text-ink' : 'bg-ink text-cream'}`}
+    >
+      {/* Les lueurs prune du fond sombre deviendraient des taches sur le gris. */}
+      {!clair && <AmbientBackdrop />}
 
       {/*
         Below `lg` this is a header, not a sidebar: a two-item nav does not
         earn a drawer or a hamburger, and hiding two links behind a tap is
         worse than showing them.
       */}
-      <aside className="relative border-b border-cream/10 bg-plum-card2/70 px-5 py-4 sm:px-8 lg:flex lg:w-[17rem] lg:shrink-0 lg:flex-col lg:gap-7 lg:border-b-0 lg:border-r lg:px-5 lg:py-7">
+      <aside
+        className={`relative border-b px-5 py-4 sm:px-8 lg:flex lg:w-[17rem] lg:shrink-0 lg:flex-col lg:gap-7 lg:border-b-0 lg:border-r lg:px-5 lg:py-7 ${
+          clair ? 'border-console-ligne bg-white' : 'border-cream/10 bg-plum-card2/70'
+        }`}
+      >
         <Link href="/" className="flex items-center gap-2.5 self-start">
           {/* La pastille wine qui tenait cette place était un repère du canevas,
               pas une marque. Le produit en a une depuis le 03/10 — et c'est
@@ -133,7 +151,11 @@ export function AppShell({
         </Link>
 
         {coupleLabel && (
-          <div className="mt-4 flex items-center gap-3 rounded-2xl border border-cream/12 bg-plum-card p-3 lg:mt-0">
+          <div
+            className={`mt-4 flex items-center gap-3 rounded-2xl border p-3 lg:mt-0 ${
+              clair ? 'border-console-ligne bg-console-fond' : 'border-cream/12 bg-plum-card'
+            }`}
+          >
             {/*
               Decorative: the canvas shows two overlapping discs standing in
               for the pair. They carry no identity — there are no avatars in
@@ -149,7 +171,10 @@ export function AppShell({
         )}
 
         <nav aria-label="Espace Couple" className="mt-4 lg:mt-0">
-          <ul className="flex gap-2 lg:flex-col lg:gap-1">
+          {/* Sur téléphone, une rangée qui défile plutôt qu'une rangée qui
+              déborde : avec l'entrée d'administration, cinq liens ne tiennent
+              pas dans 390 px, et la page entière glissait de côté. */}
+          <ul className="-mx-1 flex gap-2 overflow-x-auto px-1 lg:mx-0 lg:flex-col lg:gap-1 lg:overflow-visible lg:px-0">
             {entrees.map((item) => {
               const isActive = item.id === active;
               return (
@@ -159,10 +184,14 @@ export function AppShell({
                     // `aria-current` is what tells a screen reader which
                     // page this is; the gold pill says it to everyone else.
                     aria-current={isActive ? 'page' : undefined}
-                    className={`block rounded-xl px-4 py-2.5 text-sm transition-colors ${
-                      isActive
-                        ? 'bg-plum-card font-semibold text-gold'
-                        : 'text-cream/70 hover:bg-plum-card/60 hover:text-cream'
+                    className={`block whitespace-nowrap rounded-xl px-4 py-2.5 text-sm transition-colors ${
+                      clair
+                        ? isActive
+                          ? 'bg-console-fond font-semibold text-wine'
+                          : 'text-ink/65 hover:bg-console-fond hover:text-ink'
+                        : isActive
+                          ? 'bg-plum-card font-semibold text-gold'
+                          : 'text-cream/70 hover:bg-plum-card/60 hover:text-cream'
                     }`}
                   >
                     {item.label}
@@ -175,7 +204,9 @@ export function AppShell({
       </aside>
 
       <main className="relative min-w-0 flex-1 px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
-        <div className="mx-auto w-full max-w-3xl lg:mx-0 xl:max-w-4xl">{children}</div>
+        <div className={`mx-auto w-full lg:mx-0 ${large ? 'max-w-7xl' : 'max-w-3xl xl:max-w-4xl'}`}>
+          {children}
+        </div>
       </main>
     </div>
   );

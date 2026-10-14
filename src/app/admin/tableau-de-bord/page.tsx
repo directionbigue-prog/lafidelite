@@ -14,7 +14,7 @@ export default function TableauDeBordPage() {
   if (!utilisateur) return null;
 
   return (
-    <AppShell active="administration" coupleLabel={null}>
+    <AppShell active="administration" coupleLabel={null} surface="clair" large>
       <TableauDeBord />
     </AppShell>
   );

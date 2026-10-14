@@ -21,18 +21,46 @@ interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id' | 
   trailing?: ReactNode;
   /** Rendered under the control, above the helper — e.g. the strength meter. */
   below?: ReactNode;
+  /**
+   * `clair` only for the admin console's light grey ground (see `Alert`).
+   * The default dark field is invisible there: cream text on a light page.
+   */
+  surface?: 'sombre' | 'clair';
 }
 
-const INPUT_BASE =
-  'w-full rounded-xl border bg-plum-card2 px-4 py-3.5 text-cream outline-none transition-colors placeholder:text-cream/30';
+const SURFACE = {
+  sombre: {
+    input: 'bg-plum-card2 text-cream placeholder:text-cream/30',
+    bord: 'border-cream/20 focus:border-gold',
+    label: 'text-cream/80',
+    helper: 'text-cream/50',
+  },
+  clair: {
+    input: 'bg-white text-ink placeholder:text-ink/35',
+    bord: 'border-console-ligne focus:border-gold-deep',
+    label: 'text-ink/75',
+    helper: 'text-ink/55',
+  },
+} as const;
 
-export function Field({ label, helper, error, trailing, below, ...input }: FieldProps) {
+const INPUT_BASE = 'w-full rounded-xl border px-4 py-3.5 outline-none transition-colors';
+
+export function Field({
+  label,
+  helper,
+  error,
+  trailing,
+  below,
+  surface = 'sombre',
+  ...input
+}: FieldProps) {
   const id = useId();
   const describedBy = error ? `${id}-error` : helper ? `${id}-helper` : undefined;
+  const s = SURFACE[surface];
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm text-cream/80">
+      <label htmlFor={id} className={`text-sm ${s.label}`}>
         {label}
       </label>
 
@@ -42,8 +70,8 @@ export function Field({ label, helper, error, trailing, below, ...input }: Field
           id={id}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className={`${INPUT_BASE} ${
-            error ? 'border-wine focus:border-wine' : 'border-cream/20 focus:border-gold'
+          className={`${INPUT_BASE} ${s.input} ${
+            error ? 'border-wine focus:border-wine' : s.bord
           } ${trailing ? 'pr-12' : ''}`}
         />
         {trailing && <div className="absolute inset-y-0 right-2 flex items-center">{trailing}</div>}
@@ -56,7 +84,7 @@ export function Field({ label, helper, error, trailing, below, ...input }: Field
           {error}
         </p>
       ) : helper ? (
-        <p id={`${id}-helper`} className="text-xs text-cream/50">
+        <p id={`${id}-helper`} className={`text-xs ${s.helper}`}>
           {helper}
         </p>
       ) : null}
