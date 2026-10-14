@@ -207,17 +207,16 @@ const auth = await requireAuth(...);    // ou requireAdmin / requireOrgRole
 return withRequestContext(ctx, ...);    // pour la corrélation des journaux
 ```
 
-Les six crons (`outbox-drain`, `email-queue-drain`, `verification-cleanup`,
-`order-expiration`, `webhook-log-purge`, `email-job-purge`) sont déclarés **deux
-fois** — dans [`netlify.toml`](netlify.toml), l’hébergeur en service, et dans
-[`vercel.json`](vercel.json), conservé comme repli — et vérifient tous
+Les sept crons (`outbox-drain`, `email-queue-drain`, `verification-cleanup`,
+`order-expiration`, `webhook-log-purge`, `email-job-purge`, `rappels-couple`)
+sont déclarés dans [`vercel.json`](vercel.json), le seul calendrier — la
+production est hébergée chez Vercel — et vérifient tous
 `Authorization: Bearer ${CRON_SECRET}`.
 
 Chez Vercel ils sont tous **quotidiens**, et ce n’est pas un choix : le plan
 Hobby refuse de déployer un cron plus fréquent qu’une fois par jour, avec une
 précision de ±59 minutes. Quatre d’entre eux étaient sub-quotidiens et
-faisaient échouer le déploiement. Netlify n’a pas cette limite, et ses horaires
-sont donc plus serrés.
+faisaient échouer le déploiement.
 
 Les passer en quotidien aurait déployé proprement **et tué l’inscription** :
 un code de vérification serait parti jusqu’à 24 heures après la demande.
@@ -355,56 +354,15 @@ déclarez-le aussi côté console Google.
 **6. Pour que les emails arrivent** : un enregistrement `_dmarc` sur le domaine
 d'expédition, en plus de SPF et DKIM.
 
-### Sur Netlify
+### Et Netlify ?
 
-**L’hébergement est passé sur Netlify le 03/10/2026.** Les deux cibles restent
-décrites ici parce que les deux configurations sont versionnées et que les
-garde-fous tiennent les deux listes de crons d’accord.
-
-**1. Aucun réglage de build à faire**, pour la même raison que chez Vercel :
-l’application est le paquet racine. L’adaptateur Next.js de Netlify est appliqué
-automatiquement et la documentation déconseille de l’épingler — ne l’installez
-pas, ne le déclarez pas dans `[[plugins]]`. [`netlify.toml`](netlify.toml) ne
-contient **que** les six horaires : ni `command`, ni `publish`.
-
-**2. `prisma generate` n’a pas à être ajouté** à la commande de build : le script
-`postinstall` le lance, et `pnpm install` exécute les postinstall.
-
-**3. Les crons sont du code, pas une déclaration.** `vercel.json` n’est lu que
-par Vercel ; Netlify veut des *Scheduled Functions*. Les six coquilles de
-[`netlify/functions/`](netlify/functions/) appellent les routes déjà testées via
-[`lib/server/cron/appel-planifie.ts`](src/lib/server/cron/appel-planifie.ts), qui
-porte toute la décision — origine, secret, verbe, limite de temps. Une coquille
-ne décide rien et **n’avale pas son erreur** : une exception marque l’invocation
-en échec dans l’interface, et c’est le seul signal observable qu’un cron soit
-mort. [`netlify-toml-shape.test.ts`](src/lib/server/observability/netlify-toml-shape.test.ts)
-exige que les six routes, les six horaires et les six coquilles se correspondent,
-et que `netlify.toml` couvre exactement les mêmes routes que `vercel.json`.
-
-Les horaires y sont **plus serrés** que chez Vercel (10 min pour l’outbox,
-15 min pour l’expiration des commandes) : la contrainte du quotidien venait du
-plan Hobby de Vercel, pas du produit. Le budget est compté — environ 25 000
-invocations par mois, pour 125 000 offertes.
-
-**4. Vérifiez le *scope* de chaque variable.** C’est le piège propre à Netlify :
-une variable y porte des scopes (*Builds*, *Functions*, *Runtime*…), et une
-variable scopée *Builds* seulement est **invisible à l’exécution**. `CRON_SECRET`
-scopé *Builds* fait échouer les six fonctions planifiées ; `DATABASE_URL` ou
-`JWT_SECRET` dans le même cas font échouer l’application entière. Vercel n’a pas
-cette séparation, donc l’erreur ne peut pas venir de l’habitude.
-
-**5. Node et Prisma doivent viser le même système.** [`.nvmrc`](.nvmrc) demande
-Node 22 : Netlify aligne le runtime des fonctions sur la version du build, mais
-*seulement* si c’est un runtime AWS Lambda encore supporté — sinon il retombe
-silencieusement sur Node 24, et l’on construit sur une version pour exécuter sur
-une autre. Et comme le build tourne sur l’image Ubuntu de Netlify tandis que la
-fonction tourne sur Amazon Linux, `binaryTargets` de
-[`prisma/schema.prisma`](prisma/schema.prisma) déclare `rhel-openssl-3.0.x` en
-plus de `native` : sans lui, la première requête échoue sur un build vert.
-
-**6. Le DNS est une étape à part.** Mesuré le 03/10/2026 : `www.coeurfidele.net`
-répondait encore depuis Vercel (`x-vercel-error: DEPLOYMENT_NOT_FOUND`). Changer
-d’hébergeur dans l’interface ne déplace pas le domaine.
+La production est hébergée chez **Vercel**, et seulement chez Vercel. Le dépôt a
+porté un temps une configuration Netlify (`netlify.toml` et sept fonctions
+planifiées) ; elle a été retirée le 14/10/2026, après que les journaux de
+production ont montré un site Netlify resté actif qui appelait les crons du
+domaine avec un mauvais `CRON_SECRET` — des 401 toutes les dix minutes. Si de
+tels 401 réapparaissent sur `/api/cron/*`, c’est ce site : supprimez-le depuis
+son tableau de bord.
 
 ---
 
