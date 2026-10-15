@@ -1,3 +1,5 @@
+'use client';
+
 // The "Continuer avec Google" button from the canvas.
 //
 // A plain <a>, not a fetch: `/api/auth/oauth/google/start` answers a 302 to
@@ -12,16 +14,46 @@
 // The href goes through `lienConnexionGoogle`, which makes Google's callback
 // land on the counting relay before `next` — so Google sign-ins show in the
 // admin console without touching the protected callback.
+//
+// It also wakes the database, on render and on click: the callback is the
+// first database access of a Google sign-in, and a sleeping Neon compute
+// costs 0.7–7 s there. The seconds spent on Google's account picker absorb
+// that wake-up instead — see `lib/auth/prechauffage.ts`.
+import { useEffect, useState, type MouseEvent } from 'react';
 import { lienConnexionGoogle } from '@/lib/auth/lien-google';
+import { prechaufferServeur } from '@/lib/auth/prechauffage';
 
 export function GoogleButton({ next }: { next: string }) {
+  const [enCours, setEnCours] = useState(false);
+
+  useEffect(() => {
+    prechaufferServeur();
+    // Coming back from Google with the back button restores this page from
+    // the back-forward cache, old state included: without this the button
+    // would read "Ouverture de Google…" for good.
+    const auRetour = (e: PageTransitionEvent) => {
+      if (e.persisted) setEnCours(false);
+    };
+    window.addEventListener('pageshow', auRetour);
+    return () => window.removeEventListener('pageshow', auRetour);
+  }, []);
+
+  function auClic(e: MouseEvent<HTMLAnchorElement>) {
+    prechaufferServeur();
+    // A modified click opens a new tab: this page stays where it is.
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    setEnCours(true);
+  }
+
   return (
     <a
       href={lienConnexionGoogle(next)}
+      onClick={auClic}
+      aria-busy={enCours}
       className="flex w-full items-center justify-center gap-3 rounded-full border border-cream/26 bg-cream px-6 py-3.5 text-[15px] font-semibold text-ink transition-colors hover:bg-rose"
     >
       <GoogleMark />
-      Continuer avec Google
+      {enCours ? 'Ouverture de Google…' : 'Continuer avec Google'}
     </a>
   );
 }
