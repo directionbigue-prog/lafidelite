@@ -40,7 +40,7 @@ const TRANSCRIPTION =
   'je montre le message ; je laisse sans répondre ; je bloque le numéro. ' +
   'Malick a déjà répondu. ' +
   'Votre score de couple : 297. Aïssatou et Malick se sont compris 4 fois sur 5. ' +
-  'En bonus, le Salon : et les soirs où vous voulez juste jouer — ludo, jeu de ' +
+  'En bonus, le Salon, pour les soirs où vous voulez juste jouer : ludo, jeu de ' +
   'dames, mots croisés. Cœur Fidèle.';
 
 type Connexion = { saveData?: boolean; effectiveType?: string };

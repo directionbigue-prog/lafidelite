@@ -39,7 +39,7 @@ export const IMAGE_DE_PARTAGE = {
   url: '/opengraph-image.png',
   width: 1200,
   height: 630,
-  alt: 'Cœur Fidèle — deux cercles entrelacés dont l’intersection est dorée, sur fond prune sombre, sous le nom du jeu.',
+  alt: 'Logo de Cœur Fidèle : deux cercles entrelacés dont l’intersection est dorée, sur fond prune sombre, sous le nom du jeu.',
 } as const;
 
 /** « A, B ou C » / « A, B et C ». */
@@ -154,9 +154,9 @@ export const PAGES: readonly PageReferencee[] = [
     indexable: true,
     priorite: 1,
     frequence: 'weekly',
-    titre: 'Cœur Fidèle — le jeu de couple sur la fidélité',
+    titre: 'Cœur Fidèle, le jeu de couple sur la fidélité',
     description:
-      'Un jeu à deux, côte à côte ou chacun sur son téléphone. Trois manches, des questions qu’on n’ose pas poser, et un score commun — jamais l’un contre l’autre.',
+      'Un jeu à deux, côte à côte ou chacun sur son téléphone. Trois manches, des questions qu’on n’ose pas poser, et un score commun : vous jouez ensemble, jamais l’un contre l’autre.',
   },
   {
     chemin: '/tarifs',

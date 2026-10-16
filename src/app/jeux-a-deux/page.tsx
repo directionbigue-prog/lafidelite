@@ -57,8 +57,8 @@ export default function JeuxADeuxPage() {
               joue aussi avec un compte seul : le second joueur s’appelle simplement « Joueur 2 ».
             </li>
             <li>
-              <span className="text-gold">·</span> Ici, il y a un gagnant — mais les parties du
-              Salon ne comptent jamais dans le score de votre couple.
+              <span className="text-gold">·</span> Ici, il y a un gagnant, mais les parties du Salon
+              ne comptent jamais dans le score de votre couple.
             </li>
           </ul>
         </section>

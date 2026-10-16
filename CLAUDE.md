@@ -13,7 +13,7 @@ The product is two things sharing one account and one device:
 1. **Le jeu du couple** (`/jeu`, `/api/games/*`) — the core loop. Two partners pair into an *Espace Couple*, then play a **pass-and-play** session of 3 rounds (Miroir, Scénario, Face-à-Face) that ends in an immutable `GameResult` and a complicity level.
 2. **Le Salon** (`/salon`, `/api/salon/*`) — five light board games on the same shared device, deliberately sealed off from the couple's score.
 
-**73 API routes; 2532 unit tests across 217 files, all green** (counted 2026-10-16, after the SEO content pages). Under heavy machine load a few bcrypt-bound auth tests can time out; re-run with `--maxWorkers=3` before suspecting a regression. The UI is shipped and opinionated (see *Design system* below), and it is in French.
+**73 API routes; 2536 unit tests across 218 files, all green** (counted 2026-10-16, after removing the mockup traces from the landing). Under heavy machine load a few bcrypt-bound auth tests can time out; re-run with `--maxWorkers=3` before suspecting a regression. The UI is shipped and opinionated (see *Design system* below), and it is in French.
 
 Origin: bootstrapped from the `izikit` starter (itself ported from `amadou-template` on 2026-05-07 through 7 phases: auth → OAuth/notifs → admin → uploads/withdrawals → webhooks/cron → docs/tests → final pass). The starter's generic surface — auth, payments, admin back-office, webhooks, cron, uploads, withdrawals — is still live and still load-bearing; the couple game sits on top of it.
 

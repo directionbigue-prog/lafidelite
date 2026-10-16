@@ -87,12 +87,12 @@ function detailsDuPack(pack: Pack): string[] {
   return [
     gratuit ? 'Une partie offerte, pour essayer' : 'Parties illimitées',
     complet
-      ? `Les ${NOMS_THEMES.length} thèmes, sans réserve`
+      ? `Les ${NOMS_THEMES.length} thèmes`
       : pack.themes.length === 1 && premier
         ? `1 thème : ${premier}`
         : `${pack.themes.length} thèmes sur ${NOMS_THEMES.length}`,
     pack.salon ? 'Le Salon inclus, les cinq jeux' : 'Le Salon non inclus',
-    gratuit ? 'Sur votre seul appareil, à deux' : 'Ouvert pour vous deux',
+    gratuit ? 'Sans carte bancaire' : 'Ouvert pour vous deux',
   ];
 }
 

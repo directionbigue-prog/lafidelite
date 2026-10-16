@@ -129,7 +129,7 @@ describe('the landing page tells the truth about the question bank', () => {
   // plus : le compteur vit dans le bandeau des chiffres, juste sous le héros.
   it('counts the real bank instead of the canvas figure', () => {
     expect(landing).not.toContain('440 questions');
-    expect(landing).toMatch(/\{TOTAL_QUESTIONS\}\s*<\/span>\s*<span>questions écrites à la main/);
+    expect(landing).toMatch(/\{TOTAL_QUESTIONS\}\s*<\/span>\s*<span>questions dans le jeu/);
     expect(TOTAL_QUESTIONS).toBe(QUESTIONS_SEED.length);
   });
 

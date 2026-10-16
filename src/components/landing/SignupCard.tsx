@@ -1,4 +1,5 @@
-// La carte « Inscription en 20 secondes » de la landing.
+// La carte d’inscription de la landing, « Inscription gratuite » (« en 20 secondes »
+// jusqu’au 16/10/2026 : une durée que rien ne mesurait).
 //
 // ELLE MENTAIT, et pas qu'un peu. Sa légende annonçait « Pas de mot de passe.
 // Vous recevez un code par SMS » : le produit n'a jamais eu ni SMS ni magic
@@ -45,7 +46,7 @@ export function SignupCard({ ctaLabel }: { ctaLabel: string }) {
           marginBottom: '14px',
         }}
       >
-        Inscription en 20 secondes
+        Inscription gratuite
       </div>
       {/*
         Un GET, pas un POST : la soumission navigue vers /inscription en

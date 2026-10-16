@@ -30,7 +30,7 @@ export default function QuestionsPourCouplePage() {
           </h1>
           <p className="mt-4 text-[15px] leading-relaxed text-cream/65">
             Les questions de Cœur Fidèle ne cherchent pas à piéger : elles mettent des mots sur ce
-            dont on parle rarement à deux — la confiance, l’argent, la famille, les projets. En
+            dont on parle rarement à deux : la confiance, l’argent, la famille, les projets. En
             voici quelques-unes, tirées du jeu tel qu’il est, manche par manche.
           </p>
         </header>

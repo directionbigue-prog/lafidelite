@@ -150,17 +150,6 @@ html:has(.cf-landing) {
     min-height: 40px;
   }
 
-  /* Les deux cartouches du héros débordent leur carte de 14 px — un effet
-   * du canevas qui suppose une marge autour. Sous 380 px cette marge
-   * n'existe plus et le cartouche de droite sortait de l'écran. */
-  .cf-landing .cf-badge-left {
-    left: 0 !important;
-  }
-
-  .cf-landing .cf-badge-right {
-    right: 0 !important;
-  }
-
   /* Tarifs compacts (14/10/2026). Empilées telles quelles, les quatre
    * cartes faisaient 2 040 px — le plus haut bloc de la page sur téléphone.
    * Un carrousel les aurait ramenées à une seule hauteur, mais en cachant

@@ -17,7 +17,7 @@ const ETAPES = [
   {
     titre: 'Créez votre Espace Couple',
     texte:
-      'L’un de vous crée un compte et reçoit un code à six chiffres. L’autre l’ouvre sur son téléphone, tape son prénom, et vous voilà réunis — sans qu’il ait à s’inscrire.',
+      'L’un de vous crée un compte et reçoit un code à six chiffres. L’autre l’ouvre sur son téléphone, tape son prénom, et vous voilà réunis, sans avoir à vous inscrire tous les deux.',
   },
   {
     titre: 'Activez « Chacun sur son téléphone »',

@@ -34,14 +34,14 @@ export const metadata: Metadata = {
   // canoniques, image, icônes — en dépend.
   metadataBase: new URL(ORIGINE_CANONIQUE),
   title: {
-    default: 'Cœur Fidèle — le jeu de couple sur la fidélité',
+    default: 'Cœur Fidèle, le jeu de couple sur la fidélité',
     // Les pages enfants ne donnent que leur propre titre ; la marque est
     // ajoutée ici, une seule fois, pour qu'elle ne se répète jamais deux fois
     // dans un onglet.
     template: '%s · Cœur Fidèle',
   },
   description:
-    'Cœur Fidèle est un jeu de couple en 15 questions. Trois manches, un score commun — côte à côte sur un téléphone, ou à distance sur deux.',
+    'Cœur Fidèle est un jeu de couple en 15 questions et trois manches, avec un score commun. Côte à côte sur un téléphone, ou à distance sur deux.',
   applicationName: 'Cœur Fidèle',
   alternates: { canonical: '/' },
   // Par défaut : indexable. Chaque segment privé renverse ce réglage dans son
@@ -58,15 +58,15 @@ export const metadata: Metadata = {
     locale: 'fr_FR',
     siteName: 'Cœur Fidèle',
     url: '/',
-    title: 'Cœur Fidèle — le jeu de couple sur la fidélité',
+    title: 'Cœur Fidèle, le jeu de couple sur la fidélité',
     description:
-      'Un jeu à deux, côte à côte ou chacun sur son téléphone. Trois manches, et un score commun — jamais l’un contre l’autre.',
+      'Un jeu à deux, côte à côte ou chacun sur son téléphone. Trois manches et un score commun : vous jouez ensemble, jamais l’un contre l’autre.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Cœur Fidèle — le jeu de couple sur la fidélité',
+    title: 'Cœur Fidèle, le jeu de couple sur la fidélité',
     description:
-      'Un jeu à deux, côte à côte ou chacun sur son téléphone. Trois manches, et un score commun — jamais l’un contre l’autre.',
+      'Un jeu à deux, côte à côte ou chacun sur son téléphone. Trois manches et un score commun : vous jouez ensemble, jamais l’un contre l’autre.',
   },
   // `icon.svg` et `apple-icon.png` sont détectés par convention de fichier :
   // Next écrit les <link> lui-même, et les redéclarer ici les dupliquerait.

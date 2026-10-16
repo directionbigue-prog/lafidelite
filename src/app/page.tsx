@@ -62,8 +62,11 @@
 //     canevas. Il vit dans `components/landing/FilmPub.tsx`, seul îlot client
 //     de la page, et ne démarre que selon `lib/landing/film.ts` : 7 Mo payés
 //     en données mobiles ne se dépensent pas à l'ouverture de la page.
-//   · Les liens du footer (Confidentialité, CGU, Support, English) et
-//     plusieurs CTA pointent sur « # », comme dans la maquette.
+//   · Les liens « # » de la maquette (Confidentialité, CGU, Support, English,
+//     « Poser la vôtre sur WhatsApp ») ont été RETIRÉS le 16/10/2026, avec la
+//     capture du canevas qui servait d'image au héros et les chiffres sans
+//     source : voir `lib/landing/sans-traces.test.ts`. Un lien revient le jour
+//     où sa page existe.
 //
 // Une version précédente de ce fichier corrigeait TOUS ces points en
 // dérivant la grille du vrai contenu. Elle a été remplacée délibérément :
@@ -109,7 +112,7 @@ const SIGN_UP_HREF = '/inscription';
 const PLAY_HREF = '/jeu';
 
 export default function Home() {
-  const { ctaLabel, faq, zoneLabel, pricingCards, salonAcces } = buildLandingDesignData();
+  const { ctaLabel, faq, pricingCards, salonAcces } = buildLandingDesignData();
 
   // Les quatre cartes « L'essentiel ». Chaque phrase correspond à du code :
   // le jeu (`game/state-machine.ts`, format STANDARD 5/5/5), le mode à
@@ -121,7 +124,7 @@ export default function Home() {
       titre: 'Le jeu',
       accroche: 'Trois manches, un score commun',
       texte:
-        'Miroir, Scénario, Face-à-Face : 15 questions, une douzaine de minutes. On ne joue pas l’un contre l’autre, on finit du même côté.',
+        'Miroir, Scénario et Face-à-Face : 15 questions, une douzaine de minutes. Vous jouez ensemble, avec un seul score pour le couple.',
     },
     {
       titre: 'À distance',
@@ -133,11 +136,11 @@ export default function Home() {
       titre: 'Le rituel',
       accroche: 'Une question par jour',
       texte:
-        'Deux réponses, une minute. Votre flamme grandit chaque jour où vous répondez tous les deux.',
+        'Chaque jour, une question à laquelle vous répondez tous les deux. Votre série augmente chaque jour où vous le faites.',
     },
     {
       titre: 'Le Salon',
-      accroche: 'Cinq jeux pour les soirs légers',
+      accroche: 'Cinq jeux de société',
       texte: `Dames, awalé, ludo, le mot et mots croisés, sur le même téléphone. ${salonAcces}.`,
     },
   ];
@@ -283,11 +286,11 @@ export default function Home() {
                 textWrap: 'balance',
               }}
             >
-              Parlez de fidélité
+              Le jeu de couple
               <br />
-              avant d'avoir
+              qui fait parler
               <br />
-              <em style={{ color: '#E8B860' }}>à en parler.</em>
+              <em style={{ color: '#E8B860' }}>de fidélité.</em>
             </h1>
             <p
               style={{
@@ -299,9 +302,9 @@ export default function Home() {
                 textWrap: 'pretty',
               }}
             >
-              Cœur Fidèle est un jeu de couple en 15 questions. Trois manches, un score commun — sur
-              un téléphone qu’on se passe, ou chacun sur le sien, même à des milliers de kilomètres.
-              On rit, on se découvre, et on finit la partie du même côté.
+              Cœur Fidèle est un jeu de couple en 15 questions, réparties en trois manches, avec un
+              score commun. Vous jouez sur un téléphone que vous vous passez, ou chacun sur le sien
+              si vous êtes loin l’un de l’autre.
             </p>
             <SignupCard ctaLabel={ctaLabel} />
             <div
@@ -350,14 +353,20 @@ export default function Home() {
               }}
             >
               {' '}
+              {/* La photo seule, recadrée au format du cadre. L'ancienne
+                  image était une capture du canevas : la fausse carte « Score
+                  du couple 248 » et le bord de la maquette y étaient gravés
+                  dans les pixels (retirée le 16/10/2026). */}
               <img
-                src="/images/hero-couple-landing.png"
+                src="/images/hero-couple-portrait.webp"
                 alt="Un couple regarde son téléphone en riant"
+                width={820}
+                height={911}
                 style={{
                   width: '100%',
                   height: '100%',
-                  objectFit: 'contain',
-                  objectPosition: '50% 50%',
+                  objectFit: 'cover',
+                  objectPosition: '50% 30%',
                   display: 'block',
                 }}
               />
@@ -369,63 +378,6 @@ export default function Home() {
                   pointerEvents: 'none',
                 }}
               ></div>
-            </div>
-            <div
-              className="cf-badge-left"
-              style={{
-                position: 'absolute',
-                left: '-14px',
-                bottom: '0',
-                background: 'rgba(23,13,27,.82)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(246,238,230,.12)',
-                borderRadius: '6px',
-                padding: '20px 24px',
-                minWidth: '220px',
-              }}
-            >
-              {' '}
-              <div
-                style={{
-                  fontSize: '11px',
-                  letterSpacing: '.14em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(246,238,230,.64)',
-                  marginBottom: '8px',
-                }}
-              >
-                Score du couple
-              </div>
-              <div
-                style={{
-                  fontFamily: "'Instrument Serif',serif",
-                  fontSize: '40px',
-                  lineHeight: '1',
-                  color: '#E8B860',
-                }}
-              >
-                248
-              </div>
-              <div style={{ fontSize: '14px', color: 'rgba(246,238,230,.68)', marginTop: '6px' }}>
-                Niveau : Complices
-              </div>
-            </div>
-            <div
-              className="cf-badge-right"
-              style={{
-                position: 'absolute',
-                right: '-14px',
-                top: '0',
-                background: '#E8B860',
-                color: '#170D1B',
-                borderRadius: '4px',
-                padding: '12px 20px',
-                fontWeight: '700',
-                fontSize: '14px',
-                boxShadow: '0 20px 44px -18px rgba(232,184,96,.6)',
-              }}
-            >
-              Cœur d'Or
             </div>
           </div>
         </section>
@@ -462,7 +414,7 @@ export default function Home() {
               >
                 {TOTAL_QUESTIONS}
               </span>
-              <span>questions écrites à la main</span>
+              <span>questions dans le jeu</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
               <span
@@ -475,7 +427,7 @@ export default function Home() {
               >
                 8
               </span>
-              <span>thèmes, du léger au sérieux</span>
+              <span>thèmes au choix</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
               <span
@@ -488,7 +440,7 @@ export default function Home() {
               >
                 12
               </span>
-              <span>minutes, le temps d'un café</span>
+              <span>minutes par partie, environ</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
               <span
@@ -499,9 +451,9 @@ export default function Home() {
                   lineHeight: '1',
                 }}
               >
-                0
+                1
               </span>
-              <span>gagnant, jamais de perdant</span>
+              <span>score commun pour le couple</span>
             </div>
           </div>
         </div>
@@ -587,7 +539,7 @@ export default function Home() {
                 margin: '0 0 clamp(24px,3vw,36px)',
               }}
             >
-              Un jeu à deux, et de quoi y revenir
+              Ce que contient Cœur Fidèle
             </h2>
             <div
               style={{
@@ -675,13 +627,10 @@ export default function Home() {
                 margin: '0',
               }}
             >
-              Essayez d'abord.
+              La première partie est offerte.
               <br />
-              Payez si vous revenez.
+              Ensuite, choisissez un pack.
             </h2>
-            <div style={{ fontSize: '15px', color: 'rgba(246,238,230,.66)' }}>
-              Prix affichés pour la zone {zoneLabel}
-            </div>
           </div>
           <div
             style={{
@@ -731,7 +680,7 @@ export default function Home() {
                       borderRadius: '4px',
                     }}
                   >
-                    Le plus choisi
+                    Recommandé
                   </div>
                 )}
                 <div
@@ -858,24 +807,9 @@ export default function Home() {
                   maxWidth: '14em',
                 }}
               >
-                Ce qu'on nous demande avant de commencer
+                Avant de commencer
               </h2>
             </div>
-            <a
-              href="#"
-              style={{
-                padding: '15px 26px',
-                borderRadius: '4px',
-                border: '1px solid rgba(246,238,230,.26)',
-                color: '#F6EEE6',
-                fontWeight: '500',
-                fontSize: '16px',
-                whiteSpace: 'nowrap',
-              }}
-              className="cf-h5"
-            >
-              Poser la vôtre sur WhatsApp
-            </a>
           </div>
           {/* 460 px et non 330 : avec quatre questions, trois colonnes
               laissaient la quatrième seule sur sa ligne. Deux colonnes
@@ -973,7 +907,7 @@ export default function Home() {
                   margin: '0 0 18px',
                 }}
               >
-                Votre prochain rendez-vous commence par un lien WhatsApp.
+                Prêts pour votre première partie ?
               </h2>
               <p
                 style={{
@@ -984,8 +918,8 @@ export default function Home() {
                   maxWidth: '30em',
                 }}
               >
-                Créez votre Espace Couple, envoyez l'invitation, jouez ce soir. Inscription par
-                email, avec un code de vérification à 8 caractères.
+                Créez votre Espace Couple, puis envoyez l’invitation à votre partenaire.
+                L’inscription se fait par email, avec un code de vérification à 8 caractères.
               </p>
             </div>
             <div
@@ -1083,22 +1017,7 @@ export default function Home() {
                 </a>
               ))}
             </nav>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '26px' }}>
-              {' '}
-              <a href="#" style={{ color: 'inherit' }}>
-                Confidentialité
-              </a>
-              <a href="#" style={{ color: 'inherit' }}>
-                CGU
-              </a>
-              <a href="#" style={{ color: 'inherit' }}>
-                Support WhatsApp
-              </a>
-              <a href="#" style={{ color: 'inherit' }}>
-                English
-              </a>
-            </div>
-            <div>Vos réponses sont chiffrées et ne sont jamais revendues.</div>
+            <div>Vos réponses ne sont jamais revendues.</div>
           </div>
         </footer>
         <div
