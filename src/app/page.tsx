@@ -84,6 +84,7 @@ import { SignupCard } from '@/components/landing/SignupCard';
 import { FilmPub } from '@/components/landing/FilmPub';
 import { Marque } from '@/components/ui/Marque';
 import { donneesStructureesAccueil, scriptJsonLd } from '@/lib/seo/donnees-structurees';
+import { PAGES_DE_CONTENU } from '@/lib/seo/contenus';
 
 export const runtime = 'nodejs';
 
@@ -1059,6 +1060,29 @@ export default function Home() {
                 Cœur Fidèle
               </span>
             </div>
+            {/* Absent du canevas (16/10/2026) : les pages de contenu, liées
+                d'ici pour que les moteurs les trouvent autrement que par le
+                sitemap — voir lib/seo/contenus.ts. */}
+            <nav
+              aria-label="À découvrir"
+              style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 26px', alignItems: 'baseline' }}
+            >
+              <span
+                style={{
+                  fontSize: '11px',
+                  letterSpacing: '.16em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(246,238,230,.5)',
+                }}
+              >
+                À découvrir
+              </span>
+              {PAGES_DE_CONTENU.map((page) => (
+                <a key={page.chemin} href={page.chemin} style={{ color: '#E8B860' }}>
+                  {page.lien}
+                </a>
+              ))}
+            </nav>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '26px' }}>
               {' '}
               <a href="#" style={{ color: 'inherit' }}>

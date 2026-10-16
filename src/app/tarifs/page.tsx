@@ -8,12 +8,14 @@
 //
 // L'achat (depuis le 13/10/2026) : un `BoutonAcheterPack` par pack payant.
 // Il n'envoie que l'identifiant ; le prix est relu du registre côté serveur,
-// et le webhook Bictorys ouvre le droit quand le paiement est confirmé.
+// et le webhook du prestataire (PayTech depuis le 13/10/2026) ouvre le droit
+// quand le paiement est confirmé.
 import type { Metadata } from 'next';
 import { AppShell } from '@/components/app/AppShell';
 import { BoutonAcheterPack } from '@/components/game/BoutonAcheterPack';
 import { LIBELLE_DEVISE, PACKS_VISIBLES, PACKS_PAYANTS, packDecouverte } from '@/lib/game/packs';
 import { metadataDePage } from '@/lib/seo/pages';
+import { MOYENS_DE_PAIEMENT } from '@/lib/game/achat';
 
 // Titre, description, canonique et carte de partage viennent du registre des
 // pages (`lib/seo/pages.ts`), dont la description lit elle-même les noms des
@@ -121,9 +123,10 @@ export default function TarifsPage() {
         <section className="rounded-2xl border border-cream/12 bg-plum-card2 p-5">
           <p className="text-[10px] uppercase tracking-[0.14em] text-cream/50">Le paiement</p>
           <p className="mt-2 text-sm leading-relaxed text-cream/65">
-            Le paiement se fait sur la page sécurisée de notre prestataire, Bictorys. Le pack
-            s’ouvre dès que le paiement est confirmé, pour vous deux. Les {PACKS_PAYANTS.length}{' '}
-            packs ci-dessus sont sans engagement : {decouverte.nom} reste gratuit, à un seul thème.
+            Le paiement se fait sur la page sécurisée de notre prestataire, PayTech :{' '}
+            {MOYENS_DE_PAIEMENT}. Le pack s’ouvre dès que le paiement est confirmé, pour vous deux.
+            Les {PACKS_PAYANTS.length} packs ci-dessus sont sans engagement : {decouverte.nom} reste
+            gratuit, à un seul thème.
           </p>
         </section>
       </div>

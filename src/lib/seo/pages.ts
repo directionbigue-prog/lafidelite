@@ -21,7 +21,9 @@
 // il empêche la visite, pas l'inscription au catalogue.
 
 import { urlPubliqueCredible } from '@/lib/server/app-url';
-import { PACKS_PAYANTS } from '@/lib/game/packs';
+import { PACKS_PAYANTS, PACKS_VISIBLES } from '@/lib/game/packs';
+import { JEUX } from '@/lib/salon/jeux';
+import { NOMS_DES_JEUX } from '@/lib/salon/noms';
 
 /** Le nom du produit, tel que le portent les cartes de partage. */
 export const NOM_DU_SITE = 'Cœur Fidèle';
@@ -40,11 +42,23 @@ export const IMAGE_DE_PARTAGE = {
   alt: 'Cœur Fidèle — deux cercles entrelacés dont l’intersection est dorée, sur fond prune sombre, sous le nom du jeu.',
 } as const;
 
+/** « A, B ou C » / « A, B et C ». */
+function enumeration(noms: readonly string[], conjonction: 'ou' | 'et'): string {
+  return noms.length > 1
+    ? `${noms.slice(0, -1).join(', ')} ${conjonction} ${noms.at(-1)}`
+    : (noms[0] ?? '');
+}
+
 /** « Week-end, Semaine ou Mois » — lu du registre, jamais recopié. */
 function paliersEnVente(): string {
-  const noms = PACKS_PAYANTS.map((p) => p.nom);
-  return noms.length > 1 ? `${noms.slice(0, -1).join(', ')} ou ${noms.at(-1)}` : (noms[0] ?? '');
+  return enumeration(
+    PACKS_PAYANTS.map((p) => p.nom),
+    'ou',
+  );
 }
+
+/** Le palier le moins cher qui ouvre le Salon, lu du registre des packs. */
+const PACK_OUVRANT_LE_SALON = PACKS_VISIBLES.find((p) => p.salon && p.prix > 0);
 
 /**
  * Le domaine du produit, en dernier recours.
@@ -180,6 +194,42 @@ export const PAGES: readonly PageReferencee[] = [
     titre: 'Créer un compte',
     description:
       'Créez votre Espace Couple en deux minutes. La première partie est offerte, et aucune carte n’est demandée.',
+  },
+
+  // ─── Les pages de contenu (16/10/2026), écrites pour des recherches
+  // précises. Leur contenu vit dans `lib/seo/contenus.ts`. ───
+
+  {
+    chemin: '/jeu-de-couple-a-distance',
+    indexable: true,
+    priorite: 0.7,
+    frequence: 'monthly',
+    titre: 'Jeu de couple à distance',
+    description:
+      'Loin l’un de l’autre ? Jouez à Cœur Fidèle chacun sur son téléphone, tour à tour : les mêmes questions, un score commun, et un écran qui dit quand c’est à vous.',
+  },
+  {
+    chemin: '/questions-pour-couple',
+    indexable: true,
+    priorite: 0.7,
+    frequence: 'monthly',
+    titre: 'Questions pour couple',
+    description:
+      'Des questions pour couple qui font vraiment parler : confiance, argent, famille, projets… Des exemples tirés du jeu Cœur Fidèle, et trois manches pour y répondre à deux.',
+  },
+  {
+    chemin: '/jeux-a-deux',
+    indexable: true,
+    priorite: 0.7,
+    frequence: 'monthly',
+    titre: 'Jeux à deux sur un téléphone',
+    // Les jeux et le palier d'accès sont lus de leurs registres.
+    description: `${enumeration(
+      JEUX.map((j) => NOMS_DES_JEUX[j]),
+      'et',
+    )} : ${JEUX.length} jeux à deux sur un seul téléphone, dans le Salon de Cœur Fidèle${
+      PACK_OUVRANT_LE_SALON ? `, inclus dès le pack ${PACK_OUVRANT_LE_SALON.nom}` : ''
+    }.`,
   },
 
   // ─── Tout ce qui suit exige une session, ou protège quelque chose. ───

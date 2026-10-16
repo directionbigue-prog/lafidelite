@@ -48,4 +48,15 @@ describe('les moyens de paiement annoncés', () => {
       expect(texte, fichier).not.toMatch(/MTN|Moov/);
     }
   });
+
+  it('/tarifs nomme le prestataire réel, PayTech, et non Bictorys', () => {
+    // « notre prestataire, Bictorys » est resté affiché jusqu'au 16/10/2026,
+    // trois jours après le passage à PayTech.
+    const texte = lire('app/tarifs/page.tsx')
+      .replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
+      .replace(/^\s*\/\/.*$/gm, '');
+    expect(texte).not.toMatch(/Bictorys/);
+    expect(texte).toMatch(/PayTech/);
+    expect(texte).toMatch(/\{MOYENS_DE_PAIEMENT\}/);
+  });
 });
