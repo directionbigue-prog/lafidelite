@@ -62,6 +62,8 @@ describe('la landing ne montre aucune trace de maquette', () => {
     for (const fichier of [...LANDING, 'app/layout.tsx', 'lib/seo/pages.ts']) {
       expect(texte(fichier), fichier).not.toContain('—');
     }
-    expect(readFileSync(resolve(SRC, 'app/opengraph-image.alt.txt'), 'utf8')).not.toContain('—');
+    for (const alt of ['app/opengraph-image.alt.txt', 'app/twitter-image.alt.txt']) {
+      expect(readFileSync(resolve(SRC, alt), 'utf8'), alt).not.toContain('—');
+    }
   });
 });
