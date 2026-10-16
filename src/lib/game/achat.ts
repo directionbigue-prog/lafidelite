@@ -14,6 +14,15 @@
 // Module pur : testé directement, lu par la route et par le webhook.
 import { estAchetable, finDuDroit, packParId, type Pack } from './packs';
 
+/**
+ * Ce que la caisse PayTech propose, tel qu'on l'annonce au client.
+ *
+ * Écrit une seule fois : la FAQ de l'accueil a promis « MTN MoMo et Moov »
+ * jusqu'au 16/10/2026 pendant que le pied de la même page disait juste.
+ * Changer de prestataire, c'est changer cette ligne.
+ */
+export const MOYENS_DE_PAIEMENT = 'Wave, Orange Money, Free Money ou carte bancaire';
+
 /** Le pack qu'on peut acheter sous cet identifiant, ou null. */
 export function packEnVente(packId: string | null | undefined): Pack | null {
   const pack = packParId(packId);

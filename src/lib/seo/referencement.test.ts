@@ -12,6 +12,7 @@ import {
   urlAbsolue,
   resoudreOrigineCanonique,
 } from './pages';
+import { PACKS_PAYANTS } from '@/lib/game/packs';
 
 // « Indexer toutes les pages » n'est pas une case à cocher : la moitié des
 // écrans de ce produit sont derrière une session, et deux d'entre eux ne
@@ -293,6 +294,43 @@ describe('les métadonnées dérivent du registre', () => {
     for (const page of PAGES_INDEXABLES) {
       expect(metadataDePage(page.chemin).alternates.canonical, page.chemin).toBe(page.chemin);
     }
+  });
+
+  it('chaque page publique, hors accueil, prend ses métadonnées du registre', () => {
+    // Le test précédent vérifie ce que `metadataDePage` RENVOIE, pas que les
+    // pages l'appellent. /tarifs écrivait les siennes à la main et héritait
+    // donc de la canonique « / » du layout racine : en production (mesuré le
+    // 16/10/2026), Google la lisait comme un doublon de l'accueil. L'accueil,
+    // lui, reçoit sa canonique du layout racine.
+    for (const page of PAGES_INDEXABLES.filter((p) => p.chemin !== '/')) {
+      const source = readFileSync(resolve(APP, `.${page.chemin}`, 'page.tsx'), 'utf8');
+      expect(source, page.chemin).toMatch(
+        new RegExp(`export const metadata(: Metadata)? = metadataDePage\\('${page.chemin}'\\)`),
+      );
+    }
+  });
+
+  it('garde l’image de partage, que Next ne fusionne pas', () => {
+    // Un `openGraph` d'enfant REMPLACE celui du parent au lieu de s'y
+    // ajouter : /connexion et /inscription partaient sans image, sans
+    // `siteName` ni `locale`, et leur carte Twitter reprenait le titre de
+    // l'accueil.
+    for (const page of PAGES_INDEXABLES) {
+      const m = metadataDePage(page.chemin);
+      expect(m.openGraph?.images?.[0]?.url, page.chemin).toBe('/opengraph-image.png');
+      expect(m.openGraph, page.chemin).toMatchObject({
+        type: 'website',
+        locale: 'fr_FR',
+        siteName: 'Cœur Fidèle',
+      });
+      expect(m.twitter?.card, page.chemin).toBe('summary_large_image');
+      expect(m.twitter?.title, page.chemin).toBe(page.titre);
+    }
+  });
+
+  it('la description de /tarifs nomme chaque palier en vente, lu du registre des packs', () => {
+    const description = pageDuChemin('/tarifs')!.description!;
+    for (const pack of PACKS_PAYANTS) expect(description).toContain(pack.nom);
   });
 
   it('refuse bruyamment un chemin inconnu', () => {

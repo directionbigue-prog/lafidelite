@@ -3,7 +3,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { buildLandingDesignData } from './design-data';
-import { PACKS, PACKS_VISIBLES, LIBELLE_DEVISE } from '@/lib/game/packs';
+import { PACKS, PACKS_PAYANTS, PACKS_VISIBLES, LIBELLE_DEVISE } from '@/lib/game/packs';
+import { pageDuChemin } from '@/lib/seo/pages';
 import { NOMS_THEMES } from '@/lib/game/themes';
 
 // Ce que ces tests gardent, et pourquoi ils existent.
@@ -220,9 +221,12 @@ describe('une seule étiquette de devise dans tout le produit', () => {
 
 describe('la description de /tarifs suit le registre', () => {
   it('nomme les packs en vente et aucun autre', () => {
-    const description = /description:\s*`([^`]*)`/.exec(tarifs)?.[1];
-    expect(description, 'la description doit être un gabarit dérivé').toBeDefined();
-    expect(description).toContain('PACKS_VISIBLES');
+    // Depuis le 16/10/2026 la page prend ses métadonnées du registre des
+    // pages, qui lit les noms dans celui des packs. On vérifie donc la VALEUR
+    // servie, plus sûre qu'un motif dans la source.
+    expect(tarifs).toMatch(/metadata: Metadata = metadataDePage\('\/tarifs'\)/);
+    const description = pageDuChemin('/tarifs')?.description ?? '';
+    for (const pack of PACKS_PAYANTS) expect(description, pack.nom).toContain(pack.nom);
     // La version écrite à la main — « Découverte, Essentiel, Intégral,
     // Annuel » — vendait l'Annuel dans l'extrait de recherche et nommait deux
     // paliers sous des noms qui n'existaient plus.

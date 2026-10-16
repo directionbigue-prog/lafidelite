@@ -23,6 +23,7 @@ import { ButtonLink } from '@/components/ui/Button';
 import { BoutonAcheterPack } from '@/components/game/BoutonAcheterPack';
 import { estAchetable, LIBELLE_DEVISE, packParId } from '@/lib/game/packs';
 import { cheminAchat, memoriserPackChoisi } from '@/lib/game/pack-choisi';
+import { MOYENS_DE_PAIEMENT } from '@/lib/game/achat';
 import { formatPrice } from '@/lib/utils';
 
 export default function AcheterPage({ params }: { params: Promise<{ pack: string }> }) {
@@ -65,8 +66,7 @@ export default function AcheterPage({ params }: { params: Promise<{ pack: string
       {user ? (
         <div className="flex flex-col gap-3">
           <p className="text-sm text-cream/60">
-            Ouverture du paiement sécurisé PayTech : Wave, Orange Money, Free Money ou carte
-            bancaire.
+            Ouverture du paiement sécurisé PayTech : {MOYENS_DE_PAIEMENT}.
           </p>
           <BoutonAcheterPack packId={pack.id} libelle={`Payer ${prix}`} automatique />
           <ButtonLink href="/tarifs" variant="ghost">

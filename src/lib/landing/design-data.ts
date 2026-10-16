@@ -31,6 +31,7 @@ import {
   palierDuTheme,
 } from '@/lib/game/packs';
 import type { Pack } from '@/lib/game/packs';
+import { MOYENS_DE_PAIEMENT } from '@/lib/game/achat';
 import { NOMS_THEMES } from '@/lib/game/themes';
 import { QUESTIONS_SEED } from '../../../prisma/seed-data/questions';
 
@@ -391,7 +392,9 @@ export function buildLandingDesignData(options: LandingDesignOptions = {}): Land
         // Le « solde de points commun » de la maquette n'a jamais existé : un
         // pack est un droit d'accès, et celui d'un partenaire ouvre le jeu au
         // couple entier (`server/game/entitlements.ts`).
-        a: 'Wave, Orange Money, MTN MoMo et Moov. Un pack pris par l’un de vous deux vaut pour le couple.',
+        // Lu de `MOYENS_DE_PAIEMENT` : cette réponse promettait « MTN MoMo
+        // et Moov », que PayTech ne propose pas, jusqu'au 16/10/2026.
+        a: `${MOYENS_DE_PAIEMENT}. Un pack pris par l’un de vous deux vaut pour le couple.`,
       },
       {
         num: '05',

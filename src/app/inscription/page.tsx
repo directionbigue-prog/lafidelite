@@ -29,8 +29,17 @@ export default function InscriptionPage() {
 
   return (
     <AuthSplitLayout aside={<SignupAside />}>
-      {/* useSearchParams() (the `?invite=` code) requires a Suspense boundary. */}
-      <Suspense fallback={null}>
+      {/* useSearchParams() (the `?invite=` code) requires a Suspense boundary.
+          Its fallback is what the server sends, so it carries the page's h1:
+          with `null` the HTML had no heading at all — nothing for a crawler
+          that does not run the script. */}
+      <Suspense
+        fallback={
+          <h1 className="font-serif text-[clamp(28px,5vw,36px)] leading-tight">
+            Créer votre compte
+          </h1>
+        }
+      >
         <SignupForm googleEnabled={googleEnabled} />
       </Suspense>
     </AuthSplitLayout>

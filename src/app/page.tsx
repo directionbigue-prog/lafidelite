@@ -79,9 +79,11 @@ import { Fragment } from 'react';
 import './landing.css';
 import { buildLandingDesignData, TOTAL_QUESTIONS } from '@/lib/landing/design-data';
 import { cheminAchat } from '@/lib/game/pack-choisi';
+import { MOYENS_DE_PAIEMENT } from '@/lib/game/achat';
 import { SignupCard } from '@/components/landing/SignupCard';
 import { FilmPub } from '@/components/landing/FilmPub';
 import { Marque } from '@/components/ui/Marque';
+import { donneesStructureesAccueil, scriptJsonLd } from '@/lib/seo/donnees-structurees';
 
 export const runtime = 'nodejs';
 
@@ -147,6 +149,14 @@ export default function Home() {
 
   return (
     <>
+      {/* Données structurées : la marque, le site, les offres du registre des
+          packs et la FAQ affichée plus bas — voir lib/seo/donnees-structurees.ts. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: scriptJsonLd(donneesStructureesAccueil(faqEssentielle)),
+        }}
+      />
       <div
         className="cf-landing"
         style={{ background: '#170D1B', minHeight: '100vh', position: 'relative' }}
@@ -798,8 +808,8 @@ export default function Home() {
                 « rien n'est débitable aujourd'hui », vrai jusqu'au 13/10/2026 :
                 depuis, PayTech encaisse, et chaque carte payante ouvre sa caisse.
                 Ne nommer ici que les moyens que PayTech propose réellement. */}
-            Paiement sécurisé par PayTech : Wave, Orange Money, Free Money ou carte bancaire. Le
-            pack s'ouvre dès que le paiement est confirmé.
+            Paiement sécurisé par PayTech : {MOYENS_DE_PAIEMENT}. Le pack s'ouvre dès que le
+            paiement est confirmé.
           </div>
         </section>
         <section

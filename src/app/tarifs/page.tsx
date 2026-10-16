@@ -13,15 +13,15 @@ import type { Metadata } from 'next';
 import { AppShell } from '@/components/app/AppShell';
 import { BoutonAcheterPack } from '@/components/game/BoutonAcheterPack';
 import { LIBELLE_DEVISE, PACKS_VISIBLES, PACKS_PAYANTS, packDecouverte } from '@/lib/game/packs';
+import { metadataDePage } from '@/lib/seo/pages';
 
-export const metadata: Metadata = {
-  title: 'Nos packs',
-  // Dérivée du registre, pas écrite à la main. La version transcrite annonçait
-  // encore « Découverte, Essentiel, Intégral, Annuel » après le 02/10/2026 :
-  // l'extrait de recherche nommait deux paliers sous des noms qui n'existaient
-  // plus et vendait l'Annuel, retiré de la vente le même jour.
-  description: `${PACKS_VISIBLES.map((p) => p.nom).join(', ')} — ce que chaque pack ouvre, et pour combien de temps.`,
-};
+// Titre, description, canonique et carte de partage viennent du registre des
+// pages (`lib/seo/pages.ts`), dont la description lit elle-même les noms des
+// paliers dans `lib/game/packs.ts`. Écrites ici à la main jusqu'au
+// 16/10/2026, elles ne posaient pas de canonique : la page héritait de celle
+// du layout racine, « / », et Google la tenait pour un doublon de l'accueil.
+// La version transcrite d'avant avait déjà annoncé des paliers supprimés.
+export const metadata: Metadata = metadataDePage('/tarifs');
 
 /**
  * 4900 → « 4 900 », avec une espace fine insécable (U+202F).

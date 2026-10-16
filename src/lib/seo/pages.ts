@@ -21,6 +21,30 @@
 // il empêche la visite, pas l'inscription au catalogue.
 
 import { urlPubliqueCredible } from '@/lib/server/app-url';
+import { PACKS_PAYANTS } from '@/lib/game/packs';
+
+/** Le nom du produit, tel que le portent les cartes de partage. */
+export const NOM_DU_SITE = 'Cœur Fidèle';
+
+/**
+ * L'image de partage, servie par convention de fichier (`app/opengraph-image.png`).
+ *
+ * Répétée dans chaque page parce que Next ne FUSIONNE pas `openGraph` : celui
+ * d'une page remplace celui du layout, image comprise. /connexion et
+ * /inscription partaient ainsi sans image jusqu'au 16/10/2026.
+ */
+export const IMAGE_DE_PARTAGE = {
+  url: '/opengraph-image.png',
+  width: 1200,
+  height: 630,
+  alt: 'Cœur Fidèle — deux cercles entrelacés dont l’intersection est dorée, sur fond prune sombre, sous le nom du jeu.',
+} as const;
+
+/** « Week-end, Semaine ou Mois » — lu du registre, jamais recopié. */
+function paliersEnVente(): string {
+  const noms = PACKS_PAYANTS.map((p) => p.nom);
+  return noms.length > 1 ? `${noms.slice(0, -1).join(', ')} ou ${noms.at(-1)}` : (noms[0] ?? '');
+}
 
 /**
  * Le domaine du produit, en dernier recours.
@@ -126,8 +150,9 @@ export const PAGES: readonly PageReferencee[] = [
     priorite: 0.8,
     frequence: 'weekly',
     titre: 'Nos packs',
-    description:
-      'Week-end, Semaine ou Mois : les trois paliers ouvrent le même catalogue, seule la durée change. Une partie est offerte, sans carte.',
+    // Les noms viennent du registre des packs : la description recopiée à la
+    // main annonçait encore des paliers supprimés après leur retrait.
+    description: `${paliersEnVente()} : chaque pack ouvre tout le catalogue et le Salon, seule la durée change. Une partie est offerte, sans carte.`,
   },
   {
     // Indexable jusqu'au 14/10/2026, sous « Essayer sans compte… sans
@@ -322,7 +347,21 @@ export function metadataDePage(chemin: string): {
   title?: string;
   description?: string;
   alternates: { canonical: string };
-  openGraph?: { title?: string; description?: string; url: string };
+  openGraph?: {
+    type: 'website';
+    locale: string;
+    siteName: string;
+    title?: string;
+    description?: string;
+    url: string;
+    images: (typeof IMAGE_DE_PARTAGE)[];
+  };
+  twitter?: {
+    card: 'summary_large_image';
+    title?: string;
+    description?: string;
+    images: string[];
+  };
 } {
   const page = pageDuChemin(chemin);
   if (!page) {
@@ -335,10 +374,22 @@ export function metadataDePage(chemin: string): {
     ...(page.titre ? { title: page.titre } : {}),
     ...(page.description ? { description: page.description } : {}),
     alternates: { canonical: page.chemin },
+    // Complets, et non des surcharges : Next remplace `openGraph` et
+    // `twitter` du layout au lieu de les fusionner.
     openGraph: {
+      type: 'website',
+      locale: 'fr_FR',
+      siteName: NOM_DU_SITE,
       ...(page.titre ? { title: page.titre } : {}),
       ...(page.description ? { description: page.description } : {}),
       url: page.chemin,
+      images: [IMAGE_DE_PARTAGE],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      ...(page.titre ? { title: page.titre } : {}),
+      ...(page.description ? { description: page.description } : {}),
+      images: [IMAGE_DE_PARTAGE.url],
     },
   };
 }
