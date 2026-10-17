@@ -1,141 +1,1159 @@
-/* Styles globaux de la landing, repris du canevas Claude Design.
+/* Styles de la landing, repris du canevas Claude Design du 16/10/2026
+ * (« Cœur Fidèle, Landing » : téléphones animés, trois manches, à distance,
+ * rituel et Salon).
  *
- * Le canevas était une page autonome : ses règles visaient `html`, `body`,
- * `a` et `::selection`. Ici la feuille est importée par `app/page.tsx`, et
- * en App Router un import CSS est GLOBAL — ces sélecteurs s'appliqueraient
- * donc à toute l'application, dont les écrans de jeu et du Salon qui ont
- * leur propre charte.
+ * Le canevas était une page autonome : ses règles visaient `body`, `a` et
+ * des classes nues (`.phone`, `.opt`, `.chip`…). Ici la feuille est importée
+ * par `app/page.tsx`, et en App Router un import CSS est GLOBAL : il reste
+ * dans le document quand on navigue ensuite vers le jeu ou le Salon. Toutes
+ * les règles sont donc portées par la racine `.cf-landing`, et toutes les
+ * classes et les animations sont préfixées `cf-`.
  *
- * Les règles de document sont donc portées par la racine `.cf-landing` au
- * lieu de `body`. Le rendu de la page est identique ; ce qui change est la
- * portée, pas l'apparence. Les `@keyframes` gardent leurs noms d'origine :
- * les styles inline du design les appellent par ces noms exacts. */
+ * Le préfixe des `@keyframes` n'est pas cosmétique. Le canevas les nommait
+ * `spin`, `pulse` et `bounce`, trois noms que Tailwind déclare déjà (ce sont
+ * `animate-spin`, `animate-pulse` et `animate-bounce`). Deux `@keyframes`
+ * homonymes ne se combinent pas : le dernier chargé remplace l'autre partout,
+ * et les squelettes de chargement de l'app se seraient mis à émettre un halo
+ * doré au lieu de clignoter.
+ *
+ * Les animations ne tournent que sous `.cf-anime` (posée sur la racine) et
+ * s'arrêtent toutes quand le visiteur demande moins de mouvement. L'état
+ * immobile de chaque élément est son état FINAL : options choisies colorées,
+ * barres pleines, écran de passage masqué. Rien n'est caché derrière une
+ * animation qui ne jouera pas. */
 
-html:has(.cf-landing) {
-  scroll-behavior: smooth;
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.cf-landing) {
+    scroll-behavior: smooth;
+  }
 }
 
 .cf-landing {
-  margin: 0;
-  background: #170d1b;
-  color: #f6eee6;
-  font-family: 'Familjen Grotesk', system-ui, sans-serif;
+  --cf-fond: #1a0c19;
+  --cf-fond-bande: #24112a;
+  --cf-carte: #2b1429;
+  --cf-carte-vive: #351a33;
+  --cf-creux: #1f0f1e;
+  --cf-texte: #f4e8e2;
+  --cf-texte-doux: #e6d6dd;
+  --cf-gris: #d9c6cf;
+  --cf-discret: #cdb8c2;
+  --cf-or: #e9b85c;
+  --cf-or-clair: #f2c878;
+  --cf-or-survol: #f6d38f;
+  --cf-encre: #2a1428;
+  --cf-rose: #e87a8b;
+  --cf-bleu: #8fb3e8;
+  --cf-vert: #8fd3a8;
+  --cf-trait: rgba(244, 232, 226, 0.1);
+
+  min-height: 100vh;
+  /* `clip` et non `hidden` : le halo du héros déborde, mais un `hidden`
+   * ferait de la racine un conteneur de défilement. */
+  overflow-x: clip;
+  background: var(--cf-fond);
+  color: var(--cf-texte);
+  font-family: var(--font-manrope), system-ui, sans-serif;
 }
 
 .cf-landing a {
-  color: #e8b860;
+  color: var(--cf-or);
   text-decoration: none;
 }
 
 .cf-landing a:hover {
-  color: #f6eee6;
+  color: var(--cf-or-survol);
 }
 
 .cf-landing ::selection {
-  background: #e8b860;
-  color: #170d1b;
+  background: var(--cf-or);
+  color: var(--cf-encre);
 }
 
-@keyframes riseIn {
-  from {
-    opacity: 0;
-    transform: translateY(22px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+.cf-landing .cf-serif {
+  font-family: var(--font-fraunces), Georgia, serif;
 }
 
-/* Traitements de survol du canevas (attribut `style-hover`). */
+/* ── Charpente ────────────────────────────────────────────────────────── */
 
-.cf-landing .cf-h1:hover {
-  background: #e8b860;
+.cf-landing .cf-conteneur {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-inline: 24px;
 }
 
-.cf-landing .cf-h2:hover {
-  background: #f6eee6;
+.cf-landing .cf-section {
+  padding-block: clamp(64px, 9vw, 96px);
 }
 
-.cf-landing .cf-h3:hover {
-  border-color: rgba(232, 184, 96, 0.4);
+.cf-landing .cf-bande {
+  background: var(--cf-fond-bande);
 }
 
-.cf-landing .cf-h5:hover {
-  border-color: #e8b860;
+.cf-landing .cf-surtitre {
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cf-or);
+  font-weight: 700;
+}
+
+.cf-landing .cf-titre {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 600;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.cf-landing .cf-titre-carte {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.cf-landing .cf-texte {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--cf-gris);
+}
+
+.cf-landing .cf-texte-discret {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--cf-discret);
+}
+
+/* ── Boutons ──────────────────────────────────────────────────────────── */
+
+.cf-landing .cf-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-weight: 700;
+  text-align: center;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.cf-landing a.cf-bouton-or {
+  background: var(--cf-or);
+  color: var(--cf-encre);
+}
+
+.cf-landing a.cf-bouton-or:hover {
+  background: var(--cf-or-survol);
+  color: var(--cf-encre);
+}
+
+.cf-landing a.cf-bouton-contour {
+  color: var(--cf-texte);
+  border: 1px solid rgba(244, 232, 226, 0.28);
+}
+
+.cf-landing a.cf-bouton-contour:hover {
+  color: var(--cf-texte);
+  border-color: var(--cf-or);
+}
+
+.cf-landing a.cf-bouton-encre {
+  background: var(--cf-encre);
+  color: var(--cf-texte);
+}
+
+.cf-landing a.cf-bouton-encre:hover {
+  background: #3d1d3a;
+  color: var(--cf-texte);
+}
+
+.cf-landing .cf-bouton:focus-visible,
+.cf-landing summary:focus-visible {
+  outline: 2px solid var(--cf-or);
+  outline-offset: 3px;
 }
 
 /* Bouton lecture/pause du film (`components/landing/FilmPub.tsx`). */
 
 .cf-landing .cf-film-bouton:hover {
-  border-color: #e8b860;
+  border-color: var(--cf-or);
 }
 
 .cf-landing .cf-film-bouton:focus-visible {
-  outline: 2px solid #e8b860;
+  outline: 2px solid var(--cf-or);
   outline-offset: 3px;
+}
+
+/* La bande-annonce : verticale, donc posée dans un téléphone comme les
+ * écrans du canevas. Sa hauteur suit la vidéo (9:16), pas celle des autres
+ * téléphones. */
+.cf-landing .cf-film {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 56px;
+}
+
+.cf-landing .cf-film-texte {
+  flex: 1 1 380px;
+  min-width: 0;
+  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cf-landing .cf-tel.cf-tel-film {
+  width: 300px;
+  height: auto;
+}
+
+/* ── En-tête ──────────────────────────────────────────────────────────── */
+
+.cf-landing .cf-entete {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding-block: 20px;
+}
+
+.cf-landing a.cf-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: auto;
+  color: var(--cf-texte);
+}
+
+.cf-landing .cf-nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font-size: 15px;
+}
+
+.cf-landing .cf-nav a {
+  color: var(--cf-gris);
+}
+
+.cf-landing .cf-nav a:hover {
+  color: var(--cf-texte);
+}
+
+.cf-landing .cf-nav a.cf-nav-connexion {
+  color: var(--cf-texte);
+  font-weight: 600;
+}
+
+/* ── Téléphones ───────────────────────────────────────────────────────── */
+
+.cf-landing .cf-tel {
+  width: 248px;
+  height: 520px;
+  border-radius: 42px;
+  background: #0b0509;
+  padding: 9px;
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  flex: none;
+}
+
+.cf-landing .cf-tel-moyen {
+  width: 220px;
+  height: 460px;
+}
+
+.cf-landing .cf-tel-petit {
+  width: 200px;
+  height: 400px;
+}
+
+.cf-landing .cf-ecran {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 34px;
+  overflow: hidden;
+  background: var(--cf-carte);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 28px 16px 16px;
+}
+
+.cf-landing .cf-ecran-vif {
+  background: var(--cf-carte-vive);
+}
+
+.cf-landing .cf-ilot {
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  width: 76px;
+  height: 20px;
+  margin-left: -38px;
+  border-radius: 12px;
+  background: #0b0509;
+}
+
+.cf-landing .cf-ecran-entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--cf-discret);
+}
+
+.cf-landing .cf-barre {
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.cf-landing .cf-barre > div {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--cf-or);
+}
+
+.cf-landing .cf-joueur {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--cf-or-clair);
+}
+
+.cf-landing .cf-question {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 600;
+}
+
+.cf-landing .cf-options {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.cf-landing .cf-opt {
+  border-radius: 14px;
+  padding: 11px 12px;
+  font-size: 12.5px;
+  line-height: 1.3;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--cf-texte);
+}
+
+.cf-landing .cf-opt-choisie {
+  background: rgba(233, 184, 92, 0.18);
+  border-color: var(--cf-or);
+}
+
+.cf-landing .cf-pastille {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cf-landing .cf-av {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex: none;
+}
+
+.cf-landing .cf-av-rose {
+  background: var(--cf-rose);
+  color: var(--cf-encre);
+}
+
+.cf-landing .cf-av-bleu {
+  background: var(--cf-bleu);
+  color: #1a2a40;
+}
+
+.cf-landing .cf-note-ecran {
+  margin-top: auto;
+  text-align: center;
+  font-size: 11px;
+  color: var(--cf-discret);
+}
+
+/* L'écran de passage du Miroir : au repos il est hors champ, au-dessus. */
+.cf-landing .cf-masque {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+  background: var(--cf-creux);
+  translate: 0 -100%;
+}
+
+/* ── Sections ─────────────────────────────────────────────────────────── */
+
+.cf-landing .cf-heros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 56px;
+  padding-block: 48px 72px;
+}
+
+.cf-landing .cf-heros-texte {
+  flex: 1 1 440px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cf-landing .cf-heros h1 {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(2.6rem, 5.5vw, 4.4rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.cf-landing .cf-heros h1 em {
+  color: var(--cf-or);
+  font-weight: 400;
+}
+
+.cf-landing .cf-coches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  font-size: 14px;
+  color: var(--cf-discret);
+}
+
+.cf-landing .cf-coches span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cf-landing .cf-coches svg {
+  color: var(--cf-or);
+}
+
+.cf-landing .cf-heros-telephones {
+  position: relative;
+  flex: 1 1 460px;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-block: 20px;
+}
+
+.cf-landing .cf-halo {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  width: 420px;
+  height: 420px;
+  margin-left: -210px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(233, 184, 92, 0.22), rgba(233, 184, 92, 0) 70%);
+}
+
+.cf-landing .cf-anneau {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 10px solid rgba(233, 184, 92, 0.25);
+  border-top-color: var(--cf-or);
+  border-right-color: var(--cf-or);
+}
+
+.cf-landing .cf-chiffres {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  padding-block: 36px;
+}
+
+/* Le nombre, puis son libellé : deux `<span>` posés l'un sous l'autre. */
+.cf-landing .cf-chiffre > span {
+  display: block;
+  color: var(--cf-discret);
+  font-size: 15px;
+}
+
+.cf-landing .cf-chiffre > span:first-child {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 44px;
+  font-weight: 600;
+  color: var(--cf-or);
+}
+
+.cf-landing .cf-manches {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.cf-landing .cf-manche {
+  flex: 1 1 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.cf-landing .cf-manche-legende {
+  max-width: 300px;
+  text-align: center;
+}
+
+.cf-landing .cf-manche-legende h3 {
+  margin: 0 0 6px;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.cf-landing .cf-distance {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  align-items: center;
+  gap: 56px;
+}
+
+.cf-landing .cf-distance-telephones {
+  flex: 1 1 520px;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cf-landing .cf-distance-lien {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  font-size: 12px;
+  color: var(--cf-discret);
+}
+
+.cf-landing .cf-points {
+  display: flex;
+  gap: 6px;
+}
+
+.cf-landing .cf-points span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cf-or);
+}
+
+.cf-landing .cf-points span:nth-child(2) {
+  background: rgba(233, 184, 92, 0.6);
+}
+
+.cf-landing .cf-points span:nth-child(3) {
+  background: rgba(233, 184, 92, 0.3);
+}
+
+.cf-landing .cf-duo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.cf-landing .cf-duo-carte {
+  flex: 1 1 460px;
+  min-width: 0;
+  border-radius: 28px;
+  background: var(--cf-carte);
+  padding: clamp(24px, 4vw, 36px);
+}
+
+.cf-landing .cf-salon {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.cf-landing .cf-salon > div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: 18px;
+  background: var(--cf-creux);
+  padding: 18px;
+  font-weight: 600;
+}
+
+.cf-landing .cf-tarifs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+
+.cf-landing .cf-tarif {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-radius: 24px;
+  background: var(--cf-carte);
+  border: 1px solid var(--cf-trait);
+  padding: 28px;
+}
+
+.cf-landing .cf-tarif-vedette {
+  background: #3a1d38;
+  border: 2px solid var(--cf-or);
+}
+
+.cf-landing .cf-tarif-ruban {
+  position: absolute;
+  top: -14px;
+  left: 24px;
+  background: var(--cf-or);
+  color: var(--cf-encre);
+  font-size: 12px;
+}
+
+.cf-landing .cf-tarif-nom {
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.cf-landing .cf-tarif-prix {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.cf-landing .cf-tarif-mention {
+  font-size: 15px;
+  color: var(--cf-discret);
+}
+
+.cf-landing .cf-tarif-details {
+  flex: 1;
+  margin: 0;
+  padding: 0 0 0 18px;
+  list-style: disc;
+  color: var(--cf-discret);
+  font-size: 14.5px;
+  line-height: 1.9;
+}
+
+.cf-landing .cf-tarif-cta {
+  padding: 14px;
+}
+
+.cf-landing .cf-faq details {
+  border-top: 1px solid rgba(244, 232, 226, 0.12);
+  padding-block: 20px;
+}
+
+.cf-landing .cf-faq details:last-child {
+  border-bottom: 1px solid rgba(244, 232, 226, 0.12);
+}
+
+.cf-landing .cf-faq summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.cf-landing .cf-faq summary:hover {
+  color: var(--cf-or-clair);
+}
+
+.cf-landing .cf-faq p {
+  margin: 12px 0 0;
+  color: var(--cf-discret);
+  line-height: 1.6;
+}
+
+.cf-landing .cf-appel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  border-radius: 32px;
+  background: var(--cf-or);
+  color: var(--cf-encre);
+  padding: clamp(36px, 6vw, 56px) clamp(24px, 4vw, 40px);
+}
+
+.cf-landing .cf-pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+  padding-block: 32px;
+  font-size: 14px;
+  color: var(--cf-discret);
+}
+
+/* ── Animations ───────────────────────────────────────────────────────── */
+
+@keyframes cf-flotte {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -14px;
+  }
+}
+
+@keyframes cf-choix {
+  0%,
+  30% {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    scale: 1;
+  }
+  38% {
+    scale: 0.95;
+  }
+  46%,
+  86% {
+    background: rgba(233, 184, 92, 0.24);
+    border-color: #e9b85c;
+    scale: 1;
+  }
+  100% {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+@keyframes cf-remplit {
+  0% {
+    scale: 0 1;
+  }
+  35%,
+  100% {
+    scale: 1 1;
+  }
+}
+
+@keyframes cf-tourne {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes cf-lueur {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(233, 184, 92, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(233, 184, 92, 0);
+  }
+}
+
+@keyframes cf-halo {
+  0%,
+  100% {
+    opacity: 0.6;
+    scale: 1;
+  }
+  50% {
+    opacity: 1;
+    scale: 1.12;
+  }
+}
+
+@keyframes cf-apparait {
+  0%,
+  10% {
+    opacity: 0;
+    translate: 0 10px;
+    scale: 0.9;
+  }
+  20%,
+  85% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes cf-clignote {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes cf-glisse-gauche {
+  0%,
+  8% {
+    opacity: 0;
+    translate: -28px 0;
+  }
+  22%,
+  85% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes cf-glisse-droite {
+  0%,
+  25% {
+    opacity: 0;
+    translate: 28px 0;
+  }
+  40%,
+  85% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes cf-surgit {
+  0%,
+  45% {
+    opacity: 0;
+    scale: 0.6;
+  }
+  55% {
+    opacity: 1;
+    scale: 1.12;
+  }
+  62%,
+  85% {
+    opacity: 1;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes cf-pointilles {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+@keyframes cf-trajet {
+  0%,
+  100% {
+    translate: -36px 0;
+  }
+  50% {
+    translate: 36px 0;
+  }
+}
+
+@keyframes cf-rebond {
+  0%,
+  80%,
+  100% {
+    translate: 0 0;
+    opacity: 0.4;
+  }
+  40% {
+    translate: 0 -8px;
+    opacity: 1;
+  }
+}
+
+@keyframes cf-flamme {
+  0%,
+  100% {
+    scale: 1 1;
+    rotate: 0deg;
+  }
+  25% {
+    scale: 1.05 0.95;
+    rotate: -3deg;
+  }
+  50% {
+    scale: 0.96 1.06;
+    rotate: 2deg;
+  }
+  75% {
+    scale: 1.02 0.98;
+    rotate: -1deg;
+  }
+}
+
+@keyframes cf-balance {
+  0%,
+  100% {
+    translate: 0 0;
+    rotate: 0deg;
+  }
+  50% {
+    translate: 0 -6px;
+    rotate: -6deg;
+  }
+}
+
+@keyframes cf-reflet {
+  0%,
+  60% {
+    translate: -160% 0;
+  }
+  100% {
+    translate: 300% 0;
+  }
+}
+
+@keyframes cf-passage {
+  0%,
+  60% {
+    translate: 0 -100%;
+  }
+  68%,
+  88% {
+    translate: 0 0;
+  }
+  96%,
+  100% {
+    translate: 0 -100%;
+  }
+}
+
+.cf-anime .cf-tel {
+  animation: cf-flotte 6s ease-in-out infinite;
+}
+
+/* Décalages : les téléphones voisins ne flottent jamais à l'unisson. */
+.cf-anime .cf-tel.cf-retard-1 {
+  animation-delay: -1s;
+}
+.cf-anime .cf-tel.cf-retard-2 {
+  animation-delay: -2s;
+}
+.cf-anime .cf-tel.cf-retard-3 {
+  animation-delay: -3s;
+}
+.cf-anime .cf-tel.cf-retard-3-5 {
+  animation-delay: -3.5s;
+}
+.cf-anime .cf-tel.cf-retard-4 {
+  animation-delay: -4s;
+}
+
+.cf-anime .cf-ecran::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 4;
+  width: 40%;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0)
+  );
+  animation: cf-reflet 7s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.cf-anime .cf-opt-choisie {
+  animation: cf-choix 4.5s ease-in-out infinite;
+}
+
+.cf-anime .cf-barre > div {
+  transform-origin: left;
+  animation: cf-remplit 4.5s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+.cf-anime .cf-anneau {
+  animation: cf-tourne 6s linear infinite;
+}
+
+.cf-anime .cf-lueur {
+  animation: cf-lueur 2s ease-out infinite;
+}
+
+.cf-anime .cf-halo {
+  animation: cf-halo 5s ease-in-out infinite;
+}
+
+.cf-anime .cf-apparait {
+  animation: cf-apparait 5s ease-out infinite;
+}
+
+.cf-anime .cf-clignote {
+  animation: cf-clignote 1.8s ease-in-out infinite;
+}
+
+.cf-anime .cf-glisse-gauche {
+  animation: cf-glisse-gauche 5s ease-out infinite;
+}
+
+.cf-anime .cf-glisse-droite {
+  animation: cf-glisse-droite 5s ease-out infinite;
+}
+
+.cf-anime .cf-surgit {
+  animation: cf-surgit 5s ease-out infinite;
+}
+
+.cf-anime .cf-pointilles {
+  animation: cf-pointilles 1s linear infinite;
+}
+
+.cf-anime .cf-trajet {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cf-trajet 3s ease-in-out infinite;
+}
+
+.cf-anime .cf-points span {
+  animation: cf-rebond 1.2s ease-in-out infinite;
+}
+.cf-anime .cf-points span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.cf-anime .cf-points span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.cf-anime .cf-flamme {
+  transform-origin: 50% 100%;
+  animation: cf-flamme 1.8s ease-in-out infinite;
+}
+
+.cf-anime .cf-salon svg {
+  animation: cf-balance 2.6s ease-in-out infinite;
+}
+.cf-anime .cf-salon > div:nth-child(2) svg {
+  animation-delay: 0.3s;
+}
+.cf-anime .cf-salon > div:nth-child(3) svg {
+  animation-delay: 0.6s;
+}
+.cf-anime .cf-salon > div:nth-child(4) svg {
+  animation-delay: 0.9s;
+}
+.cf-anime .cf-salon > div:nth-child(5) svg {
+  animation-delay: 1.2s;
+}
+
+.cf-anime .cf-masque {
+  animation: cf-passage 9s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-anime *,
+  .cf-anime *::after {
+    animation: none !important;
+  }
 }
 
 /* ── Adaptation mobile ───────────────────────────────────────────────────
  *
- * Le canevas Claude Design a été dessiné pour le bureau. Son contenu est
- * largement fluide — 84 `clamp()` dans la page — et tout tient dans 390 px
- * SAUF le `<header>`, mesuré à 669 px : logo + huit liens de navigation +
- * bouton « S'inscrire » sur une seule rangée sans retour à la ligne. Les
- * 279 px de débordement décalaient la page entière vers la droite, ce qui
- * donnait une page d'accueil tronquée au chargement sur téléphone.
+ * Le canevas est fluide (grilles `auto-fit`, `flex-wrap`, titres en
+ * `clamp()`), sauf deux choses qui ne rétrécissent pas : l'en-tête et les
+ * téléphones.
  *
- * Tout ce qui suit vit dans une media query : le rendu bureau est celui du
- * canevas, inchangé. Les `!important` ne sont pas un raccourci — la page
- * porte ses styles en attribut `style`, et rien d'autre ne peut les
- * surcharger depuis une feuille.
+ * L'en-tête passe sur DEUX rangées (logo + « S'inscrire », puis la
+ * navigation en bande défilante) plutôt que de replier les liens dans un
+ * menu : un menu demanderait de l'état, donc de faire de la page entière un
+ * composant client.
  *
- * Deux choix de mise en page méritent d'être explicités :
+ * Les téléphones gardent leurs proportions et sont réduits d'un bloc par
+ * `zoom`, qui, contrairement à `transform: scale()`, réduit aussi la place
+ * qu'ils occupent. Leurs textes deviennent petits, mais ce sont des
+ * illustrations : tout ce qu'il faut lire est dit à côté, en taille normale.
+ * Les deux téléphones du héros font 448 px côte à côte, ceux de « À
+ * distance » 554 px avec leur trait d'union ; un écran de 390 px n'en offre
+ * que 342.
  *
- *   · Le header passe sur DEUX rangées (logo + CTA, puis la navigation)
- *     plutôt que de replier les liens en menu déroulant. Un menu aurait
- *     demandé de l'état, donc de faire de toute la page un composant
- *     client — 106 Ko de JSX envoyés au navigateur pour un bouton.
- *   · La navigation devient une bande défilante horizontalement. Les huit
- *     liens restent tous atteignables sans en masquer aucun, et le dégradé
- *     sur le bord droit signale qu'il y a plus à voir. C'est la seule
- *     solution qui ne retire rien au canevas.
- *
- * Depuis la page courte (14/10/2026), la navigation ne compte plus que
- * cinq liens, et les plateaux du Salon — seuls textes sous 12 px — ont
- * quitté la page avec leur section.
- */
+ * Les tarifs se compactent comme sur l'ancienne page (14/10/2026) : empilées
+ * telles quelles, les quatre cartes faisaient près de 1 300 px. Nom et prix
+ * partagent une ligne, aucune offre n'est cachée derrière un carrousel. */
 @media (max-width: 760px) {
-  .cf-landing > header {
-    flex-wrap: wrap !important;
-    row-gap: 12px !important;
-    column-gap: 12px !important;
-    padding-top: 18px !important;
-    padding-bottom: 12px !important;
+  .cf-landing .cf-entete {
+    flex-wrap: wrap;
+    row-gap: 12px;
+    column-gap: 12px;
+    padding-block: 18px 12px;
   }
 
-  /* Rangée 2, pleine largeur : la navigation passe après le CTA. */
-  .cf-landing > header > nav {
+  .cf-landing .cf-nav {
     order: 3;
     flex: 0 0 100%;
-    flex-wrap: nowrap !important;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
-    /* Déborde jusqu'aux bords de l'écran, puis se re-marge : la bande
-     * défile d'un bord à l'autre au lieu de s'arrêter dans la gouttière. */
-    margin-inline: calc(-1 * clamp(20px, 5vw, 72px));
-    padding-inline: clamp(20px, 5vw, 72px);
+    margin-inline: -24px;
+    padding-inline: 24px;
     -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent);
     mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent);
   }
 
-  .cf-landing > header > nav::-webkit-scrollbar {
+  .cf-landing .cf-nav::-webkit-scrollbar {
     display: none;
   }
 
   /* Cibles tactiles : 15 px de texte nu font 18 px de haut. */
-  .cf-landing > header > nav > a {
+  .cf-landing .cf-nav a,
+  .cf-landing .cf-pied a {
     flex: 0 0 auto;
     white-space: nowrap;
     display: inline-flex;
@@ -143,29 +1161,18 @@ html:has(.cf-landing) {
     min-height: 40px;
   }
 
-  .cf-landing > header > a,
-  .cf-landing footer a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 40px;
-  }
-
-  /* Tarifs compacts (14/10/2026). Empilées telles quelles, les quatre
-   * cartes faisaient 2 040 px — le plus haut bloc de la page sur téléphone.
-   * Un carrousel les aurait ramenées à une seule hauteur, mais en cachant
-   * trois offres derrière un balayage que beaucoup ne font pas. Ici elles
-   * restent toutes visibles : nom et prix sur la même ligne, détails serrés,
-   * bouton moins haut. */
-  .cf-landing .cf-tarifs {
-    gap: 14px !important;
+  .cf-landing .cf-heros {
+    gap: 32px;
+    padding-top: 24px;
   }
 
   .cf-landing .cf-tarif {
-    display: grid !important;
+    display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     column-gap: 12px;
+    row-gap: 4px;
     align-items: center;
-    padding: 22px 18px 18px !important;
+    padding: 24px 18px 18px;
   }
 
   .cf-landing .cf-tarif-nom {
@@ -176,27 +1183,60 @@ html:has(.cf-landing) {
   .cf-landing .cf-tarif-mention {
     grid-column: 1;
     grid-row: 2;
-    margin-bottom: 0 !important;
-    font-size: 14px !important;
+    font-size: 14px;
   }
 
   .cf-landing .cf-tarif-prix {
     grid-column: 2;
     grid-row: 1 / span 2;
-    margin: 0 !important;
-    font-size: 34px !important;
+    font-size: 30px;
     text-align: right;
   }
 
   .cf-landing .cf-tarif-details {
     grid-column: 1 / -1;
-    gap: 4px !important;
-    margin: 14px 0 16px !important;
-    font-size: 14px !important;
+    margin: 10px 0 14px;
+    font-size: 14px;
+    line-height: 1.7;
   }
 
   .cf-landing .cf-tarif-cta {
     grid-column: 1 / -1;
-    padding: 12px !important;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 620px) {
+  .cf-landing .cf-distance-telephones {
+    flex-wrap: nowrap;
+    zoom: 0.86;
+  }
+
+  .cf-landing .cf-distance-lien {
+    padding: 0 4px;
+  }
+
+  .cf-landing .cf-distance-lien svg {
+    width: 56px;
+  }
+}
+
+@media (max-width: 520px) {
+  .cf-landing .cf-heros-telephones {
+    zoom: 0.74;
+  }
+
+  .cf-landing .cf-distance-telephones {
+    zoom: 0.66;
+  }
+}
+
+@media (max-width: 380px) {
+  .cf-landing .cf-heros-telephones {
+    zoom: 0.66;
+  }
+
+  .cf-landing .cf-distance-telephones {
+    zoom: 0.6;
   }
 }

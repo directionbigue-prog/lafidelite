@@ -1,8 +1,9 @@
 // Le film publicitaire de la landing : quand il joue, et quand il se tait.
 //
-// La vidéo pèse 7 Mo pour 20 secondes. Sur l'accueil, la plupart des
-// visiteurs arrivent en données mobiles, que l'on paie au mégaoctet : un film
-// lancé dès l'ouverture de la page facture 7 Mo à quelqu'un qui n'a peut-être
+// La vidéo (la bande-annonce depuis le 17/10/2026) pèse 5,5 Mo pour 42
+// secondes. Sur l'accueil, la plupart des visiteurs arrivent en données
+// mobiles, que l'on paie au mégaoctet : un film
+// lancé dès l'ouverture de la page facture 5,5 Mo à quelqu'un qui n'a peut-être
 // jamais fait défiler jusqu'à lui. La décision est donc prise ici, en pur, et
 // le composant `components/landing/FilmPub.tsx` ne fait que l'appliquer — il
 // n'y a pas de jsdom dans ce dépôt, et ce qui vit dans le composant ne se
@@ -39,8 +40,8 @@ export type ConditionsAppareil = {
  * encore touché au bouton.
  *
  * Un réseau LENT refuse : en '3g' au sens de Chrome (débit sous 700 kb/s),
- * les 7 Mo mettent plus d'une minute à arriver pour un film encodé à
- * 2,8 Mb/s — il saccaderait, et le visiteur aurait payé pour le voir mal.
+ * les 5,5 Mo mettent plus d'une minute à arriver pour une vidéo encodée à
+ * 1,05 Mb/s — elle saccaderait, et le visiteur aurait payé pour la voir mal.
  * Un réseau INCONNU joue : Safari et Firefox n'exposent pas
  * `effectiveType`, et exiger '4g' priverait tous les iPhone du film. Le
  * visiteur garde le bouton pause, et le mode économie de données reste la

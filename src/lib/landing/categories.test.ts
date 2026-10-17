@@ -259,6 +259,12 @@ describe('the landing page tells the truth about the question bank', () => {
   const cibles = (): Record<string, string> => ({
     'app/page.tsx': landing,
     'lib/landing/design-data.ts': designData,
+    // Les téléphones de l'accueil (17/10/2026) montrent le jeu à distance :
+    // ils tombent sous la même règle que la page qui les affiche.
+    'components/landing/Maquettes.tsx': readFileSync(
+      path.join(APP_DIR, '..', 'components', 'landing', 'Maquettes.tsx'),
+      'utf8',
+    ),
     'app/layout.tsx': readFileSync(path.join(APP_DIR, 'layout.tsx'), 'utf8'),
   });
   const sansCommentaires = (source: string) => source.replace(/^[ \t]*(\/\/|\*|\/\*).*$/gm, '');

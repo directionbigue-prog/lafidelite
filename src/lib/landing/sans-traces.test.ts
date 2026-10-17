@@ -25,19 +25,28 @@ const texte = (chemin: string) =>
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/^\s*\/\/.*$/gm, '');
 
+// `SignupCard.tsx` a quitté la liste avec la page (17/10/2026) : le canevas
+// des téléphones mène à `/inscription` par un bouton. Ses écrans, eux, y
+// entrent : ils portent du texte affiché comme le reste de la page.
 const LANDING = [
   'app/page.tsx',
   'lib/landing/design-data.ts',
-  'components/landing/SignupCard.tsx',
+  'components/landing/Maquettes.tsx',
   'components/landing/FilmPub.tsx',
 ];
 
 describe('la landing ne montre aucune trace de maquette', () => {
-  it('le héros sert la photo seule, pas la capture du canevas', () => {
-    const page = texte('app/page.tsx');
-    expect(page).not.toMatch(/hero-couple-landing/);
-    expect(page).toMatch(/\/images\/hero-couple-portrait\.webp/);
-    expect(page).not.toMatch(/cf-badge-(left|right)|Score du couple|Niveau : Complices/);
+  // Le 17/10/2026 le héros a quitté la photo pour les téléphones animés du
+  // nouveau canevas : on n'exige plus le portrait, on interdit toujours la
+  // capture et sa fausse carte de score, dans la page comme dans ses écrans.
+  it('le héros ne sert pas la capture du canevas', () => {
+    for (const fichier of ['app/page.tsx', 'components/landing/Maquettes.tsx']) {
+      const source = texte(fichier);
+      expect(source, fichier).not.toMatch(/hero-couple-landing/);
+      expect(source, fichier).not.toMatch(
+        /cf-badge-(left|right)|Score du couple|Niveau : Complices/,
+      );
+    }
   });
 
   it('aucun lien ne pointe vers « # »', () => {
